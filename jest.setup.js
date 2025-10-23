@@ -1,6 +1,6 @@
 // Jest setup file for testing environment configuration
 
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -22,9 +22,9 @@ jest.mock('next/router', () => ({
         emit: jest.fn(),
       },
       isFallback: false,
-    }
+    };
   },
-}))
+}));
 
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({
@@ -36,20 +36,20 @@ jest.mock('next/navigation', () => ({
       back: jest.fn(),
       forward: jest.fn(),
       refresh: jest.fn(),
-    }
+    };
   },
   useSearchParams() {
-    return new URLSearchParams()
+    return new URLSearchParams();
   },
   usePathname() {
-    return '/'
+    return '/';
   },
-}))
+}));
 
 // Mock environment variables
-process.env.NEXT_PUBLIC_API_URL = 'https://test-api.com'
-process.env.NEXT_PUBLIC_WEBSOCKET_URL = 'wss://test-ws.com'
-process.env.GEMINI_API_KEY = 'test-api-key'
+process.env.NEXT_PUBLIC_API_URL = 'https://test-api.com';
+process.env.NEXT_PUBLIC_WEBSOCKET_URL = 'wss://test-ws.com';
+process.env.GEMINI_API_KEY = 'test-api-key';
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
@@ -57,7 +57,7 @@ global.IntersectionObserver = class IntersectionObserver {
   disconnect() {}
   observe() {}
   unobserve() {}
-}
+};
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
@@ -65,7 +65,7 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
   observe() {}
   unobserve() {}
-}
+};
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -80,13 +80,13 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
   })),
-})
+});
 
 // Mock scrollTo
 Object.defineProperty(window, 'scrollTo', {
   writable: true,
   value: jest.fn(),
-})
+});
 
 // Mock localStorage
 const localStorageMock = {
@@ -94,10 +94,10 @@ const localStorageMock = {
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
-}
+};
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
-})
+});
 
 // Mock sessionStorage
 const sessionStorageMock = {
@@ -105,50 +105,50 @@ const sessionStorageMock = {
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
-}
+};
 Object.defineProperty(window, 'sessionStorage', {
   value: sessionStorageMock,
-})
+});
 
 // Mock fetch globally
-global.fetch = jest.fn()
+global.fetch = jest.fn();
 
 // Mock Web APIs for Next.js server components
 global.Request = class MockRequest {
   constructor(url, options = {}) {
-    this.url = url
-    this.method = options.method || 'GET'
-    this.headers = new Map(Object.entries(options.headers || {}))
-    this.body = options.body
-    this.nextUrl = new URL(url)
-    this.cookies = new Map()
+    this.url = url;
+    this.method = options.method || 'GET';
+    this.headers = new Map(Object.entries(options.headers || {}));
+    this.body = options.body;
+    this.nextUrl = new URL(url);
+    this.cookies = new Map();
   }
-  
+
   json() {
-    return Promise.resolve(JSON.parse(this.body || '{}'))
+    return Promise.resolve(JSON.parse(this.body || '{}'));
   }
-  
+
   text() {
-    return Promise.resolve(this.body || '')
+    return Promise.resolve(this.body || '');
   }
-}
+};
 
 global.Response = class MockResponse {
   constructor(body, options = {}) {
-    this.body = body
-    this.status = options.status || 200
-    this.statusText = options.statusText || 'OK'
-    this.headers = new Map(Object.entries(options.headers || {}))
+    this.body = body;
+    this.status = options.status || 200;
+    this.statusText = options.statusText || 'OK';
+    this.headers = new Map(Object.entries(options.headers || {}));
   }
-  
+
   json() {
-    return Promise.resolve(JSON.parse(this.body))
+    return Promise.resolve(JSON.parse(this.body));
   }
-  
+
   text() {
-    return Promise.resolve(this.body)
+    return Promise.resolve(this.body);
   }
-  
+
   static json(data, options = {}) {
     return new MockResponse(JSON.stringify(data), {
       ...options,
@@ -156,42 +156,42 @@ global.Response = class MockResponse {
         'content-type': 'application/json',
         ...options.headers,
       },
-    })
+    });
   }
-}
+};
 
 global.Headers = class MockHeaders extends Map {
   constructor(init) {
-    super()
+    super();
     if (init) {
       if (Array.isArray(init)) {
-        init.forEach(([key, value]) => this.set(key, value))
+        init.forEach(([key, value]) => this.set(key, value));
       } else if (typeof init === 'object') {
-        Object.entries(init).forEach(([key, value]) => this.set(key, value))
+        Object.entries(init).forEach(([key, value]) => this.set(key, value));
       }
     }
   }
-  
+
   get(name) {
-    return super.get(name.toLowerCase())
+    return super.get(name.toLowerCase());
   }
-  
+
   set(name, value) {
-    return super.set(name.toLowerCase(), value)
+    return super.set(name.toLowerCase(), value);
   }
-  
+
   has(name) {
-    return super.has(name.toLowerCase())
+    return super.has(name.toLowerCase());
   }
-  
+
   delete(name) {
-    return super.delete(name.toLowerCase())
+    return super.delete(name.toLowerCase());
   }
-}
+};
 
 // Mock console methods to reduce noise in tests
-const originalError = console.error
-const originalWarn = console.warn
+const originalError = console.error;
+const originalWarn = console.warn;
 
 beforeAll(() => {
   console.error = (...args) => {
@@ -199,27 +199,26 @@ beforeAll(() => {
       typeof args[0] === 'string' &&
       args[0].includes('Warning: ReactDOM.render is no longer supported')
     ) {
-      return
+      return;
     }
-    originalError.call(console, ...args)
-  }
+    originalError.call(console, ...args);
+  };
 
   console.warn = (...args) => {
     if (
       typeof args[0] === 'string' &&
-      (args[0].includes('componentWillReceiveProps') ||
-        args[0].includes('componentWillUpdate'))
+      (args[0].includes('componentWillReceiveProps') || args[0].includes('componentWillUpdate'))
     ) {
-      return
+      return;
     }
-    originalWarn.call(console, ...args)
-  }
-})
+    originalWarn.call(console, ...args);
+  };
+});
 
 afterAll(() => {
-  console.error = originalError
-  console.warn = originalWarn
-})
+  console.error = originalError;
+  console.warn = originalWarn;
+});
 
 // Global test utilities
 global.testUtils = {
@@ -253,7 +252,7 @@ global.testUtils = {
 
   // Helper to wait for async operations
   waitFor: (ms = 0) => new Promise(resolve => setTimeout(resolve, ms)),
-}
+};
 
 // Increase timeout for async tests
-jest.setTimeout(10000)
+jest.setTimeout(10000);

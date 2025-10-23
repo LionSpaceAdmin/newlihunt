@@ -1,5 +1,6 @@
-import { StorageProvider, StoredAnalysis, UserSession, StorageConfig } from './types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as AWS from 'aws-sdk';
+import { StorageConfig, StorageProvider, StoredAnalysis, UserSession } from './types';
 
 // DynamoDB provider for AWS integration
 export class DynamoDBStorageProvider implements StorageProvider {
@@ -15,7 +16,7 @@ export class DynamoDBStorageProvider implements StorageProvider {
     // Import AWS SDK dynamically to avoid issues in browser environment
     this.tableName = config.tableName;
     this.sessionTableName = config.sessionTableName;
-    
+
     // This will be initialized when actually used in Lambda environment
     this.initializeDynamoDB(config);
   }
@@ -25,7 +26,7 @@ export class DynamoDBStorageProvider implements StorageProvider {
       // Dynamic import for server-side only
       const AWS = await import('aws-sdk');
       this.dynamodb = new AWS.DynamoDB.DocumentClient({
-        region: config?.region || 'us-east-1'
+        region: config?.region || 'us-east-1',
       });
     } catch (error) {
       console.warn('Failed to initialize DynamoDB:', error);
@@ -44,13 +45,13 @@ export class DynamoDBStorageProvider implements StorageProvider {
       // Convert nested Date objects to ISO strings
       conversation: analysis.conversation.map(msg => ({
         ...msg,
-        timestamp: msg.timestamp.toISOString()
-      }))
+        timestamp: msg.timestamp.toISOString(),
+      })),
     };
 
     const params = {
       TableName: this.tableName,
-      Item: item
+      Item: item,
     };
 
     await this.dynamodb.put(params).promise();
@@ -64,11 +65,11 @@ export class DynamoDBStorageProvider implements StorageProvider {
 
     const params = {
       TableName: this.tableName,
-      Key: { id }
+      Key: { id },
     };
 
     const result = await this.dynamodb.get(params).promise();
-    
+
     if (!result.Item) {
       return null;
     }
@@ -79,8 +80,8 @@ export class DynamoDBStorageProvider implements StorageProvider {
       timestamp: new Date(result.Item.timestamp),
       conversation: result.Item.conversation.map((msg: any) => ({
         ...msg,
-        timestamp: new Date(msg.timestamp)
-      }))
+        timestamp: new Date(msg.timestamp),
+      })),
     } as StoredAnalysis;
   }
 
@@ -94,21 +95,21 @@ export class DynamoDBStorageProvider implements StorageProvider {
       IndexName: 'userId-timestamp-index', // Assumes GSI exists
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
-        ':userId': userId
+        ':userId': userId,
       },
       ScanIndexForward: false, // Sort by timestamp descending
-      Limit: limit
+      Limit: limit,
     };
 
     const result = await this.dynamodb.query(params).promise();
-    
+
     return (result.Items || []).map((item: any) => ({
       ...item,
       timestamp: new Date(item.timestamp),
       conversation: item.conversation.map((msg: any) => ({
         ...msg,
-        timestamp: new Date(msg.timestamp)
-      }))
+        timestamp: new Date(msg.timestamp),
+      })),
     })) as StoredAnalysis[];
   }
 
@@ -122,8 +123,8 @@ export class DynamoDBStorageProvider implements StorageProvider {
       Key: { id },
       UpdateExpression: 'SET feedback = :feedback',
       ExpressionAttributeValues: {
-        ':feedback': feedback
-      }
+        ':feedback': feedback,
+      },
     };
 
     await this.dynamodb.update(params).promise();
@@ -145,12 +146,12 @@ export class DynamoDBStorageProvider implements StorageProvider {
     const item = {
       ...session,
       createdAt: session.createdAt.toISOString(),
-      lastActive: session.lastActive.toISOString()
+      lastActive: session.lastActive.toISOString(),
     };
 
     const params = {
       TableName: this.sessionTableName,
-      Item: item
+      Item: item,
     };
 
     await this.dynamodb.put(params).promise();
@@ -180,7 +181,7 @@ export class DynamoDBStorageProvider implements StorageProvider {
       TableName: this.sessionTableName,
       Key: { id: userId },
       UpdateExpression: `SET ${updateExpressions.join(', ')}`,
-      ExpressionAttributeValues: expressionAttributeValues
+      ExpressionAttributeValues: expressionAttributeValues,
     };
 
     await this.dynamodb.update(params).promise();
@@ -193,11 +194,11 @@ export class DynamoDBStorageProvider implements StorageProvider {
 
     const params = {
       TableName: this.sessionTableName,
-      Key: { id: userId }
+      Key: { id: userId },
     };
 
     const result = await this.dynamodb.get(params).promise();
-    
+
     if (!result.Item) {
       return null;
     }
@@ -205,7 +206,7 @@ export class DynamoDBStorageProvider implements StorageProvider {
     return {
       ...result.Item,
       createdAt: new Date(result.Item.createdAt),
-      lastActive: new Date(result.Item.lastActive)
+      lastActive: new Date(result.Item.lastActive),
     } as UserSession;
   }
 }

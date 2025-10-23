@@ -25,12 +25,12 @@ interface URLInspectionResult {
 // Function to safely fetch and inspect URL
 async function inspectURLDirectly(url: string): Promise<URLInspectionResult> {
   const parsedUrl = new URL(url);
-  
+
   try {
     // Fetch URL content with timeout and size limits
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-    
+
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
@@ -38,28 +38,28 @@ async function inspectURLDirectly(url: string): Promise<URLInspectionResult> {
       },
       redirect: 'follow',
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-    
+
     // Limit content size to 1MB
     const contentLength = parseInt(response.headers.get('content-length') || '0');
     if (contentLength > 1024 * 1024) {
       throw new Error('Content too large');
     }
-    
+
     const content = await response.text();
-    
+
     // Extract title
     const titleMatch = content.match(/<title[^>]*>([^<]+)<\/title>/i);
     const title = titleMatch ? titleMatch[1].trim() : '';
-    
+
     // Detect suspicious patterns
     const suspiciousPatterns = detectSuspiciousPatterns(content, parsedUrl.hostname);
-    
+
     return {
       url,
       domain: parsedUrl.hostname,
@@ -70,7 +70,6 @@ async function inspectURLDirectly(url: string): Promise<URLInspectionResult> {
       suspiciousPatterns,
       timestamp: new Date().toISOString(),
     };
-    
   } catch (error) {
     // Return basic info even if fetch fails
     return {
@@ -85,7 +84,7 @@ async function inspectURLDirectly(url: string): Promise<URLInspectionResult> {
           type: 'fetch_error',
           description: `Failed to fetch content: ${error instanceof Error ? error.message : 'Unknown error'}`,
           severity: 'medium' as const,
-        }
+        },
       ],
       timestamp: new Date().toISOString(),
     };
@@ -93,7 +92,10 @@ async function inspectURLDirectly(url: string): Promise<URLInspectionResult> {
 }
 
 // Function to detect suspicious patterns in content
-function detectSuspiciousPatterns(content: string, domain: string): Array<{
+function detectSuspiciousPatterns(
+  content: string,
+  domain: string
+): Array<{
   type: string;
   keyword?: string;
   description?: string;
@@ -101,7 +103,7 @@ function detectSuspiciousPatterns(content: string, domain: string): Array<{
 }> {
   const patterns = [];
   const lowerContent = content.toLowerCase();
-  
+
   // Urgent donation language
   const urgentWords = ['urgent', 'emergency', 'immediate', 'now', 'today only', 'limited time'];
   for (const word of urgentWords) {
@@ -115,7 +117,7 @@ function detectSuspiciousPatterns(content: string, domain: string): Array<{
       break;
     }
   }
-  
+
   // Donation-related keywords
   const donationWords = ['donate', 'donation', 'contribute', 'support', 'help', 'fund'];
   for (const word of donationWords) {
@@ -129,7 +131,7 @@ function detectSuspiciousPatterns(content: string, domain: string): Array<{
       break;
     }
   }
-  
+
   // Cryptocurrency mentions
   const cryptoWords = ['bitcoin', 'btc', 'ethereum', 'crypto', 'wallet', 'blockchain'];
   for (const word of cryptoWords) {
@@ -143,7 +145,7 @@ function detectSuspiciousPatterns(content: string, domain: string): Array<{
       break;
     }
   }
-  
+
   // Military/IDF related (could be legitimate or scam)
   const militaryWords = ['idf', 'israel defense', 'soldier', 'military', 'army', 'combat'];
   for (const word of militaryWords) {
@@ -157,7 +159,7 @@ function detectSuspiciousPatterns(content: string, domain: string): Array<{
       break;
     }
   }
-  
+
   // Suspicious domain patterns
   if (domain.includes('bit.ly') || domain.includes('tinyurl') || domain.includes('t.co')) {
     patterns.push({
@@ -166,7 +168,7 @@ function detectSuspiciousPatterns(content: string, domain: string): Array<{
       severity: 'medium' as const,
     });
   }
-  
+
   // Check for suspicious TLDs
   const suspiciousTlds = ['.tk', '.ml', '.ga', '.cf'];
   for (const tld of suspiciousTlds) {
@@ -179,7 +181,7 @@ function detectSuspiciousPatterns(content: string, domain: string): Array<{
       break;
     }
   }
-  
+
   return patterns;
 }
 
@@ -202,7 +204,7 @@ async function handlePOST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'URL is required'
+          error: 'URL is required',
         },
         { status: 400 }
       );
@@ -227,7 +229,7 @@ async function handlePOST(request: NextRequest) {
         {
           success: false,
           error: 'Invalid URL input',
-          message: sanitizeError instanceof Error ? sanitizeError.message : 'Unknown error'
+          message: sanitizeError instanceof Error ? sanitizeError.message : 'Unknown error',
         },
         { status: 400 }
       );
@@ -246,13 +248,13 @@ async function handlePOST(request: NextRequest) {
         ip,
         userAgent: request.headers.get('user-agent') || 'unknown',
         endpoint: '/api/url-inspector',
-        metadata: { url: sanitizedUrl.substring(0, 100) }
+        metadata: { url: sanitizedUrl.substring(0, 100) },
       });
 
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid URL format'
+          error: 'Invalid URL format',
         },
         { status: 400 }
       );
@@ -268,13 +270,13 @@ async function handlePOST(request: NextRequest) {
         ip,
         userAgent: request.headers.get('user-agent') || 'unknown',
         endpoint: '/api/url-inspector',
-        metadata: { url: sanitizedUrl.substring(0, 100) }
+        metadata: { url: sanitizedUrl.substring(0, 100) },
       });
 
       return NextResponse.json(
         {
           success: false,
-          error: 'Only HTTP and HTTPS URLs are allowed'
+          error: 'Only HTTP and HTTPS URLs are allowed',
         },
         { status: 400 }
       );
@@ -285,9 +287,8 @@ async function handlePOST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      result
+      result,
     });
-
   } catch (error) {
     console.error('URL inspection failed:', error);
 
@@ -306,7 +307,7 @@ async function handlePOST(request: NextRequest) {
       {
         success: false,
         error: 'URL inspection failed',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

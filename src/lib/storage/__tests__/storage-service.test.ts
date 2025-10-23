@@ -1,13 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+import { Classification, FullAnalysisResult, Severity } from '@/types/analysis';
 import { StorageService, resetStorageService } from '../storage-service';
-import { MemoryStorageProvider } from '../memory-provider';
 import { StorageConfig, StoredAnalysis } from '../types';
-import { FullAnalysisResult, Classification, Severity } from '@/types/analysis';
 
 // Mock the DynamoDB provider to simulate failures
 jest.mock('../dynamodb-provider', () => ({
   DynamoDBStorageProvider: jest.fn().mockImplementation(() => {
     throw new Error('DynamoDB initialization failed');
-  })
+  }),
 }));
 
 describe('StorageService', () => {
@@ -15,28 +15,30 @@ describe('StorageService', () => {
 
   beforeEach(() => {
     resetStorageService();
-    
+
     const mockResult: FullAnalysisResult = {
       summary: 'Test analysis summary',
       analysisData: {
         riskScore: 75,
         credibilityScore: 25,
         classification: Classification.SUSPICIOUS,
-        detectedRules: [{
-          id: 'rule1',
-          name: 'Test Rule',
-          severity: Severity.MEDIUM,
-          description: 'Test rule description',
-          points: 10
-        }],
+        detectedRules: [
+          {
+            id: 'rule1',
+            name: 'Test Rule',
+            severity: Severity.MEDIUM,
+            description: 'Test rule description',
+            points: 10,
+          },
+        ],
         recommendations: ['Test recommendation'],
         reasoning: 'Test reasoning',
         debiasingStatus: {
           anonymous_profile_neutralized: true,
           patriotic_tokens_neutralized: false,
-          sentiment_penalty_capped: true
-        }
-      }
+          sentiment_penalty_capped: true,
+        },
+      },
     };
 
     mockAnalysis = {
@@ -44,15 +46,15 @@ describe('StorageService', () => {
       userId: 'test-user-1',
       timestamp: new Date('2023-10-23T14:30:00Z'),
       input: {
-        message: 'Test suspicious content'
+        message: 'Test suspicious content',
       },
       result: mockResult,
       conversation: [],
       metadata: {
         userAgent: 'Test User Agent',
         ipHash: 'test-ip-hash',
-        processingTime: 1500
-      }
+        processingTime: 1500,
+      },
     };
   });
 
@@ -63,8 +65,8 @@ describe('StorageService', () => {
         dynamodb: {
           region: 'us-east-1',
           tableName: 'test-table',
-          sessionTableName: 'test-sessions'
-        }
+          sessionTableName: 'test-sessions',
+        },
       };
 
       const service = new StorageService(config);
@@ -74,7 +76,7 @@ describe('StorageService', () => {
 
     it('uses memory provider when configured', () => {
       const config: StorageConfig = {
-        provider: 'memory'
+        provider: 'memory',
       };
 
       const service = new StorageService(config);
@@ -95,7 +97,7 @@ describe('StorageService', () => {
         updateAnalysisFeedback: jest.fn().mockRejectedValue(new Error('Primary failed')),
         createSession: jest.fn().mockRejectedValue(new Error('Primary failed')),
         updateSession: jest.fn().mockRejectedValue(new Error('Primary failed')),
-        getSession: jest.fn().mockRejectedValue(new Error('Primary failed'))
+        getSession: jest.fn().mockRejectedValue(new Error('Primary failed')),
       };
 
       // Replace the provider with our mock
@@ -137,7 +139,7 @@ describe('StorageService', () => {
 
     it('gets user history', async () => {
       await service.saveAnalysis(mockAnalysis);
-      
+
       const history = await service.getUserHistory('test-user-1');
       expect(history).toHaveLength(1);
       expect(history[0]).toEqual(mockAnalysis);
@@ -145,9 +147,9 @@ describe('StorageService', () => {
 
     it('updates analysis feedback', async () => {
       await service.saveAnalysis(mockAnalysis);
-      
+
       await service.updateAnalysisFeedback(mockAnalysis.id, 'positive');
-      
+
       const updated = await service.getAnalysis(mockAnalysis.id);
       expect(updated?.feedback).toBe('positive');
     });
@@ -171,12 +173,12 @@ describe('StorageService', () => {
 
     it('updates session', async () => {
       await service.createSession('test-user-1');
-      
+
       await service.updateSession('test-user-1', {
         analysisCount: 5,
-        feedbackGiven: 2
+        feedbackGiven: 2,
       });
-      
+
       const updated = await service.getSession('test-user-1');
       expect(updated?.analysisCount).toBe(5);
       expect(updated?.feedbackGiven).toBe(2);

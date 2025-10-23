@@ -11,7 +11,7 @@ export const fileToBase64 = (file: File): Promise<string> => {
       const base64 = result.split(',')[1];
       resolve(base64);
     };
-    reader.onerror = (error) => reject(error);
+    reader.onerror = error => reject(error);
   });
 };
 
@@ -25,14 +25,14 @@ export const validateImageFile = (file: File): { isValid: boolean; error?: strin
   if (!allowedTypes.includes(file.type)) {
     return {
       isValid: false,
-      error: 'Invalid file type. Please upload JPEG, PNG, GIF, or WebP images only.'
+      error: 'Invalid file type. Please upload JPEG, PNG, GIF, or WebP images only.',
     };
   }
 
   if (file.size > maxSize) {
     return {
       isValid: false,
-      error: 'File too large. Maximum size is 10MB.'
+      error: 'File too large. Maximum size is 10MB.',
     };
   }
 
@@ -46,7 +46,7 @@ export const formatTimestamp = (date: Date): string => {
   return new Intl.DateTimeFormat('en-US', {
     hour: '2-digit',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
   }).format(date);
 };
 

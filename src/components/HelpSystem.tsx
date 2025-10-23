@@ -17,13 +17,13 @@ interface HelpTopic {
 
 const helpContent = {
   en: {
-    title: "Help & Guidance",
-    searchPlaceholder: "Search help topics...",
+    title: 'Help & Guidance',
+    searchPlaceholder: 'Search help topics...',
     categories: {
-      'getting-started': "Getting Started",
-      'features': "Features",
-      'troubleshooting': "Troubleshooting",
-      'security': "Security Tips"
+      'getting-started': 'Getting Started',
+      features: 'Features',
+      troubleshooting: 'Troubleshooting',
+      security: 'Security Tips',
     },
     topics: [
       {
@@ -42,7 +42,7 @@ const helpContent = {
 • Describe any red flags you've noticed
 • Ask specific questions about what concerns you`,
         category: 'getting-started' as const,
-        keywords: ['analyze', 'how to', 'start', 'upload', 'text', 'image']
+        keywords: ['analyze', 'how to', 'start', 'upload', 'text', 'image'],
       },
       {
         id: 'understanding-scores',
@@ -66,7 +66,7 @@ const helpContent = {
 
 The AI considers multiple factors including language patterns, urgency tactics, donation requests, and technical indicators.`,
         category: 'features' as const,
-        keywords: ['score', 'risk', 'credibility', 'classification', 'safe', 'suspicious']
+        keywords: ['score', 'risk', 'credibility', 'classification', 'safe', 'suspicious'],
       },
       {
         id: 'url-inspection',
@@ -96,7 +96,7 @@ The AI considers multiple factors including language patterns, urgency tactics, 
 • Suspicious file extensions
 • Non-HTTPS connections`,
         category: 'features' as const,
-        keywords: ['url', 'link', 'inspect', 'website', 'domain', 'phishing']
+        keywords: ['url', 'link', 'inspect', 'website', 'domain', 'phishing'],
       },
       {
         id: 'export-share',
@@ -125,7 +125,7 @@ The AI considers multiple factors including language patterns, urgency tactics, 
 • Use anonymized exports for social media
 • Keep full reports for personal records`,
         category: 'features' as const,
-        keywords: ['export', 'share', 'download', 'copy', 'privacy', 'report']
+        keywords: ['export', 'share', 'download', 'copy', 'privacy', 'report'],
       },
       {
         id: 'analysis-not-working',
@@ -157,7 +157,7 @@ The AI considers multiple factors including language patterns, urgency tactics, 
 • Enable JavaScript
 • Allow clipboard access for copy features`,
         category: 'troubleshooting' as const,
-        keywords: ['not working', 'broken', 'error', 'upload', 'connection', 'retry']
+        keywords: ['not working', 'broken', 'error', 'upload', 'connection', 'retry'],
       },
       {
         id: 'donation-safety',
@@ -190,7 +190,7 @@ The AI considers multiple factors including language patterns, urgency tactics, 
 • Be wary of individual fundraisers
 • Check with established Jewish organizations`,
         category: 'security' as const,
-        keywords: ['donation', 'charity', 'safe', 'verify', 'scam', 'fidf', 'israeli']
+        keywords: ['donation', 'charity', 'safe', 'verify', 'scam', 'fidf', 'israeli'],
       },
       {
         id: 'privacy-security',
@@ -224,18 +224,18 @@ The AI considers multiple factors including language patterns, urgency tactics, 
 • Use the privacy-safe export options
 • Be cautious when sharing results publicly`,
         category: 'security' as const,
-        keywords: ['privacy', 'security', 'data', 'personal', 'safe', 'encryption']
-      }
-    ] as HelpTopic[]
+        keywords: ['privacy', 'security', 'data', 'personal', 'safe', 'encryption'],
+      },
+    ] as HelpTopic[],
   },
   he: {
-    title: "עזרה והדרכה",
-    searchPlaceholder: "חפש נושאי עזרה...",
+    title: 'עזרה והדרכה',
+    searchPlaceholder: 'חפש נושאי עזרה...',
     categories: {
-      'getting-started': "תחילת העבודה",
-      'features': "תכונות",
-      'troubleshooting': "פתרון בעיות",
-      'security': "טיפים לאבטחה"
+      'getting-started': 'תחילת העבודה',
+      features: 'תכונות',
+      troubleshooting: 'פתרון בעיות',
+      security: 'טיפים לאבטחה',
     },
     topics: [
       {
@@ -254,7 +254,7 @@ The AI considers multiple factors including language patterns, urgency tactics, 
 • תאר כל דגל אדום שהבחנת בו
 • שאל שאלות ספציפיות על מה שמדאיג אותך`,
         category: 'getting-started' as const,
-        keywords: ['ניתוח', 'איך', 'התחלה', 'העלאה', 'טקסט', 'תמונה']
+        keywords: ['ניתוח', 'איך', 'התחלה', 'העלאה', 'טקסט', 'תמונה'],
       },
       {
         id: 'understanding-scores',
@@ -278,10 +278,10 @@ The AI considers multiple factors including language patterns, urgency tactics, 
 
 הבינה המלאכותית שוקלת גורמים מרובים כולל דפוסי שפה, טקטיקות דחיפות, בקשות תרומה ואינדיקטורים טכניים.`,
         category: 'features' as const,
-        keywords: ['ציון', 'סיכון', 'אמינות', 'סיווג', 'בטוח', 'חשוד']
-      }
-    ] as HelpTopic[]
-  }
+        keywords: ['ציון', 'סיכון', 'אמינות', 'סיווג', 'בטוח', 'חשוד'],
+      },
+    ] as HelpTopic[],
+  },
 };
 
 const HelpSystem: React.FC<HelpSystemProps> = ({ lang = 'en' }) => {
@@ -293,13 +293,14 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ lang = 'en' }) => {
   const content = helpContent[lang];
 
   const filteredTopics = content.topics.filter(topic => {
-    const matchesSearch = searchQuery === '' || 
+    const matchesSearch =
+      searchQuery === '' ||
       topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       topic.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       topic.keywords.some(keyword => keyword.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+
     const matchesCategory = selectedCategory === null || topic.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -353,7 +354,12 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ lang = 'en' }) => {
                 className="p-1 text-gray-400 hover:text-white transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
               </button>
             )}
@@ -366,7 +372,12 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ lang = 'en' }) => {
             className="p-2 text-gray-400 hover:text-white transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -392,11 +403,11 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ lang = 'en' }) => {
                     type="text"
                     placeholder={content.searchPlaceholder}
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="w-full px-4 py-2 bg-light-gray border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
                   />
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setSelectedCategory(null)}
@@ -429,15 +440,25 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ lang = 'en' }) => {
                 {filteredTopics.length === 0 ? (
                   <div className="text-center py-8">
                     <div className="w-16 h-16 mx-auto mb-4 bg-gray-700 rounded-full flex items-center justify-center">
-                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      <svg
+                        className="w-8 h-8 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
                       </svg>
                     </div>
                     <p className="text-gray-400">No help topics found matching your search.</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {filteredTopics.map((topic) => (
+                    {filteredTopics.map(topic => (
                       <button
                         key={topic.id}
                         onClick={() => handleTopicSelect(topic)}
@@ -452,8 +473,18 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ lang = 'en' }) => {
                               {content.categories[topic.category]}
                             </p>
                           </div>
-                          <svg className="w-5 h-5 text-gray-400 group-hover:text-accent-blue transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          <svg
+                            className="w-5 h-5 text-gray-400 group-hover:text-accent-blue transition-colors"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
                           </svg>
                         </div>
                       </button>

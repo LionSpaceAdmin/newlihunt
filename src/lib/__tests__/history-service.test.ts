@@ -6,7 +6,7 @@ global.fetch = jest.fn();
 
 // Mock user identification
 jest.mock('../user-identification', () => ({
-  getUserId: jest.fn(() => 'test-user-123')
+  getUserId: jest.fn(() => 'test-user-123'),
 }));
 
 describe('HistoryService', () => {
@@ -17,28 +17,30 @@ describe('HistoryService', () => {
   beforeEach(() => {
     resetHistoryService();
     historyService = new HistoryService('/api');
-    
+
     mockAnalysis = {
       summary: 'Test analysis summary',
       analysisData: {
         riskScore: 75,
         credibilityScore: 25,
         classification: Classification.SUSPICIOUS,
-        detectedRules: [{
-          id: 'rule1',
-          name: 'Test Rule',
-          severity: Severity.MEDIUM,
-          description: 'Test rule description',
-          points: 10
-        }],
+        detectedRules: [
+          {
+            id: 'rule1',
+            name: 'Test Rule',
+            severity: Severity.MEDIUM,
+            description: 'Test rule description',
+            points: 10,
+          },
+        ],
         recommendations: ['Test recommendation'],
         reasoning: 'Test reasoning',
         debiasingStatus: {
           anonymous_profile_neutralized: true,
           patriotic_tokens_neutralized: false,
-          sentiment_penalty_capped: true
-        }
-      }
+          sentiment_penalty_capped: true,
+        },
+      },
     };
 
     mockConversation = [
@@ -46,14 +48,14 @@ describe('HistoryService', () => {
         id: 'msg1',
         role: 'user',
         content: 'Test message',
-        timestamp: new Date('2023-10-23T14:29:00Z')
+        timestamp: new Date('2023-10-23T14:29:00Z'),
       },
       {
         id: 'msg2',
         role: 'assistant',
         content: 'Test response',
-        timestamp: new Date('2023-10-23T14:30:00Z')
-      }
+        timestamp: new Date('2023-10-23T14:30:00Z'),
+      },
     ];
 
     // Reset fetch mock
@@ -67,17 +69,17 @@ describe('HistoryService', () => {
         json: jest.fn().mockResolvedValue({
           success: true,
           id: 'analysis-123',
-          provider: 'memory'
-        })
+          provider: 'memory',
+        }),
       };
-      
+
       (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await historyService.saveAnalysis({
         analysis: mockAnalysis,
         conversation: mockConversation,
         input: { message: 'Test input' },
-        processingTime: 1500
+        processingTime: 1500,
       });
 
       expect(result.success).toBe(true);
@@ -85,7 +87,7 @@ describe('HistoryService', () => {
       expect(fetch).toHaveBeenCalledWith('/api/history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: expect.stringContaining('"userId":"test-user-123"')
+        body: expect.stringContaining('"userId":"test-user-123"'),
       });
     });
 
@@ -94,16 +96,16 @@ describe('HistoryService', () => {
         ok: false,
         status: 500,
         json: jest.fn().mockResolvedValue({
-          error: 'Internal server error'
-        })
+          error: 'Internal server error',
+        }),
       };
-      
+
       (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await historyService.saveAnalysis({
         analysis: mockAnalysis,
         conversation: mockConversation,
-        input: { message: 'Test input' }
+        input: { message: 'Test input' },
       });
 
       expect(result.success).toBe(false);
@@ -116,7 +118,7 @@ describe('HistoryService', () => {
       const result = await historyService.saveAnalysis({
         analysis: mockAnalysis,
         conversation: mockConversation,
-        input: { message: 'Test input' }
+        input: { message: 'Test input' },
       });
 
       expect(result.success).toBe(false);
@@ -137,9 +139,9 @@ describe('HistoryService', () => {
           metadata: {
             userAgent: 'Test Agent',
             ipHash: 'hash123',
-            processingTime: 1500
-          }
-        }
+            processingTime: 1500,
+          },
+        },
       ];
 
       const mockResponse = {
@@ -147,10 +149,10 @@ describe('HistoryService', () => {
         json: jest.fn().mockResolvedValue({
           success: true,
           history: mockHistory,
-          provider: 'memory'
-        })
+          provider: 'memory',
+        }),
       };
-      
+
       (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await historyService.getUserHistory(25);
@@ -168,10 +170,10 @@ describe('HistoryService', () => {
         json: jest.fn().mockResolvedValue({
           success: true,
           history: [],
-          provider: 'memory'
-        })
+          provider: 'memory',
+        }),
       };
-      
+
       (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await historyService.getUserHistory();
@@ -193,8 +195,8 @@ describe('HistoryService', () => {
         metadata: {
           userAgent: 'Test Agent',
           ipHash: 'hash123',
-          processingTime: 1500
-        }
+          processingTime: 1500,
+        },
       };
 
       const mockResponse = {
@@ -202,10 +204,10 @@ describe('HistoryService', () => {
         json: jest.fn().mockResolvedValue({
           success: true,
           analysis: mockStoredAnalysis,
-          provider: 'memory'
-        })
+          provider: 'memory',
+        }),
       };
-      
+
       (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await historyService.getAnalysis('analysis-123');
@@ -221,10 +223,10 @@ describe('HistoryService', () => {
         status: 404,
         json: jest.fn().mockResolvedValue({
           success: false,
-          error: 'Analysis not found'
-        })
+          error: 'Analysis not found',
+        }),
       };
-      
+
       (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await historyService.getAnalysis('non-existent');
@@ -241,10 +243,10 @@ describe('HistoryService', () => {
         json: jest.fn().mockResolvedValue({
           success: true,
           message: 'Feedback updated successfully',
-          provider: 'memory'
-        })
+          provider: 'memory',
+        }),
       };
-      
+
       (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await historyService.submitFeedback('analysis-123', 'positive');
@@ -253,7 +255,7 @@ describe('HistoryService', () => {
       expect(fetch).toHaveBeenCalledWith('/api/history/analysis-123', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedback: 'positive' })
+        body: JSON.stringify({ feedback: 'positive' }),
       });
     });
 
@@ -262,10 +264,10 @@ describe('HistoryService', () => {
         ok: true,
         json: jest.fn().mockResolvedValue({
           success: true,
-          message: 'Feedback updated successfully'
-        })
+          message: 'Feedback updated successfully',
+        }),
       };
-      
+
       (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await historyService.submitFeedback('analysis-123', 'negative');
@@ -274,7 +276,7 @@ describe('HistoryService', () => {
       expect(fetch).toHaveBeenCalledWith('/api/history/analysis-123', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedback: 'negative' })
+        body: JSON.stringify({ feedback: 'negative' }),
       });
     });
 
@@ -284,10 +286,10 @@ describe('HistoryService', () => {
         status: 400,
         json: jest.fn().mockResolvedValue({
           success: false,
-          error: 'Invalid feedback value'
-        })
+          error: 'Invalid feedback value',
+        }),
       };
-      
+
       (fetch as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await historyService.submitFeedback('analysis-123', 'positive');

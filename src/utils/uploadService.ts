@@ -29,7 +29,7 @@ export interface UploadOptions {
 
 const DEFAULT_OPTIONS: Required<Omit<UploadOptions, 'onProgress'>> = {
   timeout: 30000, // 30 seconds
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.scamhunt.com'
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.scamhunt.com',
 };
 
 /**
@@ -49,7 +49,7 @@ export const uploadImage = async (
         success: false,
         error: 'Invalid file',
         message: validation.error || 'File validation failed',
-        retryable: false
+        retryable: false,
       };
     }
 
@@ -58,17 +58,17 @@ export const uploadImage = async (
     formData.append('file', file);
 
     // Create XMLHttpRequest for progress tracking
-    return new Promise<UploadResult>((resolve) => {
+    return new Promise<UploadResult>(resolve => {
       const xhr = new XMLHttpRequest();
 
       // Set up progress tracking
       if (options.onProgress) {
-        xhr.upload.addEventListener('progress', (event) => {
+        xhr.upload.addEventListener('progress', event => {
           if (event.lengthComputable) {
             const progress: UploadProgress = {
               loaded: event.loaded,
               total: event.total,
-              percentage: Math.round((event.loaded / event.total) * 100)
+              percentage: Math.round((event.loaded / event.total) * 100),
             };
             options.onProgress!(progress);
           }
@@ -83,12 +83,12 @@ export const uploadImage = async (
         try {
           const response: UploadResult = JSON.parse(xhr.responseText);
           resolve(response);
-        } catch (err) {
+        } catch {
           resolve({
             success: false,
             error: 'Invalid response',
             message: 'Failed to parse server response',
-            retryable: true
+            retryable: true,
           });
         }
       });
@@ -99,7 +99,7 @@ export const uploadImage = async (
           success: false,
           error: 'Network error',
           message: 'Failed to upload file due to network error',
-          retryable: true
+          retryable: true,
         });
       });
 
@@ -108,7 +108,7 @@ export const uploadImage = async (
           success: false,
           error: 'Upload timeout',
           message: 'Upload timed out. Please try again.',
-          retryable: true
+          retryable: true,
         });
       });
 
@@ -117,7 +117,7 @@ export const uploadImage = async (
           success: false,
           error: 'Upload cancelled',
           message: 'Upload was cancelled',
-          retryable: true
+          retryable: true,
         });
       });
 
@@ -125,13 +125,12 @@ export const uploadImage = async (
       xhr.open('POST', `${config.apiUrl}/upload`);
       xhr.send(formData);
     });
-
   } catch (error) {
     return {
       success: false,
       error: 'Upload failed',
       message: error instanceof Error ? error.message : 'Unknown error occurred',
-      retryable: true
+      retryable: true,
     };
   }
 };
@@ -148,16 +147,16 @@ export const validateImageFile = (file: File): { isValid: boolean; error?: strin
   }
 
   if (file.size > MAX_FILE_SIZE) {
-    return { 
-      isValid: false, 
-      error: `File too large. Maximum size is ${Math.round(MAX_FILE_SIZE / 1024 / 1024)}MB.` 
+    return {
+      isValid: false,
+      error: `File too large. Maximum size is ${Math.round(MAX_FILE_SIZE / 1024 / 1024)}MB.`,
     };
   }
 
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return { 
-      isValid: false, 
-      error: `Invalid file type. Allowed types: ${ALLOWED_TYPES.join(', ')}` 
+    return {
+      isValid: false,
+      error: `Invalid file type. Allowed types: ${ALLOWED_TYPES.join(', ')}`,
     };
   }
 
@@ -181,7 +180,7 @@ export const formatFileSize = (bytes: number): string => {
  * Get file extension from filename
  */
 export const getFileExtension = (filename: string): string => {
-  return filename.slice((filename.lastIndexOf('.') - 1 >>> 0) + 2);
+  return filename.slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2);
 };
 
 /**
@@ -190,7 +189,7 @@ export const getFileExtension = (filename: string): string => {
 export const createImagePreview = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       if (e.target?.result) {
         resolve(e.target.result as string);
       } else {

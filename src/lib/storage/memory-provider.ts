@@ -7,12 +7,12 @@ export class MemoryStorageProvider implements StorageProvider {
 
   async saveAnalysis(analysis: StoredAnalysis): Promise<string> {
     this.analyses.set(analysis.id, analysis);
-    
+
     // Update user analysis index
     const userAnalyses = this.userAnalyses.get(analysis.userId) || [];
     userAnalyses.unshift(analysis.id); // Add to beginning for chronological order
     this.userAnalyses.set(analysis.userId, userAnalyses);
-    
+
     return analysis.id;
   }
 
@@ -23,7 +23,7 @@ export class MemoryStorageProvider implements StorageProvider {
   async getUserHistory(userId: string, limit: number = 50): Promise<StoredAnalysis[]> {
     const analysisIds = this.userAnalyses.get(userId) || [];
     const limitedIds = analysisIds.slice(0, limit);
-    
+
     const analyses: StoredAnalysis[] = [];
     for (const id of limitedIds) {
       const analysis = this.analyses.get(id);
@@ -31,7 +31,7 @@ export class MemoryStorageProvider implements StorageProvider {
         analyses.push(analysis);
       }
     }
-    
+
     return analyses;
   }
 
@@ -51,7 +51,7 @@ export class MemoryStorageProvider implements StorageProvider {
       analysisCount: 0,
       feedbackGiven: 0,
     };
-    
+
     this.sessions.set(userId, session);
     return session;
   }

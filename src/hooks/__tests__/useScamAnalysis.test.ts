@@ -1,6 +1,7 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useScamAnalysis } from '../useScamAnalysis';
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { FullAnalysisResult } from '@/types/analysis';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { useScamAnalysis } from '../useScamAnalysis';
 
 // Mock WebSocket
 class MockWebSocket {
@@ -381,9 +382,7 @@ describe('useScamAnalysis Performance', () => {
     const messages = ['Message 1', 'Message 2', 'Message 3'];
 
     await act(async () => {
-      await Promise.all(
-        messages.map(msg => result.current.sendMessage(msg))
-      );
+      await Promise.all(messages.map(msg => result.current.sendMessage(msg)));
     });
 
     expect(result.current.messages).toHaveLength(3);

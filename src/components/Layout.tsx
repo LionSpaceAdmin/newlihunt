@@ -1,17 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useScamAnalysis } from '@/hooks/useScamAnalysis';
 import Image from 'next/image';
-import { FullAnalysisResult, Message } from '@/types/analysis';
-import ChatInterface from './ChatInterface';
-import ScamAnalysis from './ScamAnalysis';
-import StatusIcon from './StatusIcon';
+import React, { useEffect, useState } from 'react';
 import BrandLogo from './BrandLogo';
-import ErrorBoundary, { ChatErrorBoundary, AnalysisErrorBoundary } from './ErrorBoundary';
+import ChatInterface from './ChatInterface';
+import ErrorBoundary, { AnalysisErrorBoundary, ChatErrorBoundary } from './ErrorBoundary';
 import HelpSystem from './HelpSystem';
 import OnboardingFlow from './OnboardingFlow';
+import ScamAnalysis from './ScamAnalysis';
+import StatusIcon from './StatusIcon';
 import SupportWidget from './SupportWidget';
-import { useScamAnalysis } from '@/hooks/useScamAnalysis';
 
 interface LayoutProps {
   lang?: 'en' | 'he';
@@ -21,7 +20,7 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  
+
   // Use the scam analysis hook to get conversation data
   const { currentAnalysis, messages } = useScamAnalysis();
 
@@ -45,11 +44,11 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
         setShowOnboarding(true);
       }
     }, 0);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
-  const handleAnalysisComplete = (analysis: FullAnalysisResult) => {
+  const handleAnalysisComplete = () => {
     if (isMobile) {
       setShowAnalysis(true);
     }
@@ -78,7 +77,12 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
                     className="p-2 text-text-secondary hover:text-text-primary transition-colors"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 19l-7-7 7-7"
+                      />
                     </svg>
                   </button>
                 )}
@@ -91,11 +95,16 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
                   </p>
                 </div>
               </div>
-              
+
               {/* Mobile Menu Button */}
               <button className="p-2 text-gray-400 hover:text-white transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
             </div>
@@ -113,14 +122,12 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
               </ChatErrorBoundary>
             )}
           </div>
-          
+
           {/* Help System */}
           <HelpSystem lang={lang} />
-          
+
           {/* Onboarding Flow */}
-          {showOnboarding && (
-            <OnboardingFlow lang={lang} onComplete={handleOnboardingComplete} />
-          )}
+          {showOnboarding && <OnboardingFlow lang={lang} onComplete={handleOnboardingComplete} />}
         </div>
       </ErrorBoundary>
     );
@@ -135,7 +142,7 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
           <header className="bg-dark-gray border-b border-gray-800 p-6">
             <BrandLogo size="lg" />
           </header>
-          
+
           <div className="flex-1">
             <ChatErrorBoundary>
               <ChatInterface onAnalysisComplete={handleAnalysisComplete} lang={lang} />
@@ -153,12 +160,12 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
                   {currentAnalysis ? 'Security assessment complete' : 'Waiting for analysis...'}
                 </p>
               </div>
-              
+
               {currentAnalysis && (
                 <div className="flex items-center space-x-2">
-                  <StatusIcon 
-                    classification={currentAnalysis.analysisData.classification} 
-                    size="sm" 
+                  <StatusIcon
+                    classification={currentAnalysis.analysisData.classification}
+                    size="sm"
                   />
                   <span className="text-sm font-medium text-gray-300">
                     {currentAnalysis.analysisData.classification}
@@ -179,36 +186,33 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
               <div className="flex-1 flex items-center justify-center p-6">
                 <div className="text-center max-w-md">
                   <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
-                    <Image 
-                      src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp" 
-                      alt="Ready for Analysis" 
+                    <Image
+                      src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp"
+                      alt="Ready for Analysis"
                       width={256}
                       height={192}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    Ready for Analysis
-                  </h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">Ready for Analysis</h3>
                   <p className="text-gray-400 leading-relaxed">
-                    Submit suspicious content in the chat to receive a detailed security assessment with risk scores and recommendations.
+                    Submit suspicious content in the chat to receive a detailed security assessment
+                    with risk scores and recommendations.
                   </p>
                 </div>
               </div>
             )}
           </div>
         </div>
-        
+
         {/* Help System */}
         <HelpSystem lang={lang} />
-        
+
         {/* Support Widget */}
         <SupportWidget lang={lang} />
-        
+
         {/* Onboarding Flow */}
-        {showOnboarding && (
-          <OnboardingFlow lang={lang} onComplete={handleOnboardingComplete} />
-        )}
+        {showOnboarding && <OnboardingFlow lang={lang} onComplete={handleOnboardingComplete} />}
       </div>
     </ErrorBoundary>
   );

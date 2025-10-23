@@ -10,7 +10,7 @@ export class StorageService {
   constructor(config: StorageConfig) {
     this.config = config;
     this.fallbackProvider = new MemoryStorageProvider();
-    
+
     if (config.provider === 'dynamodb' && config.dynamodb) {
       try {
         this.provider = new DynamoDBStorageProvider(config.dynamodb);
@@ -104,13 +104,13 @@ export function getStorageService(): StorageService {
       dynamodb: {
         region: process.env.AWS_REGION || 'us-east-1',
         tableName: process.env.DYNAMODB_TABLE_NAME || 'scam-hunt-history',
-        sessionTableName: process.env.DYNAMODB_SESSION_TABLE_NAME || 'scam-hunt-sessions'
-      }
+        sessionTableName: process.env.DYNAMODB_SESSION_TABLE_NAME || 'scam-hunt-sessions',
+      },
     };
-    
+
     storageServiceInstance = new StorageService(config);
   }
-  
+
   return storageServiceInstance;
 }
 

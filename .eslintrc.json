@@ -2,21 +2,40 @@
   "extends": "next/core-web-vitals",
   "rules": {
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-unused-vars": ["warn", { 
-      "argsIgnorePattern": "^_",
-      "varsIgnorePattern": "^_"
-    }],
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }
+    ],
     "react/no-unescaped-entities": "error",
-    "@next/next/no-img-element": "warn"
+    "@next/next/no-img-element": "warn",
+    "react-hooks/exhaustive-deps": "warn",
+    "@typescript-eslint/no-require-imports": "warn"
   },
   "overrides": [
     {
-      "files": ["**/__tests__/**/*", "**/*.test.ts", "**/*.test.tsx", "jest.config.js"],
+      "files": [
+        "**/__tests__/**/*",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "jest.config.js",
+        "tailwind.config.ts",
+        "next.config.js"
+      ],
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-unused-vars": "off",
         "@typescript-eslint/no-require-imports": "off",
         "@typescript-eslint/no-unsafe-function-type": "off"
+      }
+    },
+    {
+      "files": ["src/lib/security/**/*", "src/lib/middleware/**/*"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "warn"
       }
     }
   ]

@@ -1,10 +1,5 @@
-import {
-  generateUserId,
-  getUserId,
-  setUserId,
-  clearUserId,
-  hashIP
-} from '../user-identification';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { clearUserId, generateUserId, getUserId, hashIP, setUserId } from '../user-identification';
 
 // Mock localStorage
 const localStorageMock = {
@@ -15,7 +10,7 @@ const localStorageMock = {
 };
 
 Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
+  value: localStorageMock,
 });
 
 describe('User Identification', () => {
@@ -28,7 +23,7 @@ describe('User Identification', () => {
     it('generates unique user IDs', () => {
       const id1 = generateUserId();
       const id2 = generateUserId();
-      
+
       expect(id1).not.toBe(id2);
       expect(id1).toMatch(/^user_\d+_[a-z0-9]+$/);
       expect(id2).toMatch(/^user_\d+_[a-z0-9]+$/);
@@ -38,7 +33,7 @@ describe('User Identification', () => {
       const beforeTime = Date.now();
       const userId = generateUserId();
       const afterTime = Date.now();
-      
+
       const timestamp = parseInt(userId.split('_')[1]);
       expect(timestamp).toBeGreaterThanOrEqual(beforeTime);
       expect(timestamp).toBeLessThanOrEqual(afterTime);
@@ -48,9 +43,9 @@ describe('User Identification', () => {
   describe('getUserId', () => {
     it('generates new ID when no stored ID exists', () => {
       localStorageMock.getItem.mockReturnValue(null);
-      
+
       const userId = getUserId();
-      
+
       expect(userId).toMatch(/^user_\d+_[a-z0-9]+$/);
       expect(localStorageMock.getItem).toHaveBeenCalledWith('scam-hunt-user-id');
       expect(localStorageMock.setItem).toHaveBeenCalled();
@@ -59,12 +54,12 @@ describe('User Identification', () => {
     it('returns stored ID when valid and not expired', () => {
       const storedData = {
         userId: 'user_123_abc',
-        timestamp: Date.now() - 1000 // 1 second ago
+        timestamp: Date.now() - 1000, // 1 second ago
       };
       localStorageMock.getItem.mockReturnValue(JSON.stringify(storedData));
-      
+
       const userId = getUserId();
-      
+
       expect(userId).toBe('user_123_abc');
       expect(localStorageMock.setItem).not.toHaveBeenCalled();
     });
@@ -72,12 +67,12 @@ describe('User Identification', () => {
     it('generates new ID when stored ID is expired', () => {
       const storedData = {
         userId: 'user_123_abc',
-        timestamp: Date.now() - (31 * 24 * 60 * 60 * 1000) // 31 days ago
+        timestamp: Date.now() - 31 * 24 * 60 * 60 * 1000, // 31 days ago
       };
       localStorageMock.getItem.mockReturnValue(JSON.stringify(storedData));
-      
+
       const userId = getUserId();
-      
+
       expect(userId).not.toBe('user_123_abc');
       expect(userId).toMatch(/^user_\d+_[a-z0-9]+$/);
       expect(localStorageMock.setItem).toHaveBeenCalled();
@@ -85,9 +80,9 @@ describe('User Identification', () => {
 
     it('handles corrupted localStorage data', () => {
       localStorageMock.getItem.mockReturnValue('invalid-json');
-      
+
       const userId = getUserId();
-      
+
       expect(userId).toMatch(/^user_\d+_[a-z0-9]+$/);
       expect(localStorageMock.setItem).toHaveBeenCalled();
     });
@@ -96,9 +91,9 @@ describe('User Identification', () => {
       localStorageMock.getItem.mockImplementation(() => {
         throw new Error('localStorage error');
       });
-      
+
       const userId = getUserId();
-      
+
       expect(userId).toMatch(/^user_\d+_[a-z0-9]+$/);
     });
   });
@@ -107,16 +102,16 @@ describe('User Identification', () => {
     it('stores user ID with timestamp', () => {
       const userId = 'user_123_abc';
       const beforeTime = Date.now();
-      
+
       setUserId(userId);
-      
+
       const afterTime = Date.now();
-      
+
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'scam-hunt-user-id',
         expect.stringContaining(userId)
       );
-      
+
       const storedData = JSON.parse(localStorageMock.setItem.mock.calls[0][1]);
       expect(storedData.userId).toBe(userId);
       expect(storedData.timestamp).toBeGreaterThanOrEqual(beforeTime);
@@ -127,7 +122,7 @@ describe('User Identification', () => {
       localStorageMock.setItem.mockImplementation(() => {
         throw new Error('localStorage error');
       });
-      
+
       expect(() => setUserId('test-user')).not.toThrow();
     });
   });
@@ -135,7 +130,7 @@ describe('User Identification', () => {
   describe('clearUserId', () => {
     it('removes user ID from localStorage', () => {
       clearUserId();
-      
+
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('scam-hunt-user-id');
     });
 
@@ -143,7 +138,7 @@ describe('User Identification', () => {
       localStorageMock.removeItem.mockImplementation(() => {
         throw new Error('localStorage error');
       });
-      
+
       expect(() => clearUserId()).not.toThrow();
     });
   });
@@ -153,7 +148,7 @@ describe('User Identification', () => {
       const ip = '192.168.1.1';
       const hash1 = hashIP(ip);
       const hash2 = hashIP(ip);
-      
+
       expect(hash1).toBe(hash2);
       expect(hash1).toMatch(/^[0-9a-f]{1,16}$/);
     });
@@ -161,7 +156,7 @@ describe('User Identification', () => {
     it('generates different hashes for different IPs', () => {
       const hash1 = hashIP('192.168.1.1');
       const hash2 = hashIP('192.168.1.2');
-      
+
       expect(hash1).not.toBe(hash2);
     });
 
@@ -169,19 +164,19 @@ describe('User Identification', () => {
       const ip = '192.168.1.1';
       const hash1 = hashIP(ip, 'salt1');
       const hash2 = hashIP(ip, 'salt2');
-      
+
       expect(hash1).not.toBe(hash2);
     });
 
     it('handles empty IP gracefully', () => {
       const hash = hashIP('');
-      
+
       expect(hash).toMatch(/^[0-9a-f]{1,16}$/);
     });
 
     it('limits hash length to 16 characters', () => {
       const hash = hashIP('192.168.1.1');
-      
+
       expect(hash.length).toBeLessThanOrEqual(16);
     });
   });
@@ -200,14 +195,14 @@ describe('User Identification', () => {
 
     it('generates temporary ID on server-side', () => {
       const userId = getUserId();
-      
+
       expect(userId).toMatch(/^user_\d+_[a-z0-9]+$/);
     });
 
     it('does not attempt localStorage operations on server-side', () => {
       setUserId('test-user');
       clearUserId();
-      
+
       // Should not throw errors
       expect(true).toBe(true);
     });

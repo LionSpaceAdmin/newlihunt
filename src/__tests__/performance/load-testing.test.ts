@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Performance and load testing for the Scam Hunter platform
  * Tests system behavior under various load conditions
@@ -25,17 +26,17 @@ describe('Performance and Load Testing', () => {
           result: {
             riskScore: 50,
             credibilityScore: 50,
-            classification: 'SUSPICIOUS'
-          }
-        })
+            classification: 'SUSPICIOUS',
+          },
+        }),
       });
 
       const startTime = performance.now();
-      
+
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: 'Test message' })
+        body: JSON.stringify({ message: 'Test message' }),
       });
 
       const endTime = performance.now();
@@ -47,27 +48,25 @@ describe('Performance and Load Testing', () => {
 
     it('should handle timeout scenarios gracefully', async () => {
       // Mock slow API response
-      (global.fetch as jest.Mock).mockImplementationOnce(() => 
-        new Promise(resolve => setTimeout(resolve, 35000)) // 35 second delay
+      (global.fetch as jest.Mock).mockImplementationOnce(
+        () => new Promise(resolve => setTimeout(resolve, 35000)) // 35 second delay
       );
 
       const startTime = performance.now();
-      
+
       try {
         await Promise.race([
           fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Test message' })
+            body: JSON.stringify({ message: 'Test message' }),
           }),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Timeout')), 30000)
-          )
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 30000)),
         ]);
       } catch (error) {
         const endTime = performance.now();
         const responseTime = endTime - startTime;
-        
+
         expect(error).toBeInstanceOf(Error);
         expect(responseTime).toBeLessThan(31000); // Should timeout within 31 seconds
       }
@@ -77,21 +76,21 @@ describe('Performance and Load Testing', () => {
   describe('Memory Usage', () => {
     it('should not cause memory leaks with repeated operations', async () => {
       const initialMemory = process.memoryUsage();
-      
+
       // Simulate multiple analysis operations
       for (let i = 0; i < 100; i++) {
         (global.fetch as jest.Mock).mockResolvedValueOnce({
           ok: true,
           json: async () => ({
             success: true,
-            result: { riskScore: Math.random() * 100 }
-          })
+            result: { riskScore: Math.random() * 100 },
+          }),
         });
 
         await fetch('/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: `Test message ${i}` })
+          body: JSON.stringify({ message: `Test message ${i}` }),
         });
       }
 
@@ -102,7 +101,7 @@ describe('Performance and Load Testing', () => {
 
       const finalMemory = process.memoryUsage();
       const memoryIncrease = finalMemory.heapUsed - initialMemory.heapUsed;
-      
+
       // Memory increase should be reasonable (less than 50MB)
       expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024);
     });
@@ -119,8 +118,8 @@ describe('Performance and Load Testing', () => {
           ok: true,
           json: async () => ({
             success: true,
-            result: { riskScore: 50, requestId: i }
-          })
+            result: { riskScore: 50, requestId: i },
+          }),
         });
       }
 
@@ -130,7 +129,7 @@ describe('Performance and Load Testing', () => {
           fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: `Concurrent test ${i}` })
+            body: JSON.stringify({ message: `Concurrent test ${i}` }),
           })
         );
       }
@@ -138,14 +137,14 @@ describe('Performance and Load Testing', () => {
       const startTime = performance.now();
       const responses = await Promise.all(requests);
       const endTime = performance.now();
-      
+
       const totalTime = endTime - startTime;
-      
+
       // All requests should succeed
       responses.forEach(response => {
         expect(response.ok).toBe(true);
       });
-      
+
       // Concurrent requests should not take significantly longer than sequential
       expect(totalTime).toBeLessThan(10000); // Should complete within 10 seconds
     });
@@ -161,14 +160,14 @@ describe('Performance and Load Testing', () => {
           // First 20 requests succeed
           (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
-            json: async () => ({ success: true, result: { riskScore: 50 } })
+            json: async () => ({ success: true, result: { riskScore: 50 } }),
           });
         } else {
           // Remaining requests are rate limited
           (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: false,
             status: 429,
-            json: async () => ({ error: 'Rate limit exceeded' })
+            json: async () => ({ error: 'Rate limit exceeded' }),
           });
         }
       }
@@ -179,7 +178,7 @@ describe('Performance and Load Testing', () => {
           fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: `Rate limit test ${i}` })
+            body: JSON.stringify({ message: `Rate limit test ${i}` }),
           }).then(response => {
             if (response.status === 429) {
               rateLimitedCount++;
@@ -190,7 +189,7 @@ describe('Performance and Load Testing', () => {
       }
 
       await Promise.all(requests);
-      
+
       // Should have rate limited some requests
       expect(rateLimitedCount).toBeGreaterThan(0);
       expect(rateLimitedCount).toBeLessThan(requestCount); // Not all should be rate limited
@@ -200,43 +199,43 @@ describe('Performance and Load Testing', () => {
   describe('Large Data Handling', () => {
     it('should handle large text inputs efficiently', async () => {
       const largeText = 'A'.repeat(100000); // 100KB of text
-      
+
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           success: true,
-          result: { riskScore: 30, credibilityScore: 70 }
-        })
+          result: { riskScore: 30, credibilityScore: 70 },
+        }),
       });
 
       const startTime = performance.now();
-      
+
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: largeText })
+        body: JSON.stringify({ message: largeText }),
       });
 
       const endTime = performance.now();
       const processingTime = endTime - startTime;
-      
+
       expect(response.ok).toBe(true);
       expect(processingTime).toBeLessThan(10000); // Should process within 10 seconds
     });
 
     it('should reject excessively large inputs', async () => {
       const excessiveText = 'A'.repeat(10000000); // 10MB of text
-      
+
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 413,
-        json: async () => ({ error: 'Payload too large' })
+        json: async () => ({ error: 'Payload too large' }),
       });
 
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: excessiveText })
+        body: JSON.stringify({ message: excessiveText }),
       });
 
       expect(response.ok).toBe(false);
@@ -247,15 +246,13 @@ describe('Performance and Load Testing', () => {
   describe('Network Resilience', () => {
     it('should handle network failures gracefully', async () => {
       // Mock network failure
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new Error('Network error')
-      );
+      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
       try {
         await fetch('/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: 'Test message' })
+          body: JSON.stringify({ message: 'Test message' }),
         });
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
@@ -265,7 +262,7 @@ describe('Performance and Load Testing', () => {
 
     it('should implement proper retry logic', async () => {
       let attemptCount = 0;
-      
+
       (global.fetch as jest.Mock).mockImplementation(() => {
         attemptCount++;
         if (attemptCount < 3) {
@@ -273,7 +270,7 @@ describe('Performance and Load Testing', () => {
         }
         return Promise.resolve({
           ok: true,
-          json: async () => ({ success: true, result: { riskScore: 50 } })
+          json: async () => ({ success: true, result: { riskScore: 50 } }),
         });
       });
 
@@ -284,9 +281,9 @@ describe('Performance and Load Testing', () => {
           const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Retry test' })
+            body: JSON.stringify({ message: 'Retry test' }),
           });
-          
+
           if (response.ok) {
             break;
           }
@@ -313,17 +310,17 @@ describe('Performance and Load Testing', () => {
       };
 
       const startTime = performance.now();
-      
+
       // Simulate multiple heavy operations
       for (let i = 0; i < 10; i++) {
         heavyOperation();
         // Yield to browser between operations
         await new Promise(resolve => setTimeout(resolve, 0));
       }
-      
+
       const endTime = performance.now();
       const totalTime = endTime - startTime;
-      
+
       // Should complete but not block for too long
       expect(totalTime).toBeGreaterThan(1000); // At least 1 second of work
       expect(totalTime).toBeLessThan(5000); // But not more than 5 seconds
@@ -333,13 +330,13 @@ describe('Performance and Load Testing', () => {
   describe('Resource Cleanup', () => {
     it('should properly clean up resources after operations', async () => {
       const resources = [];
-      
+
       // Simulate resource allocation
       for (let i = 0; i < 100; i++) {
         const resource = {
           id: i,
           data: new Array(1000).fill(Math.random()),
-          cleanup: jest.fn()
+          cleanup: jest.fn(),
         };
         resources.push(resource);
       }

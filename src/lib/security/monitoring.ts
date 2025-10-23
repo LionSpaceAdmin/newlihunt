@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SecurityEvent, SecurityLogger } from '@/lib/middleware/security';
 
 export interface SecurityMetrics {
@@ -31,15 +32,11 @@ export class SecurityMonitor {
   private static readonly SUSPICIOUS_IP_THRESHOLD = 10; // Events per hour
   private static readonly RATE_LIMIT_THRESHOLD = 50; // Requests per minute
 
-  public static getSecurityMetrics(
-    timeRangeHours: number = 24
-  ): SecurityMetrics {
+  public static getSecurityMetrics(timeRangeHours: number = 24): SecurityMetrics {
     const now = new Date();
     const start = new Date(now.getTime() - timeRangeHours * 60 * 60 * 1000);
-    
-    const events = SecurityLogger.getEvents(1000).filter(
-      event => event.timestamp >= start
-    );
+
+    const events = SecurityLogger.getEvents(1000).filter(event => event.timestamp >= start);
 
     const eventsByType: Record<string, number> = {};
     const eventsBySeverity: Record<string, number> = {};
@@ -49,13 +46,13 @@ export class SecurityMonitor {
     events.forEach(event => {
       // Count by type
       eventsByType[event.type] = (eventsByType[event.type] || 0) + 1;
-      
+
       // Count by severity
       eventsBySeverity[event.severity] = (eventsBySeverity[event.severity] || 0) + 1;
-      
+
       // Count by IP
       ipCounts[event.ip] = (ipCounts[event.ip] || 0) + 1;
-      
+
       // Count by endpoint
       endpointCounts[event.endpoint] = (endpointCounts[event.endpoint] || 0) + 1;
     });
@@ -114,7 +111,8 @@ export class SecurityMonitor {
     });
 
     Object.entries(patternCounts).forEach(([pattern, count]) => {
-      if (count > 5) { // Pattern seen more than 5 times
+      if (count > 5) {
+        // Pattern seen more than 5 times
         attackPatterns.push(`${pattern} (${count} occurrences)`);
       }
     });
@@ -184,14 +182,10 @@ ${Object.entries(metrics.eventsByType)
   .join('\n')}
 
 ## Top Source IPs
-${metrics.topIPs
-  .map(({ ip, count }) => `- ${ip}: ${count} events`)
-  .join('\n')}
+${metrics.topIPs.map(({ ip, count }) => `- ${ip}: ${count} events`).join('\n')}
 
 ## Top Targeted Endpoints
-${metrics.topEndpoints
-  .map(({ endpoint, count }) => `- ${endpoint}: ${count} events`)
-  .join('\n')}
+${metrics.topEndpoints.map(({ endpoint, count }) => `- ${endpoint}: ${count} events`).join('\n')}
 
 ## Threat Analysis
 ### Suspicious IPs: ${threats.suspiciousIPs.length}
@@ -216,7 +210,7 @@ ${metrics.recentEvents
 
   public static async sendAlerts(): Promise<void> {
     const threats = this.identifyThreats();
-    
+
     // Send alerts for critical threats
     if (threats.suspiciousIPs.length > 5) {
       await this.sendAlert(
@@ -238,8 +232,9 @@ ${metrics.recentEvents
     const recentEvents = SecurityLogger.getEvents(50);
     const last5Minutes = new Date(Date.now() - 5 * 60 * 1000);
     const recentCriticalEvents = recentEvents.filter(
-      event => event.timestamp >= last5Minutes && 
-               (event.severity === 'critical' || event.severity === 'high')
+      event =>
+        event.timestamp >= last5Minutes &&
+        (event.severity === 'critical' || event.severity === 'high')
     );
 
     if (recentCriticalEvents.length > 10) {
@@ -264,7 +259,7 @@ ${metrics.recentEvents
       try {
         // Send to AWS SNS, Slack, email, etc.
         // Implementation depends on your alerting infrastructure
-        
+
         // Example: Send to webhook
         if (process.env.SECURITY_WEBHOOK_URL) {
           await fetch(process.env.SECURITY_WEBHOOK_URL, {
@@ -317,10 +312,14 @@ ${metrics.recentEvents
 }
 
 // Auto-run threat detection every 5 minutes
-if (typeof window === 'undefined') { // Server-side only
-  setInterval(() => {
-    SecurityMonitor.sendAlerts().catch(error => {
-      console.error('Failed to send security alerts:', error);
-    });
-  }, 5 * 60 * 1000);
+if (typeof window === 'undefined') {
+  // Server-side only
+  setInterval(
+    () => {
+      SecurityMonitor.sendAlerts().catch(error => {
+        console.error('Failed to send security alerts:', error);
+      });
+    },
+    5 * 60 * 1000
+  );
 }

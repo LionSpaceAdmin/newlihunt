@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Classification, FullAnalysisResult, Severity } from '@/types/analysis';
 import { MemoryStorageProvider } from '../memory-provider';
 import { StoredAnalysis, UserSession } from '../types';
-import { FullAnalysisResult, Classification, Severity } from '@/types/analysis';
 
 describe('MemoryStorageProvider', () => {
   let provider: MemoryStorageProvider;
@@ -9,28 +10,30 @@ describe('MemoryStorageProvider', () => {
 
   beforeEach(() => {
     provider = new MemoryStorageProvider();
-    
+
     const mockResult: FullAnalysisResult = {
       summary: 'Test analysis summary',
       analysisData: {
         riskScore: 75,
         credibilityScore: 25,
         classification: Classification.SUSPICIOUS,
-        detectedRules: [{
-          id: 'rule1',
-          name: 'Test Rule',
-          severity: Severity.MEDIUM,
-          description: 'Test rule description',
-          points: 10
-        }],
+        detectedRules: [
+          {
+            id: 'rule1',
+            name: 'Test Rule',
+            severity: Severity.MEDIUM,
+            description: 'Test rule description',
+            points: 10,
+          },
+        ],
         recommendations: ['Test recommendation'],
         reasoning: 'Test reasoning',
         debiasingStatus: {
           anonymous_profile_neutralized: true,
           patriotic_tokens_neutralized: false,
-          sentiment_penalty_capped: true
-        }
-      }
+          sentiment_penalty_capped: true,
+        },
+      },
     };
 
     mockAnalysis = {
@@ -39,7 +42,7 @@ describe('MemoryStorageProvider', () => {
       timestamp: new Date('2023-10-23T14:30:00Z'),
       input: {
         message: 'Test suspicious content',
-        imageUrl: 'https://example.com/image.jpg'
+        imageUrl: 'https://example.com/image.jpg',
       },
       result: mockResult,
       conversation: [
@@ -47,14 +50,14 @@ describe('MemoryStorageProvider', () => {
           id: 'msg1',
           role: 'user',
           content: 'Test message',
-          timestamp: new Date('2023-10-23T14:29:00Z')
-        }
+          timestamp: new Date('2023-10-23T14:29:00Z'),
+        },
       ],
       metadata: {
         userAgent: 'Test User Agent',
         ipHash: 'test-ip-hash',
-        processingTime: 1500
-      }
+        processingTime: 1500,
+      },
     };
 
     mockSession = {
@@ -62,14 +65,14 @@ describe('MemoryStorageProvider', () => {
       createdAt: new Date('2023-10-23T14:00:00Z'),
       lastActive: new Date('2023-10-23T14:30:00Z'),
       analysisCount: 1,
-      feedbackGiven: 0
+      feedbackGiven: 0,
     };
   });
 
   afterEach(() => {
     provider.clear();
-  }); 
- describe('saveAnalysis', () => {
+  });
+  describe('saveAnalysis', () => {
     it('saves analysis successfully', async () => {
       const id = await provider.saveAnalysis(mockAnalysis);
       expect(id).toBe(mockAnalysis.id);
@@ -78,10 +81,10 @@ describe('MemoryStorageProvider', () => {
 
     it('maintains chronological order for user analyses', async () => {
       const analysis2 = { ...mockAnalysis, id: 'test-analysis-2' };
-      
+
       await provider.saveAnalysis(mockAnalysis);
       await provider.saveAnalysis(analysis2);
-      
+
       const history = await provider.getUserHistory('test-user-1');
       expect(history).toHaveLength(2);
       expect(history[0].id).toBe('test-analysis-2'); // Most recent first
@@ -92,7 +95,7 @@ describe('MemoryStorageProvider', () => {
   describe('getAnalysis', () => {
     it('retrieves existing analysis', async () => {
       await provider.saveAnalysis(mockAnalysis);
-      
+
       const retrieved = await provider.getAnalysis('test-analysis-1');
       expect(retrieved).toEqual(mockAnalysis);
     });
@@ -112,11 +115,11 @@ describe('MemoryStorageProvider', () => {
     it('returns user history in chronological order', async () => {
       const analysis2 = { ...mockAnalysis, id: 'test-analysis-2', userId: 'test-user-1' };
       const analysis3 = { ...mockAnalysis, id: 'test-analysis-3', userId: 'test-user-2' };
-      
+
       await provider.saveAnalysis(mockAnalysis);
       await provider.saveAnalysis(analysis2);
       await provider.saveAnalysis(analysis3);
-      
+
       const history = await provider.getUserHistory('test-user-1');
       expect(history).toHaveLength(2);
       expect(history.map(a => a.id)).toEqual(['test-analysis-2', 'test-analysis-1']);
@@ -126,13 +129,13 @@ describe('MemoryStorageProvider', () => {
       const analyses = Array.from({ length: 5 }, (_, i) => ({
         ...mockAnalysis,
         id: `test-analysis-${i}`,
-        userId: 'test-user-1'
+        userId: 'test-user-1',
       }));
-      
+
       for (const analysis of analyses) {
         await provider.saveAnalysis(analysis);
       }
-      
+
       const history = await provider.getUserHistory('test-user-1', 3);
       expect(history).toHaveLength(3);
     });
@@ -141,9 +144,9 @@ describe('MemoryStorageProvider', () => {
   describe('updateAnalysisFeedback', () => {
     it('updates feedback for existing analysis', async () => {
       await provider.saveAnalysis(mockAnalysis);
-      
+
       await provider.updateAnalysisFeedback('test-analysis-1', 'positive');
-      
+
       const updated = await provider.getAnalysis('test-analysis-1');
       expect(updated?.feedback).toBe('positive');
     });
@@ -158,7 +161,7 @@ describe('MemoryStorageProvider', () => {
   describe('session management', () => {
     it('creates new session', async () => {
       const session = await provider.createSession('test-user-1');
-      
+
       expect(session.id).toBe('test-user-1');
       expect(session.analysisCount).toBe(0);
       expect(session.feedbackGiven).toBe(0);
@@ -168,7 +171,7 @@ describe('MemoryStorageProvider', () => {
 
     it('retrieves existing session', async () => {
       await provider.createSession('test-user-1');
-      
+
       const retrieved = await provider.getSession('test-user-1');
       expect(retrieved?.id).toBe('test-user-1');
     });
@@ -180,12 +183,12 @@ describe('MemoryStorageProvider', () => {
 
     it('updates session with new data', async () => {
       await provider.createSession('test-user-1');
-      
+
       await provider.updateSession('test-user-1', {
         analysisCount: 5,
-        feedbackGiven: 2
+        feedbackGiven: 2,
       });
-      
+
       const updated = await provider.getSession('test-user-1');
       expect(updated?.analysisCount).toBe(5);
       expect(updated?.feedbackGiven).toBe(2);
@@ -197,11 +200,11 @@ describe('MemoryStorageProvider', () => {
     it('clears all data', async () => {
       await provider.saveAnalysis(mockAnalysis);
       await provider.createSession('test-user-1');
-      
+
       expect(provider.size()).toBe(1);
-      
+
       provider.clear();
-      
+
       expect(provider.size()).toBe(0);
       expect(await provider.getAnalysis('test-analysis-1')).toBeNull();
       expect(await provider.getSession('test-user-1')).toBeNull();
@@ -209,10 +212,10 @@ describe('MemoryStorageProvider', () => {
 
     it('reports correct size', async () => {
       expect(provider.size()).toBe(0);
-      
+
       await provider.saveAnalysis(mockAnalysis);
       expect(provider.size()).toBe(1);
-      
+
       const analysis2 = { ...mockAnalysis, id: 'test-analysis-2' };
       await provider.saveAnalysis(analysis2);
       expect(provider.size()).toBe(2);

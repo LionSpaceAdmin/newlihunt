@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SecurityLogger } from '@/lib/middleware/security';
 
 export interface ValidationResult {
@@ -24,7 +25,7 @@ export class AdvancedInputValidator {
     /(--|\/\*|\*\/|;)/,
     /(\b(CHAR|NCHAR|VARCHAR|NVARCHAR)\s*\()/i,
     /(\b(WAITFOR|DELAY)\b)/i,
-    
+
     // XSS patterns
     /<script[^>]*>.*?<\/script>/gi,
     /javascript:/gi,
@@ -34,20 +35,20 @@ export class AdvancedInputValidator {
     /<embed[^>]*>/gi,
     /expression\s*\(/gi,
     /vbscript:/gi,
-    
+
     // Command injection patterns
     /[;&|`$(){}[\]]/,
     /\b(cat|ls|pwd|whoami|id|uname|ps|netstat|ifconfig|ping|nslookup|dig|curl|wget)\b/i,
-    
+
     // Path traversal patterns
     /\.\.[\/\\]/,
     /[\/\\]etc[\/\\]/i,
     /[\/\\]proc[\/\\]/i,
     /[\/\\]sys[\/\\]/i,
-    
+
     // LDAP injection patterns
     /[()=*!&|]/,
-    
+
     // NoSQL injection patterns
     /\$where/i,
     /\$ne/i,
@@ -63,17 +64,17 @@ export class AdvancedInputValidator {
     /click.{0,20}(here|now|immediately)/i,
     /verify.{0,20}(identity|account|information)/i,
     /limited.{0,20}time/i,
-    
+
     // Cryptocurrency scam patterns
     /send.{0,20}(bitcoin|btc|ethereum|eth|crypto)/i,
     /wallet.{0,20}(address|seed|private.{0,10}key)/i,
     /investment.{0,20}opportunity/i,
-    
+
     // Social engineering patterns
     /congratulations.{0,20}(winner|selected|chosen)/i,
     /claim.{0,20}(prize|reward|bonus)/i,
     /act.{0,20}(now|fast|quickly)/i,
-    
+
     // Donation scam patterns
     /emergency.{0,20}(fund|donation)/i,
     /donate.{0,20}(now|immediately|urgent)/i,
@@ -85,26 +86,23 @@ export class AdvancedInputValidator {
     // Base64 patterns (more specific to avoid false positives)
     /^[A-Za-z0-9+\/]{16,}={0,2}$/,
     /[A-Za-z0-9+\/]{32,}={0,2}/,
-    
+
     // Hex encoding patterns
     /(?:0x|\\x|%)[0-9a-fA-F]{2,}/,
-    
+
     // URL encoding patterns
     /%[0-9a-fA-F]{2}/,
-    
+
     // Unicode escape patterns
     /\\u[0-9a-fA-F]{4}/,
-    
+
     // HTML entity patterns
     /&[a-zA-Z][a-zA-Z0-9]*;/,
     /&#[0-9]+;/,
     /&#x[0-9a-fA-F]+;/,
   ];
 
-  public static validateInput(
-    input: string,
-    options: ValidationOptions = {}
-  ): ValidationResult {
+  public static validateInput(input: string, options: ValidationOptions = {}): ValidationResult {
     const {
       maxLength = 10000,
       allowHTML = false,
@@ -225,7 +223,7 @@ export class AdvancedInputValidator {
 
     try {
       const parsed = JSON.parse(jsonString);
-      
+
       // Check for prototype pollution
       if (this.hasPrototypePollution(parsed)) {
         errors.push('Potential prototype pollution detected');
@@ -257,25 +255,25 @@ export class AdvancedInputValidator {
 
   private static hasPrototypePollution(obj: any): boolean {
     const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
-    
+
     function checkObject(obj: any): boolean {
       if (obj === null || typeof obj !== 'object') {
         return false;
       }
-      
+
       for (const key of Object.keys(obj)) {
         if (dangerousKeys.includes(key)) {
           return true;
         }
-        
+
         if (typeof obj[key] === 'object' && checkObject(obj[key])) {
           return true;
         }
       }
-      
+
       return false;
     }
-    
+
     return checkObject(obj);
   }
 
@@ -283,20 +281,20 @@ export class AdvancedInputValidator {
     if (obj === null || typeof obj !== 'object') {
       return 0;
     }
-    
+
     let maxDepth = 0;
     for (const key of Object.keys(obj)) {
       const depth = this.getObjectDepth(obj[key]);
       maxDepth = Math.max(maxDepth, depth);
     }
-    
+
     return maxDepth + 1;
   }
 
   private static checkArraySizes(obj: any): { maxSize: number; totalArrays: number } {
     let maxSize = 0;
     let totalArrays = 0;
-    
+
     function checkValue(value: any): void {
       if (Array.isArray(value)) {
         totalArrays++;
@@ -306,7 +304,7 @@ export class AdvancedInputValidator {
         Object.values(value).forEach(checkValue);
       }
     }
-    
+
     checkValue(obj);
     return { maxSize, totalArrays };
   }

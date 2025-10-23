@@ -11,7 +11,7 @@ async function handleGET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId') || getUserId();
     const limitParam = searchParams.get('limit') || '50';
-    
+
     // Validate and sanitize limit parameter
     const limit = Math.min(Math.max(parseInt(limitParam) || 50, 1), 100); // Clamp between 1-100
 
@@ -21,11 +21,11 @@ async function handleGET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       history,
-      provider: storageService.getProviderType()
+      provider: storageService.getProviderType(),
     });
   } catch (error) {
     console.error('Failed to retrieve history:', error);
-    
+
     // Log security event
     const ip = getClientIP(request);
     SecurityLogger.logEvent({
@@ -36,12 +36,12 @@ async function handleGET(request: NextRequest) {
       userAgent: request.headers.get('user-agent') || 'unknown',
       endpoint: '/api/history',
     });
-    
+
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to retrieve history',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -51,12 +51,12 @@ async function handleGET(request: NextRequest) {
 async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      userId, 
-      analysis, 
-      conversation, 
+    const {
+      userId,
+      analysis,
+      conversation,
       input,
-      processingTime = 0 
+      processingTime = 0,
     }: {
       userId?: string;
       analysis: FullAnalysisResult;
@@ -75,11 +75,11 @@ async function handlePOST(request: NextRequest) {
         userAgent: request.headers.get('user-agent') || 'unknown',
         endpoint: '/api/history',
       });
-      
+
       return NextResponse.json(
         {
           success: false,
-          error: 'Missing required fields: analysis, conversation, and input are required'
+          error: 'Missing required fields: analysis, conversation, and input are required',
         },
         { status: 400 }
       );
@@ -99,12 +99,12 @@ async function handlePOST(request: NextRequest) {
           userAgent: request.headers.get('user-agent') || 'unknown',
           endpoint: '/api/history',
         });
-        
+
         return NextResponse.json(
           {
             success: false,
             error: 'Invalid input message',
-            message: sanitizeError instanceof Error ? sanitizeError.message : 'Unknown error'
+            message: sanitizeError instanceof Error ? sanitizeError.message : 'Unknown error',
           },
           { status: 400 }
         );
@@ -127,8 +127,8 @@ async function handlePOST(request: NextRequest) {
       metadata: {
         userAgent,
         ipHash: hashIP(ip),
-        processingTime
-      }
+        processingTime,
+      },
     };
 
     const storageService = getStorageService();
@@ -140,9 +140,9 @@ async function handlePOST(request: NextRequest) {
       if (!session) {
         session = await storageService.createSession(finalUserId);
       }
-      
+
       await storageService.updateSession(finalUserId, {
-        analysisCount: session.analysisCount + 1
+        analysisCount: session.analysisCount + 1,
       });
     } catch (sessionError) {
       console.warn('Failed to update session:', sessionError);
@@ -152,11 +152,11 @@ async function handlePOST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       id: analysisId,
-      provider: storageService.getProviderType()
+      provider: storageService.getProviderType(),
     });
   } catch (error) {
     console.error('Failed to save analysis:', error);
-    
+
     // Log security event
     const ip = getClientIP(request);
     SecurityLogger.logEvent({
@@ -167,12 +167,12 @@ async function handlePOST(request: NextRequest) {
       userAgent: request.headers.get('user-agent') || 'unknown',
       endpoint: '/api/history',
     });
-    
+
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to save analysis',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -189,7 +189,7 @@ function hashIP(ip: string): string {
   const str = ip + (process.env.IP_SALT || 'default-salt');
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash).toString(16).substring(0, 16);

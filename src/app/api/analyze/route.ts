@@ -13,37 +13,30 @@ interface AnalyzeRequest {
   }>;
 }
 
-
-
 // Simple input sanitization
 function sanitizeText(text: string, maxLength: number = 10000): string {
   if (!text || typeof text !== 'string') {
     throw new Error('Invalid input: must be a non-empty string');
   }
-  
+
   if (text.length > maxLength) {
     throw new Error(`Input too long: maximum ${maxLength} characters allowed`);
   }
-  
+
   // Basic sanitization - remove potentially dangerous patterns
   const sanitized = text
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/javascript:/gi, '')
     .replace(/on\w+\s*=/gi, '')
     .trim();
-    
+
   return sanitized;
 }
 
 async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      message, 
-      imageBase64, 
-      imageMimeType, 
-      imageUrl 
-    }: AnalyzeRequest = body;
+    const { message, imageBase64, imageMimeType, imageUrl }: AnalyzeRequest = body;
 
     // Validate input
     if (!message && !imageBase64 && !imageUrl) {
@@ -52,7 +45,7 @@ async function handlePOST(request: NextRequest) {
         {
           success: false,
           error: 'Missing input',
-          message: 'Either message text, image data, or image URL is required'
+          message: 'Either message text, image data, or image URL is required',
         },
         { status: 400 }
       );
@@ -69,7 +62,7 @@ async function handlePOST(request: NextRequest) {
           {
             success: false,
             error: 'Invalid input',
-            message: sanitizeError instanceof Error ? sanitizeError.message : 'Unknown error'
+            message: sanitizeError instanceof Error ? sanitizeError.message : 'Unknown error',
           },
           { status: 400 }
         );
@@ -87,12 +80,12 @@ async function handlePOST(request: NextRequest) {
         if (!response.ok) {
           throw new Error(`Failed to fetch image: ${response.status}`);
         }
-        
+
         const contentType = response.headers.get('content-type');
         if (!contentType?.startsWith('image/')) {
           throw new Error('Invalid image type');
         }
-        
+
         const arrayBuffer = await response.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         processedImageBase64 = buffer.toString('base64');
@@ -103,7 +96,7 @@ async function handlePOST(request: NextRequest) {
           {
             success: false,
             error: 'Image processing failed',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: error instanceof Error ? error.message : 'Unknown error',
           },
           { status: 400 }
         );
@@ -131,8 +124,8 @@ async function handlePOST(request: NextRequest) {
         processingTime: Date.now() - startTime,
         inputLength: sanitizedMessage.length,
         hasImage: !!processedImageBase64,
-        version: "2.1.0"
-      }
+        version: '2.1.0',
+      },
     };
 
     // Log successful analysis
@@ -142,11 +135,10 @@ async function handlePOST(request: NextRequest) {
       detectedRulesCount: analysisResult.analysisData.detectedRules.length,
       processingTime: result.metadata.processingTime,
       hasImage: !!processedImageBase64,
-      inputLength: sanitizedMessage.length
+      inputLength: sanitizedMessage.length,
     });
 
     return NextResponse.json(result);
-
   } catch (error) {
     console.error('Analysis error:', error);
 
@@ -155,18 +147,18 @@ async function handlePOST(request: NextRequest) {
     let errorMessage = 'Internal server error';
 
     if (error instanceof Error) {
-      if (error.message.includes('Invalid input') || 
-          error.message.includes('Missing input') ||
-          error.message.includes('Invalid image') ||
-          error.message.includes('Input too long')) {
+      if (
+        error.message.includes('Invalid input') ||
+        error.message.includes('Missing input') ||
+        error.message.includes('Invalid image') ||
+        error.message.includes('Input too long')
+      ) {
         statusCode = 400;
         errorMessage = error.message;
-      } else if (error.message.includes('API key') || 
-                 error.message.includes('authentication')) {
+      } else if (error.message.includes('API key') || error.message.includes('authentication')) {
         statusCode = 401;
         errorMessage = 'Authentication failed';
-      } else if (error.message.includes('quota') || 
-                 error.message.includes('rate limit')) {
+      } else if (error.message.includes('quota') || error.message.includes('rate limit')) {
         statusCode = 429;
         errorMessage = 'Rate limit exceeded';
       }
@@ -177,7 +169,7 @@ async function handlePOST(request: NextRequest) {
         success: false,
         error: 'Analysis failed',
         message: errorMessage,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       { status: statusCode }
     );

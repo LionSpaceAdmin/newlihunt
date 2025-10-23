@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 /**
  * @jest-environment jsdom
  */
 
-import { uploadImage } from '../utils/uploadService';
+import { act, renderHook } from '@testing-library/react';
 import { useScamAnalysis } from '../hooks/useScamAnalysis';
-import { renderHook, act } from '@testing-library/react';
+import { uploadImage } from '../utils/uploadService';
 
 // Mock fetch for API calls
 global.fetch = jest.fn();
@@ -29,27 +30,29 @@ class MockWebSocket {
     // Mock successful analysis response
     setTimeout(() => {
       if (this.onmessage) {
-        this.onmessage(new MessageEvent('message', {
-          data: JSON.stringify({
-            type: 'analysis_complete',
-            result: {
-              summary: 'Test analysis completed',
-              analysisData: {
-                riskScore: 25,
-                credibilityScore: 80,
-                classification: 'SAFE',
-                detectedRules: [],
-                recommendations: ['Verify through official channels'],
-                reasoning: 'Content appears legitimate',
-                debiasingStatus: {
-                  anonymous_profile_neutralized: true,
-                  patriotic_tokens_neutralized: true,
-                  sentiment_penalty_capped: true
-                }
-              }
-            }
+        this.onmessage(
+          new MessageEvent('message', {
+            data: JSON.stringify({
+              type: 'analysis_complete',
+              result: {
+                summary: 'Test analysis completed',
+                analysisData: {
+                  riskScore: 25,
+                  credibilityScore: 80,
+                  classification: 'SAFE',
+                  detectedRules: [],
+                  recommendations: ['Verify through official channels'],
+                  reasoning: 'Content appears legitimate',
+                  debiasingStatus: {
+                    anonymous_profile_neutralized: true,
+                    patriotic_tokens_neutralized: true,
+                    sentiment_penalty_capped: true,
+                  },
+                },
+              },
+            }),
           })
-        }));
+        );
       }
     }, 100);
   }
@@ -78,8 +81,8 @@ describe('Multimodal Analysis Integration', () => {
           success: true,
           url: 'https://test-bucket.s3.amazonaws.com/test-image.jpg',
           size: 1024,
-          contentType: 'image/jpeg'
-        })
+          contentType: 'image/jpeg',
+        }),
       });
 
       const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
@@ -96,11 +99,13 @@ describe('Multimodal Analysis Integration', () => {
         status: 413,
         json: async () => ({
           success: false,
-          error: 'File too large'
-        })
+          error: 'File too large',
+        }),
       });
 
-      const largeFile = new File(['x'.repeat(11 * 1024 * 1024)], 'large.jpg', { type: 'image/jpeg' });
+      const largeFile = new File(['x'.repeat(11 * 1024 * 1024)], 'large.jpg', {
+        type: 'image/jpeg',
+      });
       const result = await uploadImage(largeFile);
 
       expect(result.success).toBe(false);
@@ -110,9 +115,11 @@ describe('Multimodal Analysis Integration', () => {
 
   describe('Multimodal Analysis Flow', () => {
     it('should analyze text and image together', async () => {
-      const { result } = renderHook(() => useScamAnalysis({
-        websocketUrl: 'wss://test.com'
-      }));
+      const { result } = renderHook(() =>
+        useScamAnalysis({
+          websocketUrl: 'wss://test.com',
+        })
+      );
 
       await act(async () => {
         await result.current.sendMessage(
@@ -132,9 +139,11 @@ describe('Multimodal Analysis Integration', () => {
     });
 
     it('should handle image processing errors', async () => {
-      const { result } = renderHook(() => useScamAnalysis({
-        apiUrl: 'https://test-api.com'
-      }));
+      const { result } = renderHook(() =>
+        useScamAnalysis({
+          apiUrl: 'https://test-api.com',
+        })
+      );
 
       // Mock API error response
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -142,16 +151,13 @@ describe('Multimodal Analysis Integration', () => {
         status: 400,
         json: async () => ({
           error: 'Image processing failed',
-          message: 'Invalid image URL'
-        })
+          message: 'Invalid image URL',
+        }),
       });
 
       await act(async () => {
         try {
-          await result.current.sendMessage(
-            'Analyze this',
-            'https://invalid-url.com/image.jpg'
-          );
+          await result.current.sendMessage('Analyze this', 'https://invalid-url.com/image.jpg');
         } catch (error) {
           // Expected to throw
         }
@@ -172,7 +178,9 @@ describe('Multimodal Analysis Integration', () => {
 
     it('should validate file sizes', async () => {
       // Create mock large file
-      const largeFile = new File(['x'.repeat(11 * 1024 * 1024)], 'large.jpg', { type: 'image/jpeg' });
+      const largeFile = new File(['x'.repeat(11 * 1024 * 1024)], 'large.jpg', {
+        type: 'image/jpeg',
+      });
       const result = await uploadImage(largeFile);
 
       expect(result.success).toBe(false);

@@ -1,10 +1,11 @@
-import type { Config } from "tailwindcss";
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
@@ -15,85 +16,85 @@ const config: Config = {
         'light-gray': '#1a1a1a',
         'accent-blue': '#3b82f6',
         'accent-blue-dark': '#2563eb',
-        
+
         // Status Colors
         'success-green': '#10b981',
         'warning-yellow': '#f59e0b',
         'danger-red': '#ef4444',
-        
+
         // Text Colors
         'text-primary': '#ffffff',
         'text-secondary': '#d1d5db',
         'text-muted': '#9ca3af',
         'text-disabled': '#6b7280',
-        
+
         // Border Colors
         'border-primary': '#374151',
         'border-secondary': '#4b5563',
         'border-accent': '#3b82f6',
-        
+
         // Background variants
         'bg-primary': '#0A0A0A',
         'bg-secondary': '#121212',
         'bg-tertiary': '#1a1a1a',
         'bg-hover': '#262626',
         'bg-active': '#2a2a2a',
-        
+
         // Risk Score Colors
         'risk-low': '#10b981',
-        'risk-medium': '#f59e0b', 
+        'risk-medium': '#f59e0b',
         'risk-high': '#ef4444',
-        
+
         // Credibility Colors
         'credibility-high': '#10b981',
         'credibility-medium': '#f59e0b',
         'credibility-low': '#ef4444',
       },
-      
+
       fontFamily: {
         sans: ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-geist-mono)', 'monospace'],
       },
-      
+
       fontSize: {
-        'xs': ['0.75rem', { lineHeight: '1rem' }],
-        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-        'base': ['1rem', { lineHeight: '1.5rem' }],
-        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
-        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        xs: ['0.75rem', { lineHeight: '1rem' }],
+        sm: ['0.875rem', { lineHeight: '1.25rem' }],
+        base: ['1rem', { lineHeight: '1.5rem' }],
+        lg: ['1.125rem', { lineHeight: '1.75rem' }],
+        xl: ['1.25rem', { lineHeight: '1.75rem' }],
         '2xl': ['1.5rem', { lineHeight: '2rem' }],
         '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
         '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
       },
-      
+
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
         '128': '32rem',
       },
-      
+
       borderRadius: {
-        'xl': '0.75rem',
+        xl: '0.75rem',
         '2xl': '1rem',
         '3xl': '1.5rem',
       },
-      
+
       boxShadow: {
-        'glow': '0 0 20px rgba(59, 130, 246, 0.3)',
+        glow: '0 0 20px rgba(59, 130, 246, 0.3)',
         'glow-green': '0 0 20px rgba(16, 185, 129, 0.3)',
         'glow-red': '0 0 20px rgba(239, 68, 68, 0.3)',
         'inner-glow': 'inset 0 0 10px rgba(59, 130, 246, 0.2)',
       },
-      
+
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'slide-down': 'slideDown 0.3s ease-out',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'bounce-slow': 'bounce 2s infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
+        glow: 'glow 2s ease-in-out infinite alternate',
       },
-      
+
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
@@ -112,25 +113,25 @@ const config: Config = {
           '100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.6)' },
         },
       },
-      
+
       screens: {
-        'xs': '475px',
+        xs: '475px',
         '3xl': '1600px',
       },
-      
+
       backdropBlur: {
-        'xs': '2px',
+        xs: '2px',
       },
-      
+
       transitionProperty: {
-        'height': 'height',
-        'spacing': 'margin, padding',
+        height: 'height',
+        spacing: 'margin, padding',
       },
     },
   },
   plugins: [
     // Custom plugin for component utilities
-    function({ addUtilities, theme }: { addUtilities: Function; theme: Function }) {
+    function ({ addUtilities, theme }: { addUtilities: Function; theme: Function }) {
       const newUtilities = {
         // Glass morphism effect
         '.glass': {
@@ -138,16 +139,16 @@ const config: Config = {
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
         },
-        
+
         // Gradient backgrounds
         '.bg-gradient-dark': {
           background: 'linear-gradient(135deg, #0A0A0A 0%, #121212 100%)',
         },
-        
+
         '.bg-gradient-blue': {
           background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
         },
-        
+
         // Text gradients
         '.text-gradient-blue': {
           background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
@@ -155,7 +156,7 @@ const config: Config = {
           '-webkit-text-fill-color': 'transparent',
           'background-clip': 'text',
         },
-        
+
         // Custom scrollbar
         '.scrollbar-thin': {
           '&::-webkit-scrollbar': {
@@ -172,7 +173,7 @@ const config: Config = {
             background: theme('colors.bg-hover'),
           },
         },
-        
+
         // Focus styles
         '.focus-ring': {
           '&:focus': {
@@ -180,7 +181,7 @@ const config: Config = {
             boxShadow: `0 0 0 2px ${theme('colors.accent-blue')}`,
           },
         },
-        
+
         // Button variants
         '.btn-primary': {
           backgroundColor: theme('colors.accent-blue'),
@@ -205,7 +206,7 @@ const config: Config = {
             },
           },
         },
-        
+
         '.btn-secondary': {
           backgroundColor: theme('colors.bg-tertiary'),
           color: theme('colors.text-secondary'),
@@ -220,7 +221,7 @@ const config: Config = {
             color: theme('colors.text-primary'),
           },
         },
-        
+
         // Card styles
         '.card': {
           backgroundColor: theme('colors.bg-secondary'),
@@ -228,7 +229,7 @@ const config: Config = {
           borderRadius: theme('borderRadius.xl'),
           padding: theme('spacing.6'),
         },
-        
+
         '.card-hover': {
           transition: 'all 0.2s ease-in-out',
           '&:hover': {
@@ -238,7 +239,7 @@ const config: Config = {
           },
         },
       };
-      
+
       addUtilities(newUtilities);
     },
   ],

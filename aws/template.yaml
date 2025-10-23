@@ -20,12 +20,12 @@ Parameters:
     Type: String
     Default: dev
     AllowedValues: [dev, staging, prod]
-  
+
   GeminiApiKey:
     Type: String
     NoEcho: true
     Description: Google Gemini API Key
-  
+
   IPSalt:
     Type: String
     NoEcho: true
@@ -64,10 +64,10 @@ Resources:
               type: string
             imageMimeType:
               type: string
-              enum: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+              enum: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
       MethodSettings:
-        - ResourcePath: "/*"
-          HttpMethod: "*"
+        - ResourcePath: '/*'
+          HttpMethod: '*'
           LoggingLevel: INFO
           DataTraceEnabled: true
           MetricsEnabled: true
@@ -78,7 +78,7 @@ Resources:
     Properties:
       Name: !Sub '${AWS::StackName}-websocket'
       ProtocolType: WEBSOCKET
-      RouteSelectionExpression: "$request.body.action"
+      RouteSelectionExpression: '$request.body.action'
       Description: WebSocket API for real-time scam analysis streaming
 
   # WebSocket Deployment

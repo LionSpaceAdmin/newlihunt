@@ -1,4 +1,5 @@
-import { SecurityMiddleware, InputSanitizer, SecurityLogger } from '../security';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { InputSanitizer, SecurityLogger, SecurityMiddleware } from '../security';
 
 // Mock NextRequest
 const createMockRequest = (
@@ -48,7 +49,7 @@ describe('SecurityMiddleware', () => {
     it('should allow valid requests', async () => {
       const request = createMockRequest('{"test": "data"}');
       const middleware = securityMiddleware.createMiddleware();
-      
+
       const response = await middleware(request);
       expect(response).toBeNull(); // Should allow request to continue
     });
@@ -57,25 +58,25 @@ describe('SecurityMiddleware', () => {
       const largeBody = 'x'.repeat(2048); // 2KB
       const request = createMockRequest(largeBody);
       const middleware = securityMiddleware.createMiddleware();
-      
+
       const response = await middleware(request);
       expect(response).not.toBeNull();
       expect(response?.status).toBe(413);
-      
+
       const body = await response?.json();
       expect(body.error).toBe('Request too large');
     });
 
     it('should block requests from disallowed origins', async () => {
       const request = createMockRequest('{"test": "data"}', {
-        'origin': 'https://malicious.com',
+        origin: 'https://malicious.com',
       });
       const middleware = securityMiddleware.createMiddleware();
-      
+
       const response = await middleware(request);
       expect(response).not.toBeNull();
       expect(response?.status).toBe(403);
-      
+
       const body = await response?.json();
       expect(body.error).toBe('Origin not allowed');
     });
@@ -84,12 +85,12 @@ describe('SecurityMiddleware', () => {
       const wildcardMiddleware = new SecurityMiddleware({
         allowedOrigins: ['*'],
       });
-      
+
       const request = createMockRequest('{"test": "data"}', {
-        'origin': 'https://any-domain.com',
+        origin: 'https://any-domain.com',
       });
       const middleware = wildcardMiddleware.createMiddleware();
-      
+
       const response = await middleware(request);
       expect(response).toBeNull();
     });
@@ -98,12 +99,12 @@ describe('SecurityMiddleware', () => {
       const subdomainMiddleware = new SecurityMiddleware({
         allowedOrigins: ['*.example.com'],
       });
-      
+
       const request = createMockRequest('{"test": "data"}', {
-        'origin': 'https://api.example.com',
+        origin: 'https://api.example.com',
       });
       const middleware = subdomainMiddleware.createMiddleware();
-      
+
       const response = await middleware(request);
       expect(response).toBeNull();
     });
@@ -113,7 +114,7 @@ describe('SecurityMiddleware', () => {
     it('should add comprehensive security headers', () => {
       const response = createMockResponse({ success: true });
       const secureResponse = securityMiddleware.addSecurityHeaders(response);
-      
+
       expect(secureResponse.headers.get('X-Content-Type-Options')).toBe('nosniff');
       expect(secureResponse.headers.get('X-Frame-Options')).toBe('DENY');
       expect(secureResponse.headers.get('X-XSS-Protection')).toBe('1; mode=block');
@@ -125,10 +126,10 @@ describe('SecurityMiddleware', () => {
       const prodMiddleware = new SecurityMiddleware({
         enableHSTS: true,
       });
-      
+
       const response = createMockResponse({ success: true });
       const secureResponse = prodMiddleware.addSecurityHeaders(response);
-      
+
       expect(secureResponse.headers.get('Strict-Transport-Security')).toBe(
         'max-age=31536000; includeSubDomains; preload'
       );
@@ -137,7 +138,7 @@ describe('SecurityMiddleware', () => {
     it('should build proper CSP header', () => {
       const response = createMockResponse({ success: true });
       const secureResponse = securityMiddleware.addSecurityHeaders(response);
-      
+
       const csp = secureResponse.headers.get('Content-Security-Policy');
       expect(csp).toContain("default-src 'self'");
       expect(csp).toContain("script-src 'self'");
@@ -152,20 +153,20 @@ describe('InputSanitizer', () => {
     it('should sanitize basic HTML characters', () => {
       const input = '<script>alert("xss")</script>';
       const sanitized = InputSanitizer.sanitizeText(input);
-      
+
       expect(sanitized).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;&#x2F;script&gt;');
     });
 
     it('should remove null bytes and control characters', () => {
       const input = 'test\x00\x01\x02string';
       const sanitized = InputSanitizer.sanitizeText(input);
-      
+
       expect(sanitized).toBe('teststring');
     });
 
     it('should enforce length limits', () => {
       const longInput = 'x'.repeat(100);
-      
+
       expect(() => {
         InputSanitizer.sanitizeText(longInput, 50);
       }).toThrow('Input too long');
@@ -175,7 +176,7 @@ describe('InputSanitizer', () => {
       expect(() => {
         InputSanitizer.sanitizeText('');
       }).toThrow('Invalid input');
-      
+
       expect(() => {
         InputSanitizer.sanitizeText(null as any);
       }).toThrow('Invalid input');
@@ -184,7 +185,7 @@ describe('InputSanitizer', () => {
     it('should trim whitespace', () => {
       const input = '  test string  ';
       const sanitized = InputSanitizer.sanitizeText(input);
-      
+
       expect(sanitized).toBe('test string');
     });
   });
@@ -193,14 +194,14 @@ describe('InputSanitizer', () => {
     it('should remove all HTML tags', () => {
       const input = '<div>Hello <b>World</b></div>';
       const sanitized = InputSanitizer.sanitizeHTML(input);
-      
+
       expect(sanitized).toBe('Hello World');
     });
 
     it('should handle malformed HTML', () => {
       const input = '<div>Unclosed tag<script>alert(1)';
       const sanitized = InputSanitizer.sanitizeHTML(input);
-      
+
       expect(sanitized).not.toContain('<script>');
       expect(sanitized).not.toContain('<div>');
     });
@@ -225,7 +226,9 @@ describe('InputSanitizer', () => {
     it('should sanitize filenames', () => {
       expect(InputSanitizer.sanitizeFilename('test.txt')).toBe('test.txt');
       expect(InputSanitizer.sanitizeFilename('../../etc/passwd')).toBe('___etc_passwd');
-      expect(InputSanitizer.sanitizeFilename('file<>:"/\\|?*name.txt')).toBe('file__________name.txt');
+      expect(InputSanitizer.sanitizeFilename('file<>:"/\\|?*name.txt')).toBe(
+        'file__________name.txt'
+      );
       expect(InputSanitizer.sanitizeFilename('.hidden')).toBe('_hidden');
     });
   });
@@ -234,16 +237,16 @@ describe('InputSanitizer', () => {
     it('should detect SQL injection attempts', () => {
       const sqlInputs = [
         "'; DROP TABLE users; --",
-        "1 OR 1=1",
-        "UNION SELECT * FROM passwords",
+        '1 OR 1=1',
+        'UNION SELECT * FROM passwords',
         "admin'--",
         "1; WAITFOR DELAY '00:00:05'",
       ];
-      
+
       sqlInputs.forEach(input => {
         expect(InputSanitizer.detectSQLInjection(input)).toBe(true);
       });
-      
+
       expect(InputSanitizer.detectSQLInjection('normal text')).toBe(false);
     });
 
@@ -256,11 +259,11 @@ describe('InputSanitizer', () => {
         'expression(alert(1))',
         'vbscript:msgbox(1)',
       ];
-      
+
       xssInputs.forEach(input => {
         expect(InputSanitizer.detectXSS(input)).toBe(true);
       });
-      
+
       expect(InputSanitizer.detectXSS('normal text')).toBe(false);
     });
   });
@@ -281,7 +284,7 @@ describe('SecurityLogger', () => {
       userAgent: 'test-agent',
       endpoint: '/api/test',
     });
-    
+
     const events = SecurityLogger.getEvents();
     expect(events).toHaveLength(1);
     expect(events[0].type).toBe('rate_limit');
@@ -300,7 +303,7 @@ describe('SecurityLogger', () => {
         endpoint: '/api/test',
       });
     }
-    
+
     const events = SecurityLogger.getEvents();
     expect(events.length).toBeLessThanOrEqual(1000);
   });
@@ -314,7 +317,7 @@ describe('SecurityLogger', () => {
       userAgent: 'test-agent',
       endpoint: '/api/test',
     });
-    
+
     SecurityLogger.logEvent({
       type: 'invalid_input',
       severity: 'high',
@@ -323,10 +326,10 @@ describe('SecurityLogger', () => {
       userAgent: 'test-agent',
       endpoint: '/api/test',
     });
-    
+
     const rateLimitEvents = SecurityLogger.getEventsByType('rate_limit');
     const invalidInputEvents = SecurityLogger.getEventsByType('invalid_input');
-    
+
     expect(rateLimitEvents).toHaveLength(1);
     expect(invalidInputEvents).toHaveLength(1);
     expect(rateLimitEvents[0].type).toBe('rate_limit');

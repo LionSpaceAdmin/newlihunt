@@ -1,13 +1,13 @@
 export enum Classification {
-  SAFE = "SAFE",
-  SUSPICIOUS = "SUSPICIOUS",
-  HIGH_RISK = "HIGH_RISK",
+  SAFE = 'SAFE',
+  SUSPICIOUS = 'SUSPICIOUS',
+  HIGH_RISK = 'HIGH_RISK',
 }
 
 export enum Severity {
-  LOW = "LOW",
-  MEDIUM = "MEDIUM",
-  HIGH = "HIGH",
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
 }
 
 export interface DetectedRule {

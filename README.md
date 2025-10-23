@@ -5,6 +5,7 @@ An AI-powered platform for detecting online impersonation scams targeting suppor
 ## 🏗️ Architecture
 
 **Hybrid Deployment:**
+
 - **Frontend & AI**: Deployed on Vercel with Next.js API Routes
 - **Backend Infrastructure**: AWS (DynamoDB, S3)
 
@@ -32,6 +33,7 @@ An AI-powered platform for detecting online impersonation scams targeting suppor
 ## 🚀 Getting Started
 
 ### 1. Clone and Install
+
 ```bash
 git clone <repository>
 cd scam-hunt-platform
@@ -39,16 +41,19 @@ npm install
 ```
 
 ### 2. Environment Setup
+
 ```bash
 cp .env.local.example .env.local
 ```
 
 Edit `.env.local`:
+
 ```bash
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ### 3. Run Development Server
+
 ```bash
 npm run dev
 ```
@@ -82,6 +87,7 @@ src/
 ## 🚀 Deployment
 
 ### Vercel Deployment
+
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -91,6 +97,7 @@ vercel --prod
 ```
 
 ### Environment Variables (Vercel)
+
 - `GEMINI_API_KEY`: Your Google Gemini API key
 - `ENVIRONMENT`: production
 

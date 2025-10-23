@@ -31,7 +31,7 @@ export function withMiddleware<T extends unknown[]>(
 ) {
   return async (request: NextRequest, ...args: T): Promise<NextResponse> => {
     const composer = new MiddlewareComposer();
-    
+
     // Add provided middlewares
     middlewares.forEach(middleware => composer.use(middleware));
 
@@ -44,13 +44,13 @@ export function withMiddleware<T extends unknown[]>(
     // Execute the actual handler
     try {
       const response = await handler(request, ...args);
-      
+
       // Add security headers to response
       const securityMiddleware = new SecurityMiddleware();
       return securityMiddleware.addSecurityHeaders(response);
     } catch (error) {
       console.error('API handler error:', error);
-      
+
       // Log security event for errors
       const ip = getClientIP(request);
       SecurityLogger.logEvent({
@@ -86,10 +86,10 @@ export function getClientIP(request: NextRequest): string {
 export function createRateLimitedMiddleware(rateLimiter: RateLimiter): MiddlewareFunction {
   return async (request: NextRequest): Promise<NextResponse | null> => {
     const result = await rateLimiter.checkRateLimit(request);
-    
+
     if (!result.allowed) {
       const ip = getClientIP(request);
-      
+
       // Log rate limit event
       SecurityLogger.logEvent({
         type: 'rate_limit',
@@ -136,49 +136,59 @@ export function createSecurityMiddleware(config?: Record<string, unknown>): Midd
 // Pre-configured middleware combinations
 export const apiMiddleware = [
   createSecurityMiddleware(),
-  createRateLimitedMiddleware(new RateLimiter({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 100,
-    message: 'Too many API requests. Please try again in 15 minutes.',
-  })),
+  createRateLimitedMiddleware(
+    new RateLimiter({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      maxRequests: 100,
+      message: 'Too many API requests. Please try again in 15 minutes.',
+    })
+  ),
 ];
 
 export const analysisMiddleware = [
   createSecurityMiddleware(),
-  createRateLimitedMiddleware(new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 10,
-    message: 'Too many analysis requests. Please wait before submitting another analysis.',
-  })),
+  createRateLimitedMiddleware(
+    new RateLimiter({
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 10,
+      message: 'Too many analysis requests. Please wait before submitting another analysis.',
+    })
+  ),
 ];
 
 export const uploadMiddleware = [
   createSecurityMiddleware({
     maxRequestSize: 10 * 1024 * 1024, // 10MB for file uploads
   }),
-  createRateLimitedMiddleware(new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 5,
-    message: 'Too many upload requests. Please wait before uploading another file.',
-  })),
+  createRateLimitedMiddleware(
+    new RateLimiter({
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 5,
+      message: 'Too many upload requests. Please wait before uploading another file.',
+    })
+  ),
 ];
 
 export const historyMiddleware = [
   createSecurityMiddleware(),
-  createRateLimitedMiddleware(new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 30,
-    message: 'Too many history requests. Please wait before making more requests.',
-  })),
+  createRateLimitedMiddleware(
+    new RateLimiter({
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 30,
+      message: 'Too many history requests. Please wait before making more requests.',
+    })
+  ),
 ];
 
 export const urlInspectorMiddleware = [
   createSecurityMiddleware(),
-  createRateLimitedMiddleware(new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 20,
-    message: 'Too many URL inspection requests. Please wait before inspecting another URL.',
-  })),
+  createRateLimitedMiddleware(
+    new RateLimiter({
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 20,
+      message: 'Too many URL inspection requests. Please wait before inspecting another URL.',
+    })
+  ),
 ];
 
 // Export all middleware components

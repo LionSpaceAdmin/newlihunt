@@ -2,11 +2,12 @@
  * End-to-end tests for complete user workflows
  * Tests the entire user journey from input to analysis results
  */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import Layout from '@/components/Layout';
 import { useScamAnalysis } from '@/hooks/useScamAnalysis';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 // Mock the useScamAnalysis hook
 jest.mock('@/hooks/useScamAnalysis');
@@ -36,7 +37,7 @@ Object.assign(navigator, {
 describe('Complete User Workflows', () => {
   const mockSendMessage = jest.fn();
   const mockClearConversation = jest.fn();
-  
+
   const mockAnalysisResult = {
     analysisData: {
       riskScore: 75,
@@ -49,33 +50,34 @@ describe('Complete User Workflows', () => {
           description: 'Content contains urgent donation appeals',
           severity: 'HIGH' as const,
           points: 30,
-          category: 'behavioral'
-        }
+          category: 'behavioral',
+        },
       ],
       recommendations: [
         'Do not donate through this channel',
         'Verify the organization through official sources',
-        'Report this content as suspicious'
+        'Report this content as suspicious',
       ],
-      reasoning: 'This content shows multiple red flags including urgent language and unverified donation requests.',
+      reasoning:
+        'This content shows multiple red flags including urgent language and unverified donation requests.',
       debiasingStatus: {
         anonymous_profile_neutralized: true,
         patriotic_tokens_neutralized: true,
-        sentiment_penalty_capped: false
-      }
+        sentiment_penalty_capped: false,
+      },
     },
     summary: 'High-risk scam detected with urgent donation tactics',
     metadata: {
       timestamp: new Date().toISOString(),
       processingTime: 1500,
-      version: '1.0'
-    }
+      version: '1.0',
+    },
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     localStorageMock.getItem.mockReturnValue('true'); // Skip onboarding
-    
+
     mockUseScamAnalysis.mockReturnValue({
       messages: [],
       isLoading: false,
@@ -94,7 +96,7 @@ describe('Complete User Workflows', () => {
   describe('Text Analysis Workflow', () => {
     it('should complete full text analysis workflow', async () => {
       const user = userEvent.setup();
-      
+
       // Mock successful analysis
       mockSendMessage.mockResolvedValueOnce(undefined);
       mockUseScamAnalysis.mockReturnValue({
@@ -103,14 +105,14 @@ describe('Complete User Workflows', () => {
             id: '1',
             role: 'user',
             content: 'Urgent! Help Israeli soldiers now! Donate $500 immediately!',
-            timestamp: new Date()
+            timestamp: new Date(),
           },
           {
             id: '2',
             role: 'assistant',
             content: mockAnalysisResult.summary,
-            timestamp: new Date()
-          }
+            timestamp: new Date(),
+          },
         ],
         isLoading: false,
         error: null,
@@ -153,12 +155,14 @@ describe('Complete User Workflows', () => {
 
       // Verify recommendations are shown
       expect(screen.getByText('Do not donate through this channel')).toBeInTheDocument();
-      expect(screen.getByText('Verify the organization through official sources')).toBeInTheDocument();
+      expect(
+        screen.getByText('Verify the organization through official sources')
+      ).toBeInTheDocument();
     });
 
     it('should handle analysis errors gracefully', async () => {
       const user = userEvent.setup();
-      
+
       mockSendMessage.mockRejectedValueOnce(new Error('Analysis failed'));
       mockUseScamAnalysis.mockReturnValue({
         messages: [],
@@ -178,7 +182,7 @@ describe('Complete User Workflows', () => {
 
       // Verify error is displayed
       expect(screen.getByText('Analysis failed')).toBeInTheDocument();
-      
+
       // Verify retry button is available
       const retryButton = screen.getByText('Retry');
       expect(retryButton).toBeInTheDocument();
@@ -188,7 +192,7 @@ describe('Complete User Workflows', () => {
   describe('URL Inspection Workflow', () => {
     it('should detect and inspect suspicious URLs', async () => {
       const user = userEvent.setup();
-      
+
       // Mock URL inspection API
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
@@ -205,12 +209,12 @@ describe('Complete User Workflows', () => {
               {
                 type: 'domain_spoofing',
                 description: 'Potential PayPal domain spoofing',
-                severity: 'high'
-              }
+                severity: 'high',
+              },
             ],
-            timestamp: new Date().toISOString()
-          }
-        })
+            timestamp: new Date().toISOString(),
+          },
+        }),
       });
 
       render(<Layout lang="en" />);
@@ -246,15 +250,15 @@ describe('Complete User Workflows', () => {
   describe('Export and Sharing Workflow', () => {
     it('should export analysis results in different formats', async () => {
       const user = userEvent.setup();
-      
+
       mockUseScamAnalysis.mockReturnValue({
         messages: [
           {
             id: '1',
             role: 'user',
             content: 'Test message',
-            timestamp: new Date()
-          }
+            timestamp: new Date(),
+          },
         ],
         isLoading: false,
         error: null,
@@ -303,7 +307,7 @@ describe('Complete User Workflows', () => {
 
     it('should work correctly on mobile devices', async () => {
       const user = userEvent.setup();
-      
+
       mockUseScamAnalysis.mockReturnValue({
         messages: [],
         isLoading: false,
@@ -322,7 +326,7 @@ describe('Complete User Workflows', () => {
 
       // Verify mobile layout is rendered
       expect(screen.getByText('Scam Hunter')).toBeInTheDocument();
-      
+
       // Verify mobile-specific elements
       const mobileMenuButton = screen.getByRole('button');
       expect(mobileMenuButton).toBeInTheDocument();
@@ -333,19 +337,17 @@ describe('Complete User Workflows', () => {
     it('should catch and handle component errors', () => {
       // Mock console.error to avoid noise in tests
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      
+
       // Create a component that throws an error
       const ThrowError = () => {
         throw new Error('Test error');
       };
 
-      const { container } = render(
-        <Layout lang="en" />
-      );
+      const { container } = render(<Layout lang="en" />);
 
       // Verify the app doesn't crash
       expect(container).toBeInTheDocument();
-      
+
       consoleSpy.mockRestore();
     });
   });
@@ -353,11 +355,11 @@ describe('Complete User Workflows', () => {
   describe('Performance and Load Testing', () => {
     it('should handle multiple rapid interactions', async () => {
       const user = userEvent.setup();
-      
+
       render(<Layout lang="en" />);
 
       const textInput = screen.getByPlaceholderText(/describe suspicious content/i);
-      
+
       // Simulate rapid typing
       for (let i = 0; i < 10; i++) {
         await user.type(textInput, `Message ${i} `);
@@ -369,14 +371,14 @@ describe('Complete User Workflows', () => {
 
     it('should handle large text inputs', async () => {
       const user = userEvent.setup();
-      
+
       render(<Layout lang="en" />);
 
       const textInput = screen.getByPlaceholderText(/describe suspicious content/i);
       const largeText = 'A'.repeat(5000); // 5KB of text
-      
+
       await user.type(textInput, largeText);
-      
+
       expect(textInput).toHaveValue(largeText);
     });
   });
@@ -387,7 +389,7 @@ describe('Complete User Workflows', () => {
       const userAgents = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       ];
 
       userAgents.forEach(userAgent => {
@@ -397,10 +399,10 @@ describe('Complete User Workflows', () => {
         });
 
         const { unmount } = render(<Layout lang="en" />);
-        
+
         // Verify basic functionality works
         expect(screen.getByText('Scam Hunter')).toBeInTheDocument();
-        
+
         unmount();
       });
     });
@@ -423,11 +425,11 @@ describe('Complete User Workflows', () => {
 
     it('should support keyboard navigation', async () => {
       const user = userEvent.setup();
-      
+
       render(<Layout lang="en" />);
 
       const textInput = screen.getByPlaceholderText(/describe suspicious content/i);
-      
+
       // Test Tab navigation
       await user.tab();
       expect(textInput).toHaveFocus();
@@ -435,7 +437,7 @@ describe('Complete User Workflows', () => {
       // Test Enter key submission
       await user.type(textInput, 'Test message');
       await user.keyboard('{Enter}');
-      
+
       expect(mockSendMessage).toHaveBeenCalledWith('Test message', undefined);
     });
   });

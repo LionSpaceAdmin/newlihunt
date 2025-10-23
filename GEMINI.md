@@ -38,16 +38,16 @@ The `aws` directory contains the necessary files to deploy the Lambda function. 
 
 ## Development Conventions
 
-*   **Code Style:** The project uses ESLint to enforce a consistent code style. You can run the linter with the following command:
+- **Code Style:** The project uses ESLint to enforce a consistent code style. You can run the linter with the following command:
 
 ```bash
 npm run lint
 ```
 
-*   **Testing:** The project uses Jest for testing. You can run the tests with the following command:
+- **Testing:** The project uses Jest for testing. You can run the tests with the following command:
 
 ```bash
 npm run test
 ```
 
-*   **Commits:** The project follows the Conventional Commits specification.
+- **Commits:** The project follows the Conventional Commits specification.

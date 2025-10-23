@@ -3,10 +3,7 @@ import { getStorageService } from '@/lib/storage';
 import { withMiddleware, historyMiddleware, getClientIP } from '@/lib/middleware';
 import { InputSanitizer, SecurityLogger } from '@/lib/middleware/security';
 
-async function handleGET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function handleGET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -20,11 +17,11 @@ async function handleGET(
         userAgent: request.headers.get('user-agent') || 'unknown',
         endpoint: `/api/history/[id]`,
       });
-      
+
       return NextResponse.json(
         {
           success: false,
-          error: 'Analysis ID is required'
+          error: 'Analysis ID is required',
         },
         { status: 400 }
       );
@@ -40,7 +37,7 @@ async function handleGET(
       return NextResponse.json(
         {
           success: false,
-          error: 'Analysis not found'
+          error: 'Analysis not found',
         },
         { status: 404 }
       );
@@ -49,11 +46,11 @@ async function handleGET(
     return NextResponse.json({
       success: true,
       analysis,
-      provider: storageService.getProviderType()
+      provider: storageService.getProviderType(),
     });
   } catch (error) {
     console.error('Failed to retrieve analysis:', error);
-    
+
     // Log security event
     const ip = getClientIP(request);
     SecurityLogger.logEvent({
@@ -64,22 +61,19 @@ async function handleGET(
       userAgent: request.headers.get('user-agent') || 'unknown',
       endpoint: `/api/history/[id]`,
     });
-    
+
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to retrieve analysis',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
   }
 }
 
-async function handlePATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function handlePATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -95,11 +89,11 @@ async function handlePATCH(
         userAgent: request.headers.get('user-agent') || 'unknown',
         endpoint: `/api/history/[id]`,
       });
-      
+
       return NextResponse.json(
         {
           success: false,
-          error: 'Analysis ID is required'
+          error: 'Analysis ID is required',
         },
         { status: 400 }
       );
@@ -115,11 +109,11 @@ async function handlePATCH(
         userAgent: request.headers.get('user-agent') || 'unknown',
         endpoint: `/api/history/[id]`,
       });
-      
+
       return NextResponse.json(
         {
           success: false,
-          error: 'Valid feedback (positive or negative) is required'
+          error: 'Valid feedback (positive or negative) is required',
         },
         { status: 400 }
       );
@@ -129,14 +123,14 @@ async function handlePATCH(
     const sanitizedId = InputSanitizer.sanitizeText(id, 100);
 
     const storageService = getStorageService();
-    
+
     // Check if analysis exists
     const analysis = await storageService.getAnalysis(sanitizedId);
     if (!analysis) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Analysis not found'
+          error: 'Analysis not found',
         },
         { status: 404 }
       );
@@ -149,7 +143,7 @@ async function handlePATCH(
       const session = await storageService.getSession(analysis.userId);
       if (session) {
         await storageService.updateSession(analysis.userId, {
-          feedbackGiven: session.feedbackGiven + 1
+          feedbackGiven: session.feedbackGiven + 1,
         });
       }
     } catch (sessionError) {
@@ -160,11 +154,11 @@ async function handlePATCH(
     return NextResponse.json({
       success: true,
       message: 'Feedback updated successfully',
-      provider: storageService.getProviderType()
+      provider: storageService.getProviderType(),
     });
   } catch (error) {
     console.error('Failed to update feedback:', error);
-    
+
     // Log security event
     const ip = getClientIP(request);
     SecurityLogger.logEvent({
@@ -175,12 +169,12 @@ async function handlePATCH(
       userAgent: request.headers.get('user-agent') || 'unknown',
       endpoint: `/api/history/[id]`,
     });
-    
+
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to update feedback',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

@@ -8,26 +8,28 @@ interface SupportWidgetProps {
 
 const textContent = {
   en: {
-    title: "Support Our Mission",
-    description: "Help us keep the digital front strong — exposing fake accounts and defending truth online.",
-    projectSupport: "Support This Project",
-    generalSupport: "General Support",
-    fidfSupport: "Support FIDF",
-    closeButton: "Close"
+    title: 'Support Our Mission',
+    description:
+      'Help us keep the digital front strong — exposing fake accounts and defending truth online.',
+    projectSupport: 'Support This Project',
+    generalSupport: 'General Support',
+    fidfSupport: 'Support FIDF',
+    closeButton: 'Close',
   },
   he: {
-    title: "תמכו במשימה שלנו",
-    description: "עזרו לנו לשמור על החזית הדיגיטלית חזקה — חשיפת חשבונות מזויפים והגנה על האמת ברשת.",
-    projectSupport: "תמכו בפרויקט",
-    generalSupport: "תמיכה כללית",
-    fidfSupport: "תמכו ב-FIDF",
-    closeButton: "סגור"
-  }
+    title: 'תמכו במשימה שלנו',
+    description:
+      'עזרו לנו לשמור על החזית הדיגיטלית חזקה — חשיפת חשבונות מזויפים והגנה על האמת ברשת.',
+    projectSupport: 'תמכו בפרויקט',
+    generalSupport: 'תמיכה כללית',
+    fidfSupport: 'תמכו ב-FIDF',
+    closeButton: 'סגור',
+  },
 };
 
 const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [widgetLoaded, setWidgetLoaded] = useState(false);
+  const [, setWidgetLoaded] = useState(false);
   const content = textContent[lang];
 
   useEffect(() => {
@@ -38,12 +40,15 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
     script.src = 'https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js';
     script.setAttribute('data-id', 'danielhanukayeb');
     script.setAttribute('data-description', 'Support me on Buy me a coffee!');
-    script.setAttribute('data-message', '🦁 Thank you for visiting! Your support helps us keep the digital front strong — exposing fake accounts and defending truth online. Join the pride. Roar for Israel. 🇮🇱🔥');
+    script.setAttribute(
+      'data-message',
+      '🦁 Thank you for visiting! Your support helps us keep the digital front strong — exposing fake accounts and defending truth online. Join the pride. Roar for Israel. 🇮🇱🔥'
+    );
     script.setAttribute('data-color', '#FF5F5F');
     script.setAttribute('data-position', 'Right');
     script.setAttribute('data-x_margin', '18');
     script.setAttribute('data-y_margin', '18');
-    
+
     script.onload = () => setWidgetLoaded(true);
     document.head.appendChild(script);
 
@@ -90,16 +95,19 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
               <span>🦁</span>
               {content.title}
             </h2>
-            <p className="text-sm text-gray-400 mt-1">
-              {content.description}
-            </p>
+            <p className="text-sm text-gray-400 mt-1">{content.description}</p>
           </div>
           <button
             onClick={() => setIsOpen(false)}
             className="p-2 text-gray-400 hover:text-white transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -126,7 +134,9 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
           >
             <div className="text-left">
               <div className="font-semibold">{content.projectSupport}</div>
-              <div className="text-sm text-red-50 mt-1">Direct support for Scam Hunter development</div>
+              <div className="text-sm text-red-50 mt-1">
+                Direct support for Scam Hunter development
+              </div>
             </div>
             <span className="text-2xl">🎯</span>
           </button>
@@ -145,14 +155,15 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
 
           {/* Buy Me a Coffee Button */}
           <div className="pt-6 border-t border-gray-700">
-            <a 
-              href="https://www.buymeacoffee.com/danielhanukayeb" 
-              target="_blank" 
+            <a
+              href="https://www.buymeacoffee.com/danielhanukayeb"
+              target="_blank"
               rel="noopener noreferrer"
               className="block w-full transform hover:scale-[1.02] transition-transform duration-200"
             >
-              <img 
-                src="https://img.buymeacoffee.com/button-api/?text=Buy me a lions&emoji=🦁&slug=danielhanukayeb&button_colour=f20707&font_colour=ffffff&font_family=Cookie&outline_colour=ffffff&coffee_colour=FFDD00" 
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://img.buymeacoffee.com/button-api/?text=Buy me a lions&emoji=🦁&slug=danielhanukayeb&button_colour=f20707&font_colour=ffffff&font_family=Cookie&outline_colour=ffffff&coffee_colour=FFDD00"
                 alt="Buy Me A Coffee"
                 className="w-full rounded-xl hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
               />

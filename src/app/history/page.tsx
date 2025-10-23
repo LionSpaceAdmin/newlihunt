@@ -25,10 +25,10 @@ const HistoryPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const historyService = getHistoryService();
       const response = await historyService.getUserHistory(100);
-      
+
       if (response.success && response.history) {
         setHistory(response.history);
         setProvider(response.provider || null);
@@ -43,13 +43,15 @@ const HistoryPage: React.FC = () => {
   };
 
   const filteredHistory = history.filter(analysis => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch =
+      searchTerm === '' ||
       analysis.input.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
       analysis.result.summary.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesFilter = filterClassification === 'ALL' || 
+
+    const matchesFilter =
+      filterClassification === 'ALL' ||
       analysis.result.analysisData.classification === filterClassification;
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -59,7 +61,7 @@ const HistoryPage: React.FC = () => {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(new Date(date));
   };
 
@@ -98,13 +100,16 @@ const HistoryPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <Link
+                href="/"
+                className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+              >
                 <BrandLogo size="sm" />
               </Link>
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold text-white">Analysis History</h1>
                 <p className="text-sm text-gray-400">
-                  {history.length} {history.length === 1 ? 'analysis' : 'analyses'} 
+                  {history.length} {history.length === 1 ? 'analysis' : 'analyses'}
                   {provider && (
                     <span className="ml-2 px-2 py-1 text-xs bg-gray-800 rounded">
                       {provider === 'memory' ? 'Session Only' : 'Persistent'}
@@ -113,8 +118,8 @@ const HistoryPage: React.FC = () => {
                 </p>
               </div>
             </div>
-            
-            <Link 
+
+            <Link
               href="/"
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
@@ -128,12 +133,22 @@ const HistoryPage: React.FC = () => {
         {error && (
           <div className="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg">
             <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-5 h-5 text-red-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <span className="text-red-400">{error}</span>
             </div>
-            <button 
+            <button
               onClick={loadHistory}
               className="mt-2 text-sm text-red-300 hover:text-red-200 underline"
             >
@@ -149,14 +164,14 @@ const HistoryPage: React.FC = () => {
               type="text"
               placeholder="Search analyses..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <select
             value={filterClassification}
-            onChange={(e) => setFilterClassification(e.target.value as Classification | 'ALL')}
+            onChange={e => setFilterClassification(e.target.value as Classification | 'ALL')}
             className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="ALL">All Classifications</option>
@@ -170,22 +185,23 @@ const HistoryPage: React.FC = () => {
         {filteredHistory.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
-              <Image 
-                src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp" 
-                alt="No History" 
+              <Image
+                src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp"
+                alt="No History"
                 width={256}
                 height={192}
                 className="w-full h-full object-cover opacity-50"
               />
             </div>
             <h3 className="text-lg font-semibold text-white mb-2">
-              {searchTerm || filterClassification !== 'ALL' ? 'No matching analyses' : 'No analysis history'}
+              {searchTerm || filterClassification !== 'ALL'
+                ? 'No matching analyses'
+                : 'No analysis history'}
             </h3>
             <p className="text-gray-400 mb-4">
-              {searchTerm || filterClassification !== 'ALL' 
+              {searchTerm || filterClassification !== 'ALL'
                 ? 'Try adjusting your search or filter criteria.'
-                : 'Start by analyzing suspicious content to build your history.'
-              }
+                : 'Start by analyzing suspicious content to build your history.'}
             </p>
             {(searchTerm || filterClassification !== 'ALL') && (
               <button
@@ -201,7 +217,7 @@ const HistoryPage: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredHistory.map((analysis) => (
+            {filteredHistory.map(analysis => (
               <Link
                 key={analysis.id}
                 href={`/history/${analysis.id}`}
@@ -210,26 +226,28 @@ const HistoryPage: React.FC = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-3 mb-2">
-                      <StatusIcon 
-                        classification={analysis.result.analysisData.classification} 
-                        size="sm" 
+                      <StatusIcon
+                        classification={analysis.result.analysisData.classification}
+                        size="sm"
                       />
-                      <span className={`text-sm font-medium ${getClassificationColor(analysis.result.analysisData.classification)}`}>
+                      <span
+                        className={`text-sm font-medium ${getClassificationColor(analysis.result.analysisData.classification)}`}
+                      >
                         {analysis.result.analysisData.classification}
                       </span>
                       <span className="text-sm text-gray-500">
                         {formatDate(analysis.timestamp)}
                       </span>
                     </div>
-                    
+
                     <h3 className="text-white font-medium mb-2">
                       {truncateText(analysis.input.message, 80)}
                     </h3>
-                    
+
                     <p className="text-gray-400 text-sm mb-3">
                       {truncateText(analysis.result.summary, 120)}
                     </p>
-                    
+
                     <div className="flex items-center space-x-4 text-xs text-gray-500">
                       <span>Risk: {analysis.result.analysisData.riskScore}/100</span>
                       <span>Credibility: {analysis.result.analysisData.credibilityScore}/100</span>
@@ -237,16 +255,30 @@ const HistoryPage: React.FC = () => {
                         <span>{analysis.result.analysisData.detectedRules.length} flags</span>
                       )}
                       {analysis.feedback && (
-                        <span className={analysis.feedback === 'positive' ? 'text-green-400' : 'text-red-400'}>
+                        <span
+                          className={
+                            analysis.feedback === 'positive' ? 'text-green-400' : 'text-red-400'
+                          }
+                        >
                           {analysis.feedback === 'positive' ? '👍' : '👎'} Feedback given
                         </span>
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="ml-4 flex-shrink-0">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -254,16 +286,14 @@ const HistoryPage: React.FC = () => {
             ))}
           </div>
         )}
-        
+
         {/* Support Footer */}
         {filteredHistory.length > 0 && (
           <div className="mt-8 p-6 bg-dark-gray rounded-lg border border-gray-600">
             <div className="text-center">
               <div className="flex items-center justify-center gap-2 mb-3">
                 <span className="text-2xl">🦁</span>
-                <h3 className="text-lg font-semibold text-white">
-                  Support Our Mission
-                </h3>
+                <h3 className="text-lg font-semibold text-white">Support Our Mission</h3>
               </div>
               <p className="text-gray-400 text-sm mb-4">
                 Help us continue protecting the digital front and exposing fake accounts

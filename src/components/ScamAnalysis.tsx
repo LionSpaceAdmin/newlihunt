@@ -13,40 +13,44 @@ interface ScamAnalysisProps {
 
 const textContent = {
   en: {
-    title: "Detection Engine",
-    inputLabel: "Paste X link or @handle",
-    placeholder: "Paste the link, @handle, or message content here...",
-    uploadLabel: "Upload Image (Optional)",
-    uploadButton: "Upload a file",
-    uploadHint: "or drag and drop",
-    uploadDesc: "PNG, JPG, GIF up to 10MB",
-    analyzeButton: "Analyze",
-    analyzingButton: "Analyzing...",
-    error_missing_input: "Please provide a link, text, or an image to analyze.",
-    error_api: "An error occurred during analysis. Please check your API key and try again.",
-    loadingText: "Scam Hunter is on the case...",
-    loadingSubtext: "Analyzing evidence for behavioral patterns.",
-    newAnalysis: "Start New Analysis"
+    title: 'Detection Engine',
+    inputLabel: 'Paste X link or @handle',
+    placeholder: 'Paste the link, @handle, or message content here...',
+    uploadLabel: 'Upload Image (Optional)',
+    uploadButton: 'Upload a file',
+    uploadHint: 'or drag and drop',
+    uploadDesc: 'PNG, JPG, GIF up to 10MB',
+    analyzeButton: 'Analyze',
+    analyzingButton: 'Analyzing...',
+    error_missing_input: 'Please provide a link, text, or an image to analyze.',
+    error_api: 'An error occurred during analysis. Please check your API key and try again.',
+    loadingText: 'Scam Hunter is on the case...',
+    loadingSubtext: 'Analyzing evidence for behavioral patterns.',
+    newAnalysis: 'Start New Analysis',
   },
   he: {
-    title: "מנוע זיהוי",
-    inputLabel: "הדבק קישור מ-X או @שם_משתמש",
-    placeholder: "הדבק כאן את הקישור, שם המשתמש או תוכן ההודעה...",
-    uploadLabel: "העלאת תמונה (אופציונלי)",
-    uploadButton: "העלאת קובץ",
-    uploadHint: "או גרור ושחרר",
-    uploadDesc: "PNG, JPG, GIF עד 10MB",
-    analyzeButton: "נתח",
-    analyzingButton: "מנתח...",
-    error_missing_input: "אנא ספק קישור, טקסט או תמונה לניתוח.",
-    error_api: "אירעה שגיאה במהלך הניתוח. אנא בדוק את מפתח ה-API ונסה שוב.",
-    loadingText: "צייד הרמאויות בפעולה...",
-    loadingSubtext: "מנתח ראיות לדפוסי התנהגות.",
-    newAnalysis: "התחל ניתוח חדש"
-  }
+    title: 'מנוע זיהוי',
+    inputLabel: 'הדבק קישור מ-X או @שם_משתמש',
+    placeholder: 'הדבק כאן את הקישור, שם המשתמש או תוכן ההודעה...',
+    uploadLabel: 'העלאת תמונה (אופציונלי)',
+    uploadButton: 'העלאת קובץ',
+    uploadHint: 'או גרור ושחרר',
+    uploadDesc: 'PNG, JPG, GIF עד 10MB',
+    analyzeButton: 'נתח',
+    analyzingButton: 'מנתח...',
+    error_missing_input: 'אנא ספק קישור, טקסט או תמונה לניתוח.',
+    error_api: 'אירעה שגיאה במהלך הניתוח. אנא בדוק את מפתח ה-API ונסה שוב.',
+    loadingText: 'צייד הרמאויות בפעולה...',
+    loadingSubtext: 'מנתח ראיות לדפוסי התנהגות.',
+    newAnalysis: 'התחל ניתוח חדש',
+  },
 };
 
-const ScamAnalysis: React.FC<ScamAnalysisProps> = ({ lang = 'en', analysis = null, conversation = [] }) => {
+const ScamAnalysis: React.FC<ScamAnalysisProps> = ({
+  lang = 'en',
+  analysis = null,
+  conversation = [],
+}) => {
   const [inputText, setInputText] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -119,8 +123,8 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({ lang = 'en', analysis = nul
         body: JSON.stringify({
           text: inputText,
           imageBase64,
-          imageMimeType
-        })
+          imageMimeType,
+        }),
       });
 
       if (!response.ok) {
@@ -154,9 +158,9 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({ lang = 'en', analysis = nul
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 rounded-lg overflow-hidden">
-              <Image 
-                src="/lion-digital-guardian/report-card/analysis-dashboard_v1_16x9.webp" 
-                alt="Analysis Report" 
+              <Image
+                src="/lion-digital-guardian/report-card/analysis-dashboard_v1_16x9.webp"
+                alt="Analysis Report"
                 width={64}
                 height={64}
                 className="w-full h-full object-cover"
@@ -179,16 +183,14 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({ lang = 'en', analysis = nul
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-white">{t.title}</h2>
-      
+
       {/* Input Section */}
       <div className="bg-dark-gray p-6 rounded-lg space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            {t.inputLabel}
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">{t.inputLabel}</label>
           <textarea
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={e => setInputText(e.target.value)}
             placeholder={t.placeholder}
             className="w-full h-32 px-3 py-2 bg-light-gray border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent resize-none"
           />
@@ -196,9 +198,7 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({ lang = 'en', analysis = nul
 
         {/* File Upload */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            {t.uploadLabel}
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">{t.uploadLabel}</label>
           <div
             onDragOver={handleDragOver}
             onDrop={handleDrop}
@@ -212,7 +212,9 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({ lang = 'en', analysis = nul
                   </div>
                   <div>
                     <p className="text-white text-sm font-medium">{uploadedFile.name}</p>
-                    <p className="text-gray-400 text-xs">{(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p className="text-gray-400 text-xs">
+                      {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
                   </div>
                 </div>
                 <button

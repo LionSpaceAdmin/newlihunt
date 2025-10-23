@@ -22,7 +22,7 @@ export function getUserId(): string {
     const stored = localStorage.getItem(USER_ID_KEY);
     if (stored) {
       const { userId, timestamp } = JSON.parse(stored);
-      
+
       // Check if the stored ID is still valid (within session duration)
       if (Date.now() - timestamp < SESSION_DURATION) {
         return userId;
@@ -46,7 +46,7 @@ export function setUserId(userId: string): void {
   try {
     const data = {
       userId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
     localStorage.setItem(USER_ID_KEY, JSON.stringify(data));
   } catch (error) {
@@ -72,7 +72,7 @@ export function hashIP(ip: string, salt: string = 'default-salt'): string {
   const str = ip + salt;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash).toString(16).substring(0, 16);

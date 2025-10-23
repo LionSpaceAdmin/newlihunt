@@ -49,12 +49,12 @@ export class HistoryService {
         },
         body: JSON.stringify({
           ...request,
-          userId: getUserId()
+          userId: getUserId(),
         }),
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || data.error || 'Failed to save analysis');
       }
@@ -64,7 +64,7 @@ export class HistoryService {
       console.error('Failed to save analysis:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -78,7 +78,7 @@ export class HistoryService {
 
       const response = await fetch(url.toString());
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || data.error || 'Failed to retrieve history');
       }
@@ -88,7 +88,7 @@ export class HistoryService {
       console.error('Failed to retrieve history:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -97,7 +97,7 @@ export class HistoryService {
     try {
       const response = await fetch(`${this.baseUrl}/history/${id}`);
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || data.error || 'Failed to retrieve analysis');
       }
@@ -107,7 +107,7 @@ export class HistoryService {
       console.error('Failed to retrieve analysis:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -123,7 +123,7 @@ export class HistoryService {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || data.error || 'Failed to submit feedback');
       }
@@ -133,7 +133,7 @@ export class HistoryService {
       console.error('Failed to submit feedback:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }

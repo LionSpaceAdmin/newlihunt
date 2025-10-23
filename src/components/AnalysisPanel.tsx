@@ -2,13 +2,13 @@ import React, { useState, useCallback } from 'react';
 import { FullAnalysisResult, Message } from '@/types/analysis';
 import FlagCard from './FlagCard';
 import { submitFeedback } from '@/lib/feedback-service';
-import { 
-  downloadTextReport, 
-  downloadJSONReport, 
-  copyToClipboard, 
+import {
+  downloadTextReport,
+  downloadJSONReport,
+  copyToClipboard,
   shareAnalysis,
   validateSharingPrivacy,
-  ExportOptions
+  ExportOptions,
 } from '@/lib/exportUtils';
 
 interface AnalysisPanelProps {
@@ -19,66 +19,66 @@ interface AnalysisPanelProps {
 
 const textContent = {
   en: {
-    riskScore: "Risk Score",
-    credibilityScore: "Credibility Score",
-    classification: "Classification",
-    safe: "SAFE",
-    suspicious: "SUSPICIOUS",
-    highRisk: "HIGH_RISK",
-    summary: "Summary",
-    reasoning: "Reasoning",
-    recommendations: "Recommendations",
-    detectedRules: "Detected Rules",
-    debiasingStatus: "Debiasing Status",
-    anonymousProfileNeutralized: "Anonymous Profile Neutralized",
-    patrioticTokensNeutralized: "Patriotic Language Neutralized",
-    sentimentPenaltyCapped: "Emotional Content Penalty Capped",
-    feedbackPrompt: "Was this analysis helpful?",
-    copySuccess: "Analysis copied to clipboard!",
-    sharePrompt: "Share this analysis",
-    feedbackThanks: "Thank you for your feedback!",
-    feedbackError: "Failed to submit feedback.",
-    exportReport: "Export Report",
-    downloadText: "Download as Text",
-    downloadJSON: "Download as JSON",
-    copyFull: "Copy Full Report",
-    copySummary: "Copy Summary",
-    copySocial: "Copy for Social Media",
-    shareNative: "Share",
-    exportOptions: "Export Options",
-    privacyWarning: "Privacy Warning",
-    privacyNotice: "This report may contain sensitive information. Review before sharing.",
+    riskScore: 'Risk Score',
+    credibilityScore: 'Credibility Score',
+    classification: 'Classification',
+    safe: 'SAFE',
+    suspicious: 'SUSPICIOUS',
+    highRisk: 'HIGH_RISK',
+    summary: 'Summary',
+    reasoning: 'Reasoning',
+    recommendations: 'Recommendations',
+    detectedRules: 'Detected Rules',
+    debiasingStatus: 'Debiasing Status',
+    anonymousProfileNeutralized: 'Anonymous Profile Neutralized',
+    patrioticTokensNeutralized: 'Patriotic Language Neutralized',
+    sentimentPenaltyCapped: 'Emotional Content Penalty Capped',
+    feedbackPrompt: 'Was this analysis helpful?',
+    copySuccess: 'Analysis copied to clipboard!',
+    sharePrompt: 'Share this analysis',
+    feedbackThanks: 'Thank you for your feedback!',
+    feedbackError: 'Failed to submit feedback.',
+    exportReport: 'Export Report',
+    downloadText: 'Download as Text',
+    downloadJSON: 'Download as JSON',
+    copyFull: 'Copy Full Report',
+    copySummary: 'Copy Summary',
+    copySocial: 'Copy for Social Media',
+    shareNative: 'Share',
+    exportOptions: 'Export Options',
+    privacyWarning: 'Privacy Warning',
+    privacyNotice: 'This report may contain sensitive information. Review before sharing.',
   },
   he: {
-    riskScore: "ציון סיכון",
-    credibilityScore: "ציון אמינות",
-    classification: "סיווג",
-    safe: "בטוח",
-    suspicious: "חשוד",
-    highRisk: "בסיכון גבוה",
-    summary: "סיכום",
-    reasoning: "הנמקה",
-    recommendations: "המלצות",
-    detectedRules: "כללים שזוהו",
-    debiasingStatus: "סטטוס נטרול הטיה",
-    anonymousProfileNeutralized: "פרופיל אנונימי נוטרל",
-    patrioticTokensNeutralized: "שפה פטריוטית נוטרלה",
-    sentimentPenaltyCapped: "עונש תוכן רגשי הוגבל",
-    feedbackPrompt: "האם ניתוח זה היה מועיל?",
-    copySuccess: "הניתוח הועתק ללוח!",
-    sharePrompt: "שתף ניתוח זה",
-    feedbackThanks: "תודה על המשוב שלך!",
-    feedbackError: "הגשת המשוב נכשלה.",
-    exportReport: "ייצא דוח",
-    downloadText: "הורד כטקסט",
-    downloadJSON: "הורד כ-JSON",
-    copyFull: "העתק דוח מלא",
-    copySummary: "העתק סיכום",
-    copySocial: "העתק לרשתות חברתיות",
-    shareNative: "שתף",
-    exportOptions: "אפשרויות ייצוא",
-    privacyWarning: "אזהרת פרטיות",
-    privacyNotice: "דוח זה עלול להכיל מידע רגיש. בדוק לפני שיתוף.",
+    riskScore: 'ציון סיכון',
+    credibilityScore: 'ציון אמינות',
+    classification: 'סיווג',
+    safe: 'בטוח',
+    suspicious: 'חשוד',
+    highRisk: 'בסיכון גבוה',
+    summary: 'סיכום',
+    reasoning: 'הנמקה',
+    recommendations: 'המלצות',
+    detectedRules: 'כללים שזוהו',
+    debiasingStatus: 'סטטוס נטרול הטיה',
+    anonymousProfileNeutralized: 'פרופיל אנונימי נוטרל',
+    patrioticTokensNeutralized: 'שפה פטריוטית נוטרלה',
+    sentimentPenaltyCapped: 'עונש תוכן רגשי הוגבל',
+    feedbackPrompt: 'האם ניתוח זה היה מועיל?',
+    copySuccess: 'הניתוח הועתק ללוח!',
+    sharePrompt: 'שתף ניתוח זה',
+    feedbackThanks: 'תודה על המשוב שלך!',
+    feedbackError: 'הגשת המשוב נכשלה.',
+    exportReport: 'ייצא דוח',
+    downloadText: 'הורד כטקסט',
+    downloadJSON: 'הורד כ-JSON',
+    copyFull: 'העתק דוח מלא',
+    copySummary: 'העתק סיכום',
+    copySocial: 'העתק לרשתות חברתיות',
+    shareNative: 'שתף',
+    exportOptions: 'אפשרויות ייצוא',
+    privacyWarning: 'אזהרת פרטיות',
+    privacyNotice: 'דוח זה עלול להכיל מידע רגיש. בדוק לפני שיתוף.',
   },
 };
 
@@ -102,43 +102,52 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
     }
   };
 
-  const handleFeedback = useCallback(async (type: 'up' | 'down') => {
-    setFeedback(type);
-    try {
-      await submitFeedback({
-        analysisId: analysis.metadata.timestamp, // Using timestamp as a unique ID for now
-        feedbackType: type,
-      });
-      alert(t.feedbackThanks);
-    } catch {
-      alert(t.feedbackError);
-    }
-  }, [analysis.metadata.timestamp, t.feedbackThanks, t.feedbackError]);
+  const handleFeedback = useCallback(
+    async (type: 'up' | 'down') => {
+      setFeedback(type);
+      try {
+        await submitFeedback({
+          analysisId: analysis.metadata.timestamp, // Using timestamp as a unique ID for now
+          feedbackType: type,
+        });
+        alert(t.feedbackThanks);
+      } catch {
+        alert(t.feedbackError);
+      }
+    },
+    [analysis.metadata.timestamp, t.feedbackThanks, t.feedbackError]
+  );
 
-  const handleCopy = useCallback(async (format: 'summary' | 'social' | 'full' = 'summary') => {
-    const success = await copyToClipboard(analysis, format);
-    if (success) {
-      setCopyStatus(t.copySuccess);
-      setTimeout(() => setCopyStatus(null), 3000);
-    } else {
-      setCopyStatus('Failed to copy');
-      setTimeout(() => setCopyStatus(null), 3000);
-    }
-  }, [analysis, t.copySuccess]);
+  const handleCopy = useCallback(
+    async (format: 'summary' | 'social' | 'full' = 'summary') => {
+      const success = await copyToClipboard(analysis, format);
+      if (success) {
+        setCopyStatus(t.copySuccess);
+        setTimeout(() => setCopyStatus(null), 3000);
+      } else {
+        setCopyStatus('Failed to copy');
+        setTimeout(() => setCopyStatus(null), 3000);
+      }
+    },
+    [analysis, t.copySuccess]
+  );
 
-  const handleDownload = useCallback((format: 'text' | 'json') => {
-    const options: ExportOptions = {
-      includeConversation: true,
-      includeTimestamp: true,
-      privacy: 'anonymized'
-    };
+  const handleDownload = useCallback(
+    (format: 'text' | 'json') => {
+      const options: ExportOptions = {
+        includeConversation: true,
+        includeTimestamp: true,
+        privacy: 'anonymized',
+      };
 
-    if (format === 'text') {
-      downloadTextReport(analysis, conversation, options);
-    } else {
-      downloadJSONReport(analysis, conversation, options);
-    }
-  }, [analysis, conversation]);
+      if (format === 'text') {
+        downloadTextReport(analysis, conversation, options);
+      } else {
+        downloadJSONReport(analysis, conversation, options);
+      }
+    },
+    [analysis, conversation]
+  );
 
   const handleNativeShare = useCallback(async () => {
     const success = await shareAnalysis(analysis);
@@ -172,12 +181,10 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
               👎
             </button>
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            {copyStatus && (
-              <span className="text-sm text-green-400 mr-2">{copyStatus}</span>
-            )}
-            
+            {copyStatus && <span className="text-sm text-green-400 mr-2">{copyStatus}</span>}
+
             {/* Quick Copy Button */}
             <button
               onClick={() => handleCopy('summary')}
@@ -186,7 +193,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
             >
               📋
             </button>
-            
+
             {/* Native Share Button */}
             <button
               onClick={handleNativeShare}
@@ -195,7 +202,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
             >
               📤
             </button>
-            
+
             {/* Export Menu */}
             <div className="relative">
               <button
@@ -205,12 +212,12 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
               >
                 💾
               </button>
-              
+
               {showExportMenu && (
                 <div className="absolute right-0 mt-2 w-64 bg-dark-gray border border-gray-600 rounded-lg shadow-lg z-10">
                   <div className="p-3">
                     <h4 className="text-white font-medium mb-3">{t.exportOptions}</h4>
-                    
+
                     {/* Privacy Warning */}
                     {!privacyCheck.safe && (
                       <div className="mb-3 p-2 bg-yellow-900/20 border border-yellow-600/30 rounded text-xs">
@@ -226,7 +233,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
                         </ul>
                       </div>
                     )}
-                    
+
                     <div className="space-y-2">
                       {/* Copy Options */}
                       <div className="border-b border-gray-600 pb-2">
@@ -259,7 +266,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
                           📱 {t.copySocial}
                         </button>
                       </div>
-                      
+
                       {/* Download Options */}
                       <div>
                         <p className="text-gray-400 text-xs mb-2">Download Report</p>
@@ -316,7 +323,15 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
                 strokeDasharray={`${analysisData.riskScore * 2.51}, 251.2`}
                 transform="rotate(-90 50 50)"
               ></circle>
-              <text x="50" y="55" font-family="Arial" fontSize="20" fill="white" textAnchor="middle" dominantBaseline="middle">
+              <text
+                x="50"
+                y="55"
+                font-family="Arial"
+                fontSize="20"
+                fill="white"
+                textAnchor="middle"
+                dominantBaseline="middle"
+              >
                 {analysisData.riskScore}
               </text>
             </svg>
@@ -346,7 +361,15 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
                 strokeDasharray={`${analysisData.credibilityScore * 2.51}, 251.2`}
                 transform="rotate(-90 50 50)"
               ></circle>
-              <text x="50" y="55" font-family="Arial" fontSize="20" fill="white" textAnchor="middle" dominantBaseline="middle">
+              <text
+                x="50"
+                y="55"
+                font-family="Arial"
+                fontSize="20"
+                fill="white"
+                textAnchor="middle"
+                dominantBaseline="middle"
+              >
                 {analysisData.credibilityScore}
               </text>
             </svg>
@@ -355,7 +378,9 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
 
         <div className="bg-dark-gray p-6 rounded-lg shadow-lg text-center flex flex-col justify-center items-center">
           <h3 className="text-xl font-semibold text-white mb-3">{t.classification}</h3>
-          <div className={`px-5 py-2 rounded-full text-white font-bold text-lg ${getClassificationColor(analysisData.classification)}`}>
+          <div
+            className={`px-5 py-2 rounded-full text-white font-bold text-lg ${getClassificationColor(analysisData.classification)}`}
+          >
             {t[analysisData.classification.toLowerCase() as keyof typeof t]}
           </div>
         </div>
@@ -366,10 +391,12 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
         <h2 className="text-2xl font-bold text-white mb-4">{t.recommendations}</h2>
         <ul className="list-disc list-inside space-y-2">
           {analysisData.recommendations.map((rec, index) => (
-            <li key={index} className="text-lg">{rec}</li>
+            <li key={index} className="text-lg">
+              {rec}
+            </li>
           ))}
         </ul>
-        
+
         {/* Support Information */}
         <div className="mt-6 pt-4 border-t border-gray-600">
           <div className="flex items-center gap-2 mb-3">
@@ -379,10 +406,9 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
             </h3>
           </div>
           <p className="text-gray-400 text-sm mb-4">
-            {lang === 'he' 
+            {lang === 'he'
               ? 'עזרו לנו להמשיך לחשף חשבונות מזויפים ולהגן על האמת ברשת'
-              : 'Help us continue exposing fake accounts and defending truth online'
-            }
+              : 'Help us continue exposing fake accounts and defending truth online'}
           </p>
           <div className="flex flex-wrap gap-2">
             <a
@@ -411,7 +437,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
       <div className="bg-dark-gray p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-white mb-4">{t.detectedRules}</h2>
         <div className="space-y-4">
-          {analysisData.detectedRules.map((rule) => (
+          {analysisData.detectedRules.map(rule => (
             <FlagCard key={rule.id} rule={rule} lang={lang} />
           ))}
         </div>
@@ -428,20 +454,38 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
         <h2 className="text-2xl font-bold text-white mb-4">{t.debiasingStatus}</h2>
         <ul className="list-disc list-inside space-y-2">
           <li>
-            {t.anonymousProfileNeutralized}: {' '}
-            <span className={analysisData.debiasingStatus.anonymous_profile_neutralized ? 'text-success-green' : 'text-danger-red'}>
+            {t.anonymousProfileNeutralized}:{' '}
+            <span
+              className={
+                analysisData.debiasingStatus.anonymous_profile_neutralized
+                  ? 'text-success-green'
+                  : 'text-danger-red'
+              }
+            >
               {analysisData.debiasingStatus.anonymous_profile_neutralized ? 'Yes' : 'No'}
             </span>
           </li>
           <li>
-            {t.patrioticTokensNeutralized}: {' '}
-            <span className={analysisData.debiasingStatus.patriotic_tokens_neutralized ? 'text-success-green' : 'text-danger-red'}>
+            {t.patrioticTokensNeutralized}:{' '}
+            <span
+              className={
+                analysisData.debiasingStatus.patriotic_tokens_neutralized
+                  ? 'text-success-green'
+                  : 'text-danger-red'
+              }
+            >
               {analysisData.debiasingStatus.patriotic_tokens_neutralized ? 'Yes' : 'No'}
             </span>
           </li>
           <li>
-            {t.sentimentPenaltyCapped}: {' '}
-            <span className={analysisData.debiasingStatus.sentiment_penalty_capped ? 'text-success-green' : 'text-danger-red'}>
+            {t.sentimentPenaltyCapped}:{' '}
+            <span
+              className={
+                analysisData.debiasingStatus.sentiment_penalty_capped
+                  ? 'text-success-green'
+                  : 'text-danger-red'
+              }
+            >
               {analysisData.debiasingStatus.sentiment_penalty_capped ? 'Yes' : 'No'}
             </span>
           </li>

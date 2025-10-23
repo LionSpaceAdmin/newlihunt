@@ -8,16 +8,16 @@ interface FlagCardProps {
 
 const textContent = {
   en: {
-    severity: "Severity",
-    points: "Points",
-    showDetails: "Show Details",
-    hideDetails: "Hide Details",
+    severity: 'Severity',
+    points: 'Points',
+    showDetails: 'Show Details',
+    hideDetails: 'Hide Details',
   },
   he: {
-    severity: "חומרה",
-    points: "נקודות",
-    showDetails: "הצג פרטים",
-    hideDetails: "הסתר פרטים",
+    severity: 'חומרה',
+    points: 'נקודות',
+    showDetails: 'הצג פרטים',
+    hideDetails: 'הסתר פרטים',
   },
 };
 
@@ -40,15 +40,23 @@ const FlagCard: React.FC<FlagCardProps> = ({ rule, lang = 'en' }) => {
 
   return (
     <div className="bg-gray-800 p-4 rounded-lg shadow-md">
-      <div className="flex items-center justify-between cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
+      <div
+        className="flex items-center justify-between cursor-pointer"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         <div className="flex items-center space-x-3">
           <div className={`w-3 h-3 rounded-full ${getSeverityColor(rule.severity)}`} />
           <h3 className="text-lg font-semibold text-white">{rule.name}</h3>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-400">{t.severity}: {rule.severity}</span>
-          <span className={`text-sm font-medium ${rule.points > 0 ? 'text-danger-red' : 'text-success-green'}`}>
-            {rule.points > 0 ? '+' : ''}{rule.points} {t.points}
+          <span className="text-sm text-gray-400">
+            {t.severity}: {rule.severity}
+          </span>
+          <span
+            className={`text-sm font-medium ${rule.points > 0 ? 'text-danger-red' : 'text-success-green'}`}
+          >
+            {rule.points > 0 ? '+' : ''}
+            {rule.points} {t.points}
           </span>
           <svg
             className={`w-4 h-4 text-gray-400 transform transition-transform ${isExpanded ? 'rotate-180' : 'rotate-0'}`}

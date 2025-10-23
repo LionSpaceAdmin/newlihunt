@@ -7,11 +7,13 @@ This guide will help you deploy the Scam Hunt Platform backend infrastructure to
 The platform uses a hybrid architecture:
 
 ### **Frontend & AI (Vercel)**
+
 - **Next.js Application**: Deployed on Vercel
 - **Gemini AI Integration**: Direct API calls from Next.js API routes
 - **URL Inspection**: Built-in Next.js functionality
 
 ### **Backend Infrastructure (AWS)**
+
 - **DynamoDB**: NoSQL database for analysis history and user sessions
 - **S3**: Object storage for uploaded images
 - **IAM**: Identity and access management
@@ -22,17 +24,21 @@ The platform uses a hybrid architecture:
 ## 📋 Prerequisites
 
 ### Required Tools
+
 - AWS CLI v2 or later
-- Node.js 18+ 
+- Node.js 18+
 - Either Terraform 1.0+ OR AWS CLI (for CloudFormation)
 - zip utility
 
 ### Required Credentials
+
 - AWS account with appropriate permissions
 - Gemini API key for AI analysis
 
 ### AWS Permissions Required
+
 Your AWS user/role needs the following permissions:
+
 - IAM: Create/manage roles and policies
 - Lambda: Create/manage functions
 - API Gateway: Create/manage APIs
@@ -45,6 +51,7 @@ Your AWS user/role needs the following permissions:
 ### Option 1: Terraform Deployment (Recommended)
 
 1. **Set up environment variables:**
+
 ```bash
 export AWS_REGION=us-east-1
 export ENVIRONMENT=production
@@ -52,6 +59,7 @@ export GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 2. **Run the deployment script:**
+
 ```bash
 cd scam-hunt-platform/scripts
 ./deploy-aws.sh
@@ -60,6 +68,7 @@ cd scam-hunt-platform/scripts
 ### Option 2: CloudFormation Deployment
 
 1. **Set up environment variables:**
+
 ```bash
 export AWS_REGION=us-east-1
 export ENVIRONMENT=production
@@ -67,6 +76,7 @@ export GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 2. **Run the CloudFormation deployment script:**
+
 ```bash
 cd scam-hunt-platform/scripts
 ./deploy-cloudformation.sh
@@ -81,17 +91,20 @@ cd scam-hunt-platform/scripts
 ### DynamoDB Tables
 
 #### Analysis History Table
+
 - **Primary Key**: `userId` (Hash), `timestamp` (Range)
 - **GSI**: `AnalysisIdIndex` on `analysisId`
 - **TTL**: Enabled on `ttl` attribute
 - **Billing**: Pay-per-request
 
 #### User Sessions Table
+
 - **Primary Key**: `userId` (Hash)
 - **TTL**: Enabled on `ttl` attribute
 - **Billing**: Pay-per-request
 
 ### S3 Bucket
+
 - **Purpose**: Store uploaded images
 - **Encryption**: AES-256
 - **Versioning**: Enabled
@@ -99,6 +112,7 @@ cd scam-hunt-platform/scripts
 - **CORS**: Configured for web access
 
 ### API Gateway
+
 **Status**: Removed - No longer needed as all API endpoints are handled by Next.js on Vercel
 
 ## 🔧 Configuration
@@ -135,15 +149,18 @@ Deploy your Next.js frontend to Vercel:
 ## 📊 Monitoring and Logging
 
 ### CloudWatch Logs
+
 - Lambda function logs are automatically sent to CloudWatch
 - Log groups: `/aws/lambda/scam-hunt-platform-*`
 
 ### CloudWatch Metrics
+
 - API Gateway metrics (requests, latency, errors)
 - Lambda metrics (invocations, duration, errors)
 - DynamoDB metrics (read/write capacity, throttles)
 
 ### Recommended Alarms
+
 ```bash
 # High error rate
 aws cloudwatch put-metric-alarm \
@@ -171,16 +188,19 @@ aws cloudwatch put-metric-alarm \
 ## 🔒 Security Best Practices
 
 ### IAM Roles
+
 - Lambda functions use least-privilege IAM roles
 - No hardcoded credentials in code
 - Environment variables for sensitive data
 
 ### API Security
+
 - CORS properly configured
 - Rate limiting implemented in Lambda
 - Input validation and sanitization
 
 ### Data Protection
+
 - S3 bucket encryption enabled
 - DynamoDB encryption at rest
 - TTL configured for data cleanup
@@ -190,6 +210,7 @@ aws cloudwatch put-metric-alarm \
 ### Common Issues
 
 #### 1. Lambda Function Timeout
+
 ```bash
 # Check CloudWatch logs
 aws logs describe-log-groups --log-group-name-prefix "/aws/lambda/scam-hunt-platform"
@@ -201,11 +222,13 @@ aws lambda update-function-configuration \
 ```
 
 #### 2. API Gateway CORS Issues
+
 - Ensure OPTIONS methods are properly configured
 - Check response headers in Lambda functions
 - Verify allowed origins in CORS configuration
 
 #### 3. DynamoDB Throttling
+
 ```bash
 # Check metrics
 aws cloudwatch get-metric-statistics \
@@ -219,6 +242,7 @@ aws cloudwatch get-metric-statistics \
 ```
 
 #### 4. S3 Upload Issues
+
 - Check bucket policy and CORS configuration
 - Verify IAM permissions for Lambda
 - Check CloudWatch logs for detailed errors
@@ -244,6 +268,7 @@ aws s3 ls s3://scam-hunt-platform-uploads-production
 ## 💰 Cost Optimization
 
 ### Expected Costs (Monthly)
+
 - **API Gateway**: ~$3.50 per million requests
 - **Lambda**: ~$0.20 per million requests (512MB, 1s duration)
 - **DynamoDB**: ~$1.25 per million read/write requests
@@ -251,6 +276,7 @@ aws s3 ls s3://scam-hunt-platform-uploads-production
 - **CloudWatch**: ~$0.50 per GB ingested
 
 ### Cost Optimization Tips
+
 1. Use DynamoDB on-demand pricing for variable workloads
 2. Set up S3 lifecycle policies for old uploads
 3. Monitor and optimize Lambda memory allocation
@@ -259,6 +285,7 @@ aws s3 ls s3://scam-hunt-platform-uploads-production
 ## 🔄 Updates and Maintenance
 
 ### Updating Lambda Code
+
 ```bash
 # Package new code
 cd aws/lambda/analyze
@@ -271,6 +298,7 @@ aws lambda update-function-code \
 ```
 
 ### Infrastructure Updates
+
 ```bash
 # Terraform
 cd terraform
@@ -287,6 +315,7 @@ aws cloudformation update-stack \
 ## 📞 Support
 
 For deployment issues:
+
 1. Check CloudWatch logs first
 2. Verify all environment variables are set
 3. Ensure AWS permissions are correct

@@ -5,13 +5,16 @@ export function proxy(request: NextRequest) {
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
     const response = new NextResponse(null, { status: 200 });
-    
+
     // Add CORS headers
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, X-Requested-With'
+    );
     response.headers.set('Access-Control-Max-Age', '86400');
-    
+
     return defaultSecurityMiddleware.addSecurityHeaders(response);
   }
 
@@ -25,7 +28,7 @@ export function proxy(request: NextRequest) {
   secureResponse.headers.set('X-DNS-Prefetch-Control', 'off');
   secureResponse.headers.set('X-Download-Options', 'noopen');
   secureResponse.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
-  
+
   // Strict Transport Security (only in production with HTTPS)
   if (process.env.NODE_ENV === 'production') {
     secureResponse.headers.set(
@@ -61,52 +64,52 @@ export function proxy(request: NextRequest) {
 
 function buildContentSecurityPolicy(): string {
   const isDevelopment = process.env.NODE_ENV === 'development';
-  
+
   const directives = [
     "default-src 'self'",
-    
+
     // Scripts: Allow self, inline scripts for Next.js, and Vercel analytics
     isDevelopment
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live"
       : "script-src 'self' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com",
-    
+
     // Styles: Allow self, inline styles, and Google Fonts
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    
+
     // Fonts: Allow self and Google Fonts
     "font-src 'self' https://fonts.gstatic.com data:",
-    
+
     // Images: Allow self, data URLs, HTTPS, and blob URLs for uploads
     "img-src 'self' data: https: blob:",
-    
+
     // Media: Allow self, data URLs, and HTTPS
     "media-src 'self' data: https:",
-    
+
     // Connect: Allow self, HTTPS, and WebSocket connections
     isDevelopment
       ? "connect-src 'self' https: wss: ws: http://localhost:*"
       : "connect-src 'self' https: wss:",
-    
+
     // Frames: Deny all frames
     "frame-src 'none'",
-    
+
     // Objects: Deny all objects
     "object-src 'none'",
-    
+
     // Base URI: Restrict to self
     "base-uri 'self'",
-    
+
     // Form actions: Restrict to self
     "form-action 'self'",
-    
+
     // Frame ancestors: Deny all
     "frame-ancestors 'none'",
-    
+
     // Upgrade insecure requests in production
-    ...(isDevelopment ? [] : ["upgrade-insecure-requests"]),
-    
+    ...(isDevelopment ? [] : ['upgrade-insecure-requests']),
+
     // Block mixed content
-    "block-all-mixed-content",
+    'block-all-mixed-content',
   ];
 
   return directives.join('; ');

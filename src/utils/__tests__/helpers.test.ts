@@ -1,17 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  fileToBase64,
-  validateImageFile,
-  formatTimestamp,
-  generateMessageId,
-  sanitizeInput,
-  extractDomain,
-  isValidUrl,
-  getRiskScoreColor,
-  getCredibilityScoreColor,
-  getClassificationColor,
-  getSeverityColor,
-  truncateText,
-  copyToClipboard,
+    copyToClipboard,
+    extractDomain,
+    fileToBase64,
+    formatTimestamp,
+    generateMessageId,
+    getClassificationColor,
+    getCredibilityScoreColor,
+    getRiskScoreColor,
+    getSeverityColor,
+    isValidUrl,
+    sanitizeInput,
+    truncateText,
+    validateImageFile,
 } from '../helpers';
 
 // Mock clipboard API
@@ -25,7 +26,7 @@ describe('File Utilities', () => {
   describe('fileToBase64', () => {
     it('converts file to base64 string', async () => {
       const mockFile = new File(['test content'], 'test.txt', { type: 'text/plain' });
-      
+
       // Mock FileReader
       const mockFileReader = {
         readAsDataURL: jest.fn(),
@@ -37,17 +38,17 @@ describe('File Utilities', () => {
       (global as any).FileReader = jest.fn(() => mockFileReader);
 
       const promise = fileToBase64(mockFile);
-      
+
       // Simulate FileReader onload
       mockFileReader.onload();
-      
+
       const result = await promise;
       expect(result).toBe('dGVzdCBjb250ZW50');
     });
 
     it('handles FileReader errors', async () => {
       const mockFile = new File(['test'], 'test.txt', { type: 'text/plain' });
-      
+
       const mockFileReader = {
         readAsDataURL: jest.fn(),
         result: null,
@@ -58,11 +59,11 @@ describe('File Utilities', () => {
       (global as any).FileReader = jest.fn(() => mockFileReader);
 
       const promise = fileToBase64(mockFile);
-      
+
       // Simulate FileReader error
       const error = new Error('FileReader error');
       mockFileReader.onerror(error);
-      
+
       await expect(promise).rejects.toThrow('FileReader error');
     });
   });
@@ -79,7 +80,7 @@ describe('File Utilities', () => {
 
     it('rejects invalid file types', () => {
       const invalidFile = new File([''], 'test.pdf', { type: 'application/pdf' });
-      
+
       const result = validateImageFile(invalidFile);
       expect(result.isValid).toBe(false);
       expect(result.error).toContain('Invalid file type');
@@ -96,7 +97,7 @@ describe('File Utilities', () => {
 
     it('accepts all supported image types', () => {
       const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-      
+
       supportedTypes.forEach(type => {
         const file = new File([''], `test.${type.split('/')[1]}`, { type });
         Object.defineProperty(file, 'size', { value: 1024 }); // 1KB
@@ -113,7 +114,7 @@ describe('Text Utilities', () => {
     it('formats timestamp correctly', () => {
       const date = new Date('2023-10-23T14:30:00');
       const result = formatTimestamp(date);
-      
+
       // Should return time in format like "2:30 PM"
       expect(result).toMatch(/\d{1,2}:\d{2}\s?(AM|PM)/);
     });
@@ -123,7 +124,7 @@ describe('Text Utilities', () => {
     it('generates unique message IDs', () => {
       const id1 = generateMessageId();
       const id2 = generateMessageId();
-      
+
       expect(id1).not.toBe(id2);
       expect(id1).toMatch(/^msg_\d+_[a-z0-9]+$/);
       expect(id2).toMatch(/^msg_\d+_[a-z0-9]+$/);
@@ -134,21 +135,21 @@ describe('Text Utilities', () => {
     it('sanitizes HTML characters', () => {
       const input = '<script>alert("xss")</script>';
       const result = sanitizeInput(input);
-      
+
       expect(result).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;&#x2F;script&gt;');
     });
 
     it('handles various special characters', () => {
       const input = `<>"'&/`;
       const result = sanitizeInput(input);
-      
+
       expect(result).toBe('&lt;&gt;&quot;&#x27;&amp;&#x2F;');
     });
 
     it('preserves safe content', () => {
       const input = 'This is safe content with numbers 123 and symbols !@#$%^*()';
       const result = sanitizeInput(input);
-      
+
       expect(result).toBe('This is safe content with numbers 123 and symbols !@#$%^*()');
     });
   });
@@ -157,7 +158,7 @@ describe('Text Utilities', () => {
     it('truncates long text', () => {
       const longText = 'This is a very long text that should be truncated';
       const result = truncateText(longText, 20);
-      
+
       expect(result).toBe('This is a very long ...');
       expect(result.length).toBe(23); // 20 + '...'
     });
@@ -165,7 +166,7 @@ describe('Text Utilities', () => {
     it('does not truncate short text', () => {
       const shortText = 'Short text';
       const result = truncateText(shortText, 20);
-      
+
       expect(result).toBe('Short text');
     });
 
@@ -257,17 +258,19 @@ describe('Clipboard Utilities', () => {
   describe('copyToClipboard', () => {
     it('copies text using modern clipboard API', async () => {
       const text = 'Test text to copy';
-      
+
       const result = await copyToClipboard(text);
-      
+
       expect(result).toBe(true);
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(text);
     });
 
     it('falls back to legacy method when clipboard API fails', async () => {
       // Mock clipboard API to fail
-      (navigator.clipboard.writeText as jest.Mock).mockRejectedValueOnce(new Error('Clipboard API failed'));
-      
+      (navigator.clipboard.writeText as jest.Mock).mockRejectedValueOnce(
+        new Error('Clipboard API failed')
+      );
+
       // Mock document methods for fallback
       const mockTextArea = {
         value: '',
@@ -275,20 +278,22 @@ describe('Clipboard Utilities', () => {
         select: jest.fn(),
         style: {},
       };
-      
-      const createElementSpy = jest.spyOn(document, 'createElement').mockReturnValue(mockTextArea as any);
+
+      const createElementSpy = jest
+        .spyOn(document, 'createElement')
+        .mockReturnValue(mockTextArea as any);
       const appendChildSpy = jest.spyOn(document.body, 'appendChild').mockImplementation();
       const removeChildSpy = jest.spyOn(document.body, 'removeChild').mockImplementation();
       const execCommandSpy = jest.spyOn(document, 'execCommand').mockReturnValue(true);
-      
+
       const text = 'Test text to copy';
       const result = await copyToClipboard(text);
-      
+
       expect(result).toBe(true);
       expect(createElementSpy).toHaveBeenCalledWith('textarea');
       expect(mockTextArea.value).toBe(text);
       expect(execCommandSpy).toHaveBeenCalledWith('copy');
-      
+
       // Cleanup
       createElementSpy.mockRestore();
       appendChildSpy.mockRestore();
@@ -298,13 +303,15 @@ describe('Clipboard Utilities', () => {
 
     it('returns false when both methods fail', async () => {
       // Mock clipboard API to fail
-      (navigator.clipboard.writeText as jest.Mock).mockRejectedValueOnce(new Error('Clipboard API failed'));
-      
+      (navigator.clipboard.writeText as jest.Mock).mockRejectedValueOnce(
+        new Error('Clipboard API failed')
+      );
+
       // Mock fallback to fail
       jest.spyOn(document, 'execCommand').mockReturnValue(false);
-      
+
       const result = await copyToClipboard('test');
-      
+
       expect(result).toBe(false);
     });
   });
@@ -314,22 +321,22 @@ describe('Clipboard Utilities', () => {
 describe('Performance Tests', () => {
   it('handles large text sanitization efficiently', () => {
     const largeText = '<script>'.repeat(10000) + 'content' + '</script>'.repeat(10000);
-    
+
     const startTime = performance.now();
     const result = sanitizeInput(largeText);
     const endTime = performance.now();
-    
+
     expect(endTime - startTime).toBeLessThan(100); // Should complete in under 100ms
     expect(result).toContain('&lt;script&gt;');
   });
 
   it('generates message IDs quickly', () => {
     const startTime = performance.now();
-    
+
     const ids = Array.from({ length: 1000 }, () => generateMessageId());
-    
+
     const endTime = performance.now();
-    
+
     expect(endTime - startTime).toBeLessThan(50); // Should complete in under 50ms
     expect(new Set(ids).size).toBe(1000); // All IDs should be unique
   });

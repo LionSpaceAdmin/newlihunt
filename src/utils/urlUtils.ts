@@ -97,7 +97,7 @@ export async function inspectURL(url: string): Promise<URLInspectionResponse> {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       return {
         success: false,
@@ -121,28 +121,28 @@ export async function inspectURL(url: string): Promise<URLInspectionResponse> {
  */
 export function formatURLInspectionResult(result: URLInspectionResult): string {
   const { domain, title, hasSSL, suspiciousPatterns } = result;
-  
+
   let summary = `🔍 **URL Analysis for ${domain}**\n\n`;
-  
+
   if (title) {
     summary += `📄 **Page Title:** ${title}\n`;
   }
-  
+
   summary += `🔒 **Security:** ${hasSSL ? 'HTTPS (Secure)' : 'HTTP (Not Secure)'}\n`;
-  
+
   if (suspiciousPatterns.length > 0) {
     summary += `\n⚠️ **Suspicious Patterns Detected:**\n`;
     suspiciousPatterns.forEach(pattern => {
-      const severityIcon = pattern.severity === 'high' ? '🚨' : 
-                          pattern.severity === 'medium' ? '⚠️' : '⚡';
+      const severityIcon =
+        pattern.severity === 'high' ? '🚨' : pattern.severity === 'medium' ? '⚠️' : '⚡';
       summary += `${severityIcon} ${pattern.description || pattern.keyword || pattern.type}\n`;
     });
   } else {
     summary += `\n✅ **No obvious suspicious patterns detected**\n`;
   }
-  
+
   summary += `\n*Analysis completed at ${new Date(result.timestamp).toLocaleString()}*`;
-  
+
   return summary;
 }
 

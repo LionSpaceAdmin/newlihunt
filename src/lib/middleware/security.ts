@@ -114,7 +114,7 @@ export class SecurityMiddleware {
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
-      "upgrade-insecure-requests",
+      'upgrade-insecure-requests',
     ];
 
     return directives.join('; ');
@@ -129,13 +129,13 @@ export class SecurityMiddleware {
       if (allowedOrigin === origin) {
         return true;
       }
-      
+
       // Support wildcard subdomains
       if (allowedOrigin.startsWith('*.')) {
         const domain = allowedOrigin.substring(2);
         return origin.endsWith(`.${domain}`) || origin === domain;
       }
-      
+
       return false;
     });
   }
@@ -299,12 +299,10 @@ export class SecurityLogger {
   }
 
   public static getEventsByType(type: SecurityEvent['type'], limit: number = 100): SecurityEvent[] {
-    return this.events
-      .filter(event => event.type === type)
-      .slice(-limit);
+    return this.events.filter(event => event.type === type).slice(-limit);
   }
 
-  private static async sendToMonitoring(event: SecurityEvent): Promise<void> {
+  private static async sendToMonitoring(): Promise<void> {
     // Implement monitoring service integration
     // This could be AWS CloudWatch, DataDog, etc.
     try {
@@ -323,7 +321,8 @@ export const defaultSecurityMiddleware = new SecurityMiddleware({
   enableCSP: true,
   enableHSTS: process.env.NODE_ENV === 'production',
   maxRequestSize: 10 * 1024 * 1024, // 10MB
-  allowedOrigins: process.env.NODE_ENV === 'production' 
-    ? [process.env.NEXT_PUBLIC_APP_URL || 'https://scam-hunt.vercel.app']
-    : ['*'],
+  allowedOrigins:
+    process.env.NODE_ENV === 'production'
+      ? [process.env.NEXT_PUBLIC_APP_URL || 'https://scam-hunt.vercel.app']
+      : ['*'],
 });

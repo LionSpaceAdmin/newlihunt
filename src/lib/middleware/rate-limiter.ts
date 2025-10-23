@@ -18,14 +18,17 @@ interface RateLimitEntry {
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
 // Cleanup expired entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitStore.entries()) {
-    if (entry.resetTime < now) {
-      rateLimitStore.delete(key);
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [key, entry] of rateLimitStore.entries()) {
+      if (entry.resetTime < now) {
+        rateLimitStore.delete(key);
+      }
     }
-  }
-}, 5 * 60 * 1000);
+  },
+  5 * 60 * 1000
+);
 
 export class RateLimiter {
   private config: RateLimitConfig;
@@ -45,19 +48,19 @@ export class RateLimiter {
     const forwardedFor = request.headers.get('x-forwarded-for');
     const realIp = request.headers.get('x-real-ip');
     const ip = forwardedFor?.split(',')[0] || realIp || 'unknown';
-    
+
     // Include user agent for additional uniqueness
     const userAgent = request.headers.get('user-agent') || '';
     const userAgentHash = this.simpleHash(userAgent);
-    
+
     return `${ip}:${userAgentHash}`;
-  }
+  };
 
   private simpleHash(str: string): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16).substring(0, 8);
@@ -76,7 +79,6 @@ export class RateLimiter {
   }> {
     const key = this.getClientKey(request);
     const now = Date.now();
-    const windowStart = now - this.config.windowMs;
 
     let entry = rateLimitStore.get(key);
 
@@ -176,7 +178,7 @@ export const sessionRateLimiter = new RateLimiter({
     if (sessionId) {
       return `session:${sessionId}`;
     }
-    
+
     const forwardedFor = request.headers.get('x-forwarded-for');
     const realIp = request.headers.get('x-real-ip');
     const ip = forwardedFor?.split(',')[0] || realIp || 'unknown';
