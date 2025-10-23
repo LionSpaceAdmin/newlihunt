@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { FullAnalysisResult } from '@/types/analysis';
+import Image from 'next/image';
+import { FullAnalysisResult, Message } from '@/types/analysis';
 import { formatTimestamp } from '@/utils/helpers';
 import { uploadImage, validateImageFile, createImagePreview, formatFileSize, UploadProgress } from '@/utils/uploadService';
 import { useScamAnalysis } from '@/hooks/useScamAnalysis';
-import { detectURLs, isLikelySuspiciousURL, inspectURL, formatURLInspectionResult, createURLSafetyWarning } from '@/utils/urlUtils';
+import { detectURLs, isLikelySuspiciousURL, inspectURL, formatURLInspectionResult } from '@/utils/urlUtils';
 
 interface ChatInterfaceProps {
   onAnalysisComplete: (analysis: FullAnalysisResult) => void;
@@ -281,11 +282,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
         >
           {message.imageUrl && (
             <div className="mb-2">
-              <img
+              <Image
                 src={message.imageUrl}
                 alt="Uploaded content"
+                width={400}
+                height={200}
                 className="max-w-full h-auto rounded-lg"
-                style={{ maxHeight: '200px' }}
+                style={{ objectFit: 'contain', maxHeight: '200px' }}
               />
             </div>
           )}
@@ -366,9 +369,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
         {messages.length === 0 && (
           <div className="text-center py-8">
             <div className="w-48 h-27 mx-auto mb-6 rounded-lg overflow-hidden">
-              <img 
+              <Image 
                 src="/lion-digital-guardian/hero-banner/landing-visual_v1_16x9.webp" 
                 alt="Scam Hunter - Digital Guardian" 
+                width={384}
+                height={216}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -403,9 +408,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
             <div className="bg-dark-gray text-gray-300 rounded-lg px-4 py-3 max-w-[80%]">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 rounded-lg overflow-hidden">
-                  <img 
+                  <Image 
                     src="/lion-digital-guardian/loading-screen/lion-awakening_v1_3x4.webp" 
                     alt="Analyzing..." 
+                    width={48}
+                    height={48}
                     className="w-full h-full object-cover animate-lion-awakening"
                   />
                 </div>
@@ -463,9 +470,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
           <div className="mb-3 p-3 bg-blue-900/20 border border-blue-600/30 rounded-lg">
             <div className="flex items-center space-x-3">
               {previewImage && (
-                <img
+                <Image
                   src={previewImage}
                   alt="Upload preview"
+                  width={48}
+                  height={48}
                   className="w-12 h-12 object-cover rounded"
                 />
               )}
@@ -565,18 +574,19 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
             {/* File Upload Button */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className={`flex-shrink-0 p-2 transition-colors ${
+              className={`flex-shrink-0 p-3 sm:p-2 transition-colors touch-manipulation ${
                 uploadProgress 
                   ? 'text-blue-400 cursor-not-allowed' 
-                  : 'text-gray-400 hover:text-accent-blue'
+                  : 'text-gray-400 hover:text-accent-blue active:text-accent-blue'
               }`}
               disabled={isLoading || uploadProgress !== null}
               title="Upload image"
+              aria-label="Upload image"
             >
               {uploadProgress ? (
-                <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                <div className="w-6 h-6 sm:w-5 sm:h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
               ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                 </svg>
               )}
@@ -589,21 +599,23 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={t.placeholder}
-              className="flex-1 bg-transparent text-white placeholder-gray-400 resize-none focus:outline-none min-h-[40px] max-h-[120px]"
+              className="flex-1 bg-transparent text-white placeholder-gray-400 resize-none focus:outline-none min-h-[44px] sm:min-h-[40px] max-h-[120px] text-base"
               rows={1}
               disabled={isLoading || uploadProgress !== null}
+              style={{ fontSize: '16px' }}
             />
 
             {/* Send Button */}
             <button
               onClick={handleInputSubmit}
-              disabled={isLoading || uploadProgress !== null || (!inputText.trim())}
-              className="flex-shrink-0 p-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={isLoading || uploadProgress !== null || (!inputText.trim() && !previewImage)}
+              className="flex-shrink-0 p-3 sm:p-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation"
+              aria-label="Send message"
             >
               {isLoading || uploadProgress !== null ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-6 h-6 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
               )}

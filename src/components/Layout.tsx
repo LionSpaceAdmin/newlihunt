@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { FullAnalysisResult, Message } from '@/types/analysis';
 import ChatInterface from './ChatInterface';
 import ScamAnalysis from './ScamAnalysis';
@@ -37,10 +38,15 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
 
   // Check if onboarding should be shown
   useEffect(() => {
-    const completed = localStorage.getItem('scam-hunter-onboarding-completed');
-    if (completed !== 'true') {
-      setShowOnboarding(true);
-    }
+    // Use setTimeout to avoid setState during render
+    const timer = setTimeout(() => {
+      const completed = localStorage.getItem('scam-hunter-onboarding-completed');
+      if (completed !== 'true') {
+        setShowOnboarding(true);
+      }
+    }, 0);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const handleAnalysisComplete = (analysis: FullAnalysisResult) => {
@@ -173,9 +179,11 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
               <div className="flex-1 flex items-center justify-center p-6">
                 <div className="text-center max-w-md">
                   <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
-                    <img 
+                    <Image 
                       src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp" 
                       alt="Ready for Analysis" 
+                      width={256}
+                      height={192}
                       className="w-full h-full object-cover"
                     />
                   </div>

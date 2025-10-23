@@ -258,7 +258,7 @@ export interface SecurityEvent {
   userAgent: string;
   endpoint: string;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class SecurityLogger {

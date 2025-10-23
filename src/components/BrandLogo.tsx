@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 interface BrandLogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -28,9 +29,11 @@ const BrandLogo: React.FC<BrandLogoProps> = ({
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
       <div className={`${sizeClasses[size]} rounded-xl overflow-hidden animate-digital-pulse`}>
-        <img 
+        <Image 
           src="/lion-digital-guardian/app-icon/68512281-D399-4756-9206-67C2C2E83BB0.webp" 
           alt="Scam Hunter Logo" 
+          width={64}
+          height={64}
           className="w-full h-full object-cover"
         />
       </div>

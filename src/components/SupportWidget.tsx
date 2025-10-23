@@ -107,13 +107,26 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
         {/* Support Options */}
         <div className="p-6 space-y-4">
           {/* Project-Specific Support */}
+          {/* FIDF Support - First Priority */}
           <button
-            onClick={handleProjectSupport}
-            className="w-full p-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-between"
+            onClick={handleFIDFSupport}
+            className="w-full p-5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all duration-200 flex items-center justify-between shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
           >
             <div className="text-left">
-              <div className="font-medium">{content.projectSupport}</div>
-              <div className="text-sm text-red-100">Direct support for Scam Hunter development</div>
+              <div className="font-bold text-lg">{content.fidfSupport}</div>
+              <div className="text-sm text-blue-50 mt-1">Support Friends of the IDF</div>
+            </div>
+            <span className="text-3xl">🇮🇱</span>
+          </button>
+
+          {/* Project Support */}
+          <button
+            onClick={handleProjectSupport}
+            className="w-full p-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl transition-all duration-200 flex items-center justify-between shadow-md hover:shadow-lg transform hover:scale-[1.01]"
+          >
+            <div className="text-left">
+              <div className="font-semibold">{content.projectSupport}</div>
+              <div className="text-sm text-red-50 mt-1">Direct support for Scam Hunter development</div>
             </div>
             <span className="text-2xl">🎯</span>
           </button>
@@ -121,39 +134,27 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
           {/* General Support */}
           <button
             onClick={handleGeneralSupport}
-            className="w-full p-4 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors flex items-center justify-between"
+            className="w-full p-4 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-xl transition-all duration-200 flex items-center justify-between shadow-md hover:shadow-lg transform hover:scale-[1.01]"
           >
             <div className="text-left">
-              <div className="font-medium">{content.generalSupport}</div>
-              <div className="text-sm text-orange-100">Support the developer's work</div>
+              <div className="font-semibold">{content.generalSupport}</div>
+              <div className="text-sm text-orange-50 mt-1">Support the developer&apos;s work</div>
             </div>
             <span className="text-2xl">☕</span>
           </button>
 
-          {/* FIDF Support */}
-          <button
-            onClick={handleFIDFSupport}
-            className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-between"
-          >
-            <div className="text-left">
-              <div className="font-medium">{content.fidfSupport}</div>
-              <div className="text-sm text-blue-100">Support Friends of the IDF</div>
-            </div>
-            <span className="text-2xl">🇮🇱</span>
-          </button>
-
           {/* Buy Me a Coffee Button */}
-          <div className="pt-4 border-t border-gray-600">
+          <div className="pt-6 border-t border-gray-700">
             <a 
               href="https://www.buymeacoffee.com/danielhanukayeb" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="block w-full"
+              className="block w-full transform hover:scale-[1.02] transition-transform duration-200"
             >
               <img 
                 src="https://img.buymeacoffee.com/button-api/?text=Buy me a lions&emoji=🦁&slug=danielhanukayeb&button_colour=f20707&font_colour=ffffff&font_family=Cookie&outline_colour=ffffff&coffee_colour=FFDD00" 
                 alt="Buy Me A Coffee"
-                className="w-full rounded-lg hover:opacity-90 transition-opacity"
+                className="w-full rounded-xl hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
               />
             </a>
           </div>

@@ -1,8 +1,9 @@
 import { StorageProvider, StoredAnalysis, UserSession, StorageConfig } from './types';
+import * as AWS from 'aws-sdk';
 
 // DynamoDB provider for AWS integration
 export class DynamoDBStorageProvider implements StorageProvider {
-  private dynamodb: any;
+  private dynamodb: AWS.DynamoDB.DocumentClient | null = null;
   private tableName: string;
   private sessionTableName: string;
 

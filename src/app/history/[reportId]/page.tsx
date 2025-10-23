@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 import { getHistoryService } from '@/lib/history-service';
 import { StoredAnalysis } from '@/lib/storage/types';
 import { Classification } from '@/types/analysis';
 import StatusIcon from '@/components/StatusIcon';
-import BrandLogo from '@/components/BrandLogo';
+
 import ScamAnalysis from '@/components/ScamAnalysis';
 
 const AnalysisDetailPage: React.FC = () => {
@@ -18,12 +19,6 @@ const AnalysisDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (reportId) {
-      loadAnalysis();
-    }
-  }, [reportId]);
 
   const loadAnalysis = async () => {
     try {
@@ -36,14 +31,21 @@ const AnalysisDetailPage: React.FC = () => {
       if (response.success && response.analysis) {
         setAnalysis(response.analysis);
       } else {
-        setError(response.error || 'Analysis not found');
+        setError('Analysis not found');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      console.error('Failed to load analysis:', err);
+      setError('Failed to load analysis');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (reportId) {
+      loadAnalysis();
+    }
+  }, [reportId]);
 
   const submitFeedback = async (feedback: 'positive' | 'negative') => {
     if (!analysis) return;
@@ -78,18 +80,7 @@ const AnalysisDetailPage: React.FC = () => {
     }).format(new Date(date));
   };
 
-  const getClassificationColor = (classification: Classification) => {
-    switch (classification) {
-      case Classification.SAFE:
-        return 'text-green-400';
-      case Classification.SUSPICIOUS:
-        return 'text-yellow-400';
-      case Classification.HIGH_RISK:
-        return 'text-red-400';
-      default:
-        return 'text-gray-400';
-    }
-  };
+
 
   if (loading) {
     return (
@@ -121,9 +112,11 @@ const AnalysisDetailPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
-              <img 
+              <Image 
                 src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp" 
                 alt="Analysis Not Found" 
+                width={256}
+                height={192}
                 className="w-full h-full object-cover opacity-50"
               />
             </div>
@@ -244,10 +237,13 @@ const AnalysisDetailPage: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">Attached Image</label>
                 <div className="bg-gray-800 rounded-lg p-4">
-                  <img 
+                  <Image 
                     src={analysis.input.imageUrl} 
                     alt="Analysis input" 
+                    width={400}
+                    height={300}
                     className="max-w-full h-auto rounded-lg"
+                    style={{ objectFit: 'contain' }}
                   />
                 </div>
               </div>
@@ -319,10 +315,13 @@ const AnalysisDetailPage: React.FC = () => {
                     
                     {message.imageUrl && (
                       <div className="mt-3">
-                        <img 
+                        <Image 
                           src={message.imageUrl} 
                           alt="Message attachment" 
+                          width={400}
+                          height={300}
                           className="max-w-full h-auto rounded-lg"
+                          style={{ objectFit: 'contain' }}
                         />
                       </div>
                     )}

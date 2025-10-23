@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import Image from 'next/image';
 
 interface OnboardingFlowProps {
   lang?: 'en' | 'he';
@@ -30,9 +31,11 @@ const onboardingContent = {
         content: (
           <div className="text-center">
             <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
-              <img 
+              <Image 
                 src="/lion-digital-guardian/hero-banner/landing-visual_v1_16x9.webp" 
                 alt="Scam Hunter Guardian" 
+                width={256}
+                height={192}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -200,7 +203,7 @@ const onboardingContent = {
               </svg>
             </div>
             <p className="text-gray-300 leading-relaxed mb-6">
-              You're all set! Start by typing a message, uploading an image, or pasting a suspicious link 
+              You&apos;re all set! Start by typing a message, uploading an image, or pasting a suspicious link 
               in the chat interface. Scam Hunter will analyze it and provide you with detailed results.
             </p>
             <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4">
@@ -231,15 +234,17 @@ const onboardingContent = {
         content: (
           <div className="text-center">
             <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
-              <img 
+              <Image 
                 src="/lion-digital-guardian/hero-banner/landing-visual_v1_16x9.webp" 
                 alt="שומר צייד הרמאויות" 
+                width={256}
+                height={192}
                 className="w-full h-full object-cover"
               />
             </div>
             <p className="text-gray-300 leading-relaxed mb-4">
               צייד הרמאויות משתמש בבינה מלאכותית מתקדמת כדי לנתח תוכן חשוד ולהגן עליכם מפני רמאויות ברשת,
-              במיוחד כאלה המכוונות לתומכי ישראל וצה"ל.
+              במיוחד כאלה המכוונות לתומכי ישראל וצה&quot;ל.
             </p>
             <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4">
               <p className="text-blue-300 text-sm">
@@ -267,13 +272,20 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ lang = 'en', onComplete
   const content = onboardingContent[lang];
   const steps = content.steps;
 
+  const handleComplete = useCallback(() => {
+    setIsVisible(false);
+    // Store completion in localStorage
+    localStorage.setItem('scam-hunter-onboarding-completed', 'true');
+    onComplete();
+  }, [onComplete]);
+
   const handleNext = useCallback(() => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       handleComplete();
     }
-  }, [currentStep, steps.length]);
+  }, [currentStep, steps.length, handleComplete]);
 
   const handlePrevious = useCallback(() => {
     if (currentStep > 0) {
@@ -283,14 +295,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ lang = 'en', onComplete
 
   const handleSkip = useCallback(() => {
     handleComplete();
-  }, []);
-
-  const handleComplete = useCallback(() => {
-    setIsVisible(false);
-    // Store completion in localStorage
-    localStorage.setItem('scam-hunter-onboarding-completed', 'true');
-    onComplete();
-  }, [onComplete]);
+  }, [handleComplete]);
 
   // Check if onboarding was already completed
   useEffect(() => {

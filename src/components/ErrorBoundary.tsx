@@ -35,11 +35,14 @@ class ErrorBoundary extends Component<Props, State> {
     }
 
     // Log to external error tracking service (if available)
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'exception', {
-        description: error.toString(),
-        fatal: false,
-      });
+    if (typeof window !== 'undefined') {
+      const windowWithGtag = window as Window & { gtag?: (...args: unknown[]) => void };
+      if (windowWithGtag.gtag) {
+        windowWithGtag.gtag('event', 'exception', {
+          description: error.toString(),
+          fatal: false,
+        });
+      }
     }
 
     this.setState({ errorInfo });
@@ -72,7 +75,7 @@ class ErrorBoundary extends Component<Props, State> {
             
             <h2 className="text-xl font-bold text-white mb-2">Something went wrong</h2>
             <p className="text-gray-400 mb-6">
-              We encountered an unexpected error. This has been logged and we'll look into it.
+              We encountered an unexpected error. This has been logged and we&apos;ll look into it.
             </p>
             
             <div className="space-y-3">

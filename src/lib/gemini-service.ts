@@ -133,7 +133,7 @@ export const sendMessageToBot = async (chat: Chat, message: string): Promise<Gen
   return chat.sendMessage({ message });
 };
 
-export const groundedSearch = async (query: string): Promise<{ text: string; sources: any[] }> => {
+export const groundedSearch = async (query: string): Promise<{ text: string; sources: unknown[] }> => {
   const ai = getGeminiClient();
   
   const response = await ai.models.generateContent({

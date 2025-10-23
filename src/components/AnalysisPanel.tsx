@@ -6,8 +6,7 @@ import {
   downloadTextReport, 
   downloadJSONReport, 
   copyToClipboard, 
-  shareAnalysis, 
-  generateSocialSummary,
+  shareAnalysis,
   validateSharingPrivacy,
   ExportOptions
 } from '@/lib/exportUtils';
@@ -111,7 +110,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
         feedbackType: type,
       });
       alert(t.feedbackThanks);
-    } catch (error) {
+    } catch {
       alert(t.feedbackError);
     }
   }, [analysis.metadata.timestamp, t.feedbackThanks, t.feedbackError]);

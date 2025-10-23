@@ -85,7 +85,7 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
   }, [finalConfig.websocketUrl, finalConfig.retryAttempts]);
 
   // Handle WebSocket messages
-  const handleWebSocketMessage = useCallback((data: any) => {
+  const handleWebSocketMessage = useCallback((data: { type: string; content?: string; analysis?: FullAnalysisResult; error?: string; progress?: number; message?: string; result?: FullAnalysisResult }) => {
     switch (data.type) {
       case 'analysis_started':
         setIsLoading(true);
@@ -99,13 +99,15 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
 
       case 'analysis_complete':
         setIsLoading(false);
-        setCurrentAnalysis(data.result);
+        setCurrentAnalysis(data.result || null);
         
         // Add AI response message
-        addMessage({
-          role: 'assistant',
-          content: data.result.summary
-        });
+        if (data.result) {
+          addMessage({
+            role: 'assistant',
+            content: data.result.summary
+          });
+        }
         break;
 
       case 'analysis_error':

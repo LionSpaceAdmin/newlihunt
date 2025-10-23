@@ -112,7 +112,7 @@ export function generateJSONReport(
 ): string {
   const { includeConversation = false, includeTimestamp = true, privacy = 'anonymized' } = options;
   
-  const report: any = {
+  const report: Record<string, unknown> = {
     platform: 'Scam Hunter',
     version: '1.0',
     analysis: {

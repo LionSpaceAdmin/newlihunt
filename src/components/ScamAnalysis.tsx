@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import Image from 'next/image';
 // Remove direct gemini import - we'll use AWS API Gateway instead
 import { FullAnalysisResult, Message } from '@/types/analysis';
 import { fileToBase64, validateImageFile } from '@/utils/helpers';
@@ -153,9 +154,11 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({ lang = 'en', analysis = nul
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 rounded-lg overflow-hidden">
-              <img 
+              <Image 
                 src="/lion-digital-guardian/report-card/analysis-dashboard_v1_16x9.webp" 
                 alt="Analysis Report" 
+                width={64}
+                height={64}
                 className="w-full h-full object-cover"
               />
             </div>

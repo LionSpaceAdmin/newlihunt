@@ -13,13 +13,7 @@ interface AnalyzeRequest {
   }>;
 }
 
-// Helper function to get client IP
-function getClientIP(request: NextRequest): string {
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  const realIp = request.headers.get('x-real-ip');
-  const ip = forwardedFor?.split(',')[0] || realIp || 'unknown';
-  return ip.trim();
-}
+
 
 // Simple input sanitization
 function sanitizeText(text: string, maxLength: number = 10000): string {
@@ -48,8 +42,7 @@ async function handlePOST(request: NextRequest) {
       message, 
       imageBase64, 
       imageMimeType, 
-      imageUrl,
-      conversationHistory 
+      imageUrl 
     }: AnalyzeRequest = body;
 
     // Validate input

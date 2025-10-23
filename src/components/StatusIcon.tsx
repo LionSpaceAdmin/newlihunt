@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Classification } from '@/types/analysis';
 
 interface StatusIconProps {
@@ -34,9 +35,11 @@ const StatusIcon: React.FC<StatusIconProps> = ({
 
   return (
     <div className={`${sizeClasses[size]} rounded-lg overflow-hidden ${className}`}>
-      <img 
+      <Image 
         src={getStatusImage()} 
         alt={`Status: ${classification}`} 
+        width={64}
+        height={64}
         className="w-full h-full object-cover"
       />
     </div>

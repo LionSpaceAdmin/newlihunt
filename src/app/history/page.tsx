@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getHistoryService } from '@/lib/history-service';
 import { StoredAnalysis } from '@/lib/storage/types';
 import { Classification } from '@/types/analysis';
@@ -169,9 +170,11 @@ const HistoryPage: React.FC = () => {
         {filteredHistory.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
-              <img 
+              <Image 
                 src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp" 
                 alt="No History" 
+                width={256}
+                height={192}
                 className="w-full h-full object-cover opacity-50"
               />
             </div>

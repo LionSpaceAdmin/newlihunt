@@ -130,7 +130,7 @@ const config: Config = {
   },
   plugins: [
     // Custom plugin for component utilities
-    function({ addUtilities, theme }: any) {
+    function({ addUtilities, theme }: { addUtilities: Function; theme: Function }) {
       const newUtilities = {
         // Glass morphism effect
         '.glass': {

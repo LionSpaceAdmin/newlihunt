@@ -5,10 +5,10 @@ import { InputSanitizer, SecurityLogger } from '@/lib/middleware/security';
 
 async function handleGET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       const ip = getClientIP(request);
@@ -78,10 +78,10 @@ async function handleGET(
 
 async function handlePATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { feedback }: { feedback: 'positive' | 'negative' } = body;
 

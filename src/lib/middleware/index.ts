@@ -25,11 +25,11 @@ export class MiddlewareComposer {
 }
 
 // Helper function to create API route middleware
-export function withMiddleware(
-  handler: (request: NextRequest, ...args: any[]) => Promise<NextResponse>,
+export function withMiddleware<T extends unknown[]>(
+  handler: (request: NextRequest, ...args: T) => Promise<NextResponse>,
   middlewares: MiddlewareFunction[] = []
 ) {
-  return async (request: NextRequest, ...args: any[]): Promise<NextResponse> => {
+  return async (request: NextRequest, ...args: T): Promise<NextResponse> => {
     const composer = new MiddlewareComposer();
     
     // Add provided middlewares
@@ -128,7 +128,7 @@ export function createRateLimitedMiddleware(rateLimiter: RateLimiter): Middlewar
 }
 
 // Helper function to create security middleware
-export function createSecurityMiddleware(config?: any): MiddlewareFunction {
+export function createSecurityMiddleware(config?: Record<string, unknown>): MiddlewareFunction {
   const securityMiddleware = new SecurityMiddleware(config);
   return securityMiddleware.createMiddleware();
 }
