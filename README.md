@@ -29,7 +29,7 @@ An AI-powered platform for detecting online impersonation scams targeting suppor
 - **AI**: Google Gemini 2.5 Pro + 2.5 Flash (@google/genai)
 - **Storage**: Memory Provider (dev) / DynamoDB Provider (prod-ready)
 - **Testing**: Jest, React Testing Library
-- **Code Quality**: ESLint, Prettier, Husky, lint-staged
+- **Code Quality**: ESLint v9, Prettier, Husky, lint-staged
 - **Deployment**: Vercel Edge Network
 
 ## 📋 Prerequisites
