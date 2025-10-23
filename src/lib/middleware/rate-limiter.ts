@@ -40,7 +40,7 @@ export class RateLimiter {
     };
   }
 
-  private defaultKeyGenerator(request: NextRequest): string {
+  private defaultKeyGenerator = (request: NextRequest): string => {
     // Use IP address as default key
     const forwardedFor = request.headers.get('x-forwarded-for');
     const realIp = request.headers.get('x-real-ip');

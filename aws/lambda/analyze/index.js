@@ -1,27 +1,26 @@
 const GeminiClient = require('./gemini-client');
 const { SAFE_DONATION_CHANNELS } = require('./risk-signals');
-const { withRateLimit, analysisRateLimiter } = require('../shared/rate-limiter');
-const { withSecurity, defaultSecurityMiddleware, LambdaInputSanitizer } = require('../shared/security');
 const https = require('https');
 const http = require('http');
 
-// Enhanced input validation and sanitization
+// Simple input validation and sanitization
 const validateAndSanitizeInput = (input) => {
     if (!input || typeof input !== 'string') {
         throw new Error('Invalid input: must be a non-empty string');
     }
     
-    // Check for malicious patterns
-    if (LambdaInputSanitizer.detectSQLInjection(input)) {
-        throw new Error('Potential SQL injection detected');
+    if (input.length > 10000) {
+        throw new Error('Input too long: maximum 10000 characters allowed');
     }
     
-    if (LambdaInputSanitizer.detectXSS(input)) {
-        throw new Error('Potential XSS attack detected');
-    }
-    
-    // Use enhanced sanitization
-    return LambdaInputSanitizer.sanitizeText(input, 10000);
+    // Basic sanitization - remove potentially dangerous patterns
+    const sanitized = input
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+\s*=/gi, '')
+        .trim();
+        
+    return sanitized;
 };
 
 // Fetch image from URL and convert to base64
@@ -135,19 +134,12 @@ const handler = async (event) => {
             throw new Error('GEMINI_API_KEY not configured');
         }
 
-        // Parse and validate request body with enhanced security
+        // Parse and validate request body
         let requestBody;
         try {
-            requestBody = LambdaInputSanitizer.validateJSON(event.body || '{}');
+            requestBody = JSON.parse(event.body || '{}');
         } catch (parseError) {
-            // Log security event
-            await defaultSecurityMiddleware.logSecurityEvent(
-                event,
-                'invalid_input',
-                'medium',
-                `JSON parsing failed: ${parseError.message}`,
-                { body: event.body?.substring(0, 200) }
-            );
+            console.log('JSON parsing failed:', parseError.message);
             
             return {
                 statusCode: 400,

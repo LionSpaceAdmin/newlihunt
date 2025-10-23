@@ -12,7 +12,7 @@ interface AnalysisConfig {
 }
 
 const DEFAULT_CONFIG: AnalysisConfig = {
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://bp0rqw2q34.execute-api.us-east-1.amazonaws.com/production',
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || '/api',
   websocketUrl: undefined, // Disable WebSocket for now
   timeout: 30000, // 30 seconds
   retryAttempts: 3
