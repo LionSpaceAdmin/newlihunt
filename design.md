@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Scam Hunt Platform is a React web application with complete separation of concerns: frontend deployed on Vercel for optimal edge performance, and backend infrastructure entirely on AWS for scalability and security. The system features a conversational AI interface powered by Google Gemini for real-time scam analysis, with AWS Lambda functions handling all backend logic, AWS API Gateway managing API routing, and comprehensive AWS services for data storage, file handling, and global content delivery.
+The Scam Hunt Platform is a React web application with a hybrid architecture: frontend and AI processing deployed on Vercel for optimal performance, with AWS providing backend infrastructure for data storage. The system features a conversational AI interface powered by Google Gemini for real-time scam analysis, with Next.js API routes handling all AI processing and AWS services providing scalable data storage and file handling.
 
 ## Architecture
 
@@ -10,38 +10,32 @@ The Scam Hunt Platform is a React web application with complete separation of co
 
 ```mermaid
 graph TB
-    Client[React Client - Vercel] --> CloudFront[AWS CloudFront CDN]
-    CloudFront --> APIGateway[AWS API Gateway]
-    APIGateway --> Lambda[AWS Lambda Functions]
-    Lambda --> Gemini[Google Gemini API]
-    Lambda --> DynamoDB[AWS DynamoDB]
-    Lambda --> S3[AWS S3 Storage]
+    Client[React Client] --> Vercel[Vercel Platform]
+    Vercel --> NextAPI[Next.js API Routes]
+    NextAPI --> Gemini[Google Gemini API]
+    NextAPI --> AWS[AWS Services]
     
-    subgraph "Frontend Layer (Vercel)"
-        Client --> ChatInterface[Chat Interface]
-        Client --> AnalysisPanel[Analysis Panel]
-        Client --> HistoryPage[History Page]
+    subgraph "Vercel Deployment"
+        Vercel --> Frontend[React Frontend]
+        Vercel --> APIRoutes[API Routes]
+        APIRoutes --> AnalyzeAPI[/api/analyze]
+        APIRoutes --> HistoryAPI[/api/history]
+        APIRoutes --> URLInspectorAPI[/api/url-inspector]
     end
     
-    subgraph "AWS API Gateway Routes"
-        APIGateway --> AnalyzeAPI[POST /analyze]
-        APIGateway --> HistoryAPI[GET/POST /history]
-        APIGateway --> UploadAPI[POST /upload]
-        APIGateway --> URLInspectorAPI[POST /url-inspector]
+    subgraph "AI Processing (Vercel)"
+        AnalyzeAPI --> GeminiClient[Gemini Client]
+        URLInspectorAPI --> URLAnalysis[URL Analysis]
+        GeminiClient --> AIPrompts[AI Prompts]
+        GeminiClient --> ResponseParser[Response Parser]
     end
     
-    subgraph "AWS Lambda Functions"
-        Lambda --> AnalyzeLambda[analyze-function]
-        Lambda --> HistoryLambda[history-function]
-        Lambda --> UploadLambda[upload-function]
-        Lambda --> URLLambda[url-inspector-function]
-    end
-    
-    subgraph "AI Module (Lambda Layer)"
-        AnalyzeLambda --> Prompt[prompt.js]
-        AnalyzeLambda --> GeminiClient[gemini.js]
-        AnalyzeLambda --> Parser[parser.js]
-        AnalyzeLambda --> Signals[signals.js]
+    subgraph "AWS Backend"
+        AWS --> DynamoDB[DynamoDB Tables]
+        AWS --> S3[S3 Storage]
+        DynamoDB --> AnalysisTable[Analysis History]
+        DynamoDB --> SessionsTable[User Sessions]
+        S3 --> ImageStorage[Image Storage]
     end
 ```
 
@@ -54,19 +48,17 @@ graph TB
 - **Package Manager**: pnpm for efficient dependency management
 - **Deployment**: Vercel with edge optimization and global CDN
 
-**Backend (AWS Infrastructure):**
-- **Compute**: AWS Lambda functions with Node.js 20 runtime
-- **API Management**: AWS API Gateway with REST API and WebSocket support
+**Backend (Hybrid Vercel + AWS):**
+- **API Layer**: Next.js API Routes on Vercel Edge Functions
 - **Database**: AWS DynamoDB with on-demand scaling
-- **File Storage**: AWS S3 with CloudFront integration
-- **CDN**: AWS CloudFront for global content delivery
-- **Authentication**: AWS Cognito for future user management
-- **Monitoring**: AWS CloudWatch for logging and metrics
+- **File Storage**: AWS S3 for image uploads
+- **Monitoring**: Vercel Analytics + AWS CloudWatch
+- **CDN**: Vercel Edge Network for global distribution
 
 **AI Integration:**
 - **AI Model**: Google Gemini 2.5 Pro via @google/genai SDK
-- **Processing**: Server-side AI processing in Lambda functions
-- **Streaming**: WebSocket connections for real-time AI responses
+- **Processing**: Server-side AI processing in Next.js API Routes
+- **URL Analysis**: Built-in Next.js functionality for URL inspection
 
 ## Components and Interfaces
 

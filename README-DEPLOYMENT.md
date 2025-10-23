@@ -1,12 +1,17 @@
 # הוראות דפלוי ל-Vercel
 
-## דפלוי הפרונט-אנד ב-Vercel
+## דפלוי האפליקציה ב-Vercel
+
+### ארכיטקטורה נוכחית:
+- **Vercel**: Frontend + AI + API Routes
+- **AWS**: Backend Infrastructure (DynamoDB, S3)
 
 ### שלב 1: הכנת הפרויקט
 הפרויקט מוכן לדפלוי עם הגדרות הבאות:
-- ✅ GEMINI_API_KEY מוגדר ב-.env.production
+- ✅ GEMINI_API_KEY מוגדר ב-Vercel
 - ✅ vercel.json מוגדר עם כל ההגדרות הנדרשות
 - ✅ הפרויקט עובר build בהצלחה
+- ✅ כל ה-API routes עובדים מקומית
 
 ### שלב 2: דפלוי ב-Vercel
 
@@ -45,8 +50,9 @@ vercel --prod
 
 ### שלב 4: בדיקת הדפלוי
 לאחר הדפלוי, בדוק:
-- ✅ האתר נטען בהצלחה
-- ✅ ניתוח הודעות עובד (API route: /api/history)
+- ✅ האתר נטען בהצלחה ב-https://lionsofzion.io
+- ✅ ניתוח הודעות עובד (API route: /api/analyze)
+- ✅ שמירת היסטוריה עובדת (API route: /api/history)
 - ✅ בדיקת URLs עובדת (API route: /api/url-inspector)
 - ✅ ה-GEMINI_API_KEY עובד (בדוק בקונסול שאין שגיאות authentication)
 
@@ -61,6 +67,8 @@ vercel --prod
 3. **שגיאות API**: בדוק את הלוגים ב-Vercel Dashboard > Functions
 
 ### הערות חשובות:
-- המפתח `AIzaSyDzGQQ-Nd1QZUbIAIOWHFyz9PT88cjjGtk` מוגדר בכל הקבצים הרלוונטיים
+- המפתח החדש מוגדר ב-Vercel environment variables
 - הפרויקט מוכן לדפלוי מיידי ב-Vercel
 - כל ה-API routes יעבדו אוטומטית כ-Vercel Functions
+- AWS Lambda functions הוסרו למניעת כפילות
+- URL inspection מתבצע ישירות ב-Next.js API routes

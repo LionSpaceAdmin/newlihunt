@@ -1,36 +1,137 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scam Hunt Platform
 
-## Getting Started
+An AI-powered platform for detecting online impersonation scams targeting supporters of Israel and the IDF.
 
-First, run the development server:
+## 🏗️ Architecture
 
+**Hybrid Deployment:**
+- **Frontend & AI**: Deployed on Vercel with Next.js API Routes
+- **Backend Infrastructure**: AWS (DynamoDB, S3)
+
+## 🚀 Features
+
+- **AI-Powered Analysis**: Google Gemini 2.5 Pro for scam detection
+- **URL Inspection**: Safe URL analysis without visiting suspicious sites
+- **Image Analysis**: Screenshot analysis for social media scams
+- **History Tracking**: Save and review past analyses
+- **Real-time Chat**: Conversational interface for analysis
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
+- **AI**: Google Gemini API (@google/genai)
+- **Backend**: AWS DynamoDB, S3
+- **Deployment**: Vercel (Frontend + API), AWS (Data)
+
+## 📋 Prerequisites
+
+- Node.js 18+
+- Google Gemini API Key
+- AWS Account (for data storage)
+
+## 🚀 Getting Started
+
+### 1. Clone and Install
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository>
+cd scam-hunt-platform
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Environment Setup
+```bash
+cp .env.local.example .env.local
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Edit `.env.local`:
+```bash
+GEMINI_API_KEY=your_gemini_api_key_here
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Run Development Server
+```bash
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) to see the application.
 
-To learn more about Next.js, take a look at the following resources:
+## 📁 Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/                 # Next.js App Router
+│   ├── api/            # API Routes (Vercel Functions)
+│   │   ├── analyze/    # AI analysis endpoint
+│   │   ├── history/    # Analysis history
+│   │   └── url-inspector/ # URL inspection
+│   └── page.tsx        # Main application page
+├── components/         # React components
+├── hooks/             # Custom React hooks
+├── lib/               # Utilities and services
+│   ├── gemini-service.ts # Gemini AI integration
+│   └── middleware/    # API middleware
+└── types/             # TypeScript definitions
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔧 API Endpoints
 
-## Deploy on Vercel
+- `POST /api/analyze` - AI-powered scam analysis
+- `GET/POST /api/history` - Analysis history management
+- `POST /api/url-inspector` - Safe URL inspection
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Vercel Deployment
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+### Environment Variables (Vercel)
+- `GEMINI_API_KEY`: Your Google Gemini API key
+- `ENVIRONMENT`: production
+
+## 📚 Documentation
+
+- [Deployment Guide](./README-DEPLOYMENT.md) - Detailed deployment instructions
+- [AWS Setup](./AWS_DEPLOYMENT.md) - AWS infrastructure setup
+- [Design Document](./design.md) - Architecture and design decisions
+
+## 🧪 Testing
+
+```bash
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+## 🔒 Security
+
+- Input sanitization and validation
+- Rate limiting on API endpoints
+- Secure environment variable handling
+- Safe URL inspection without direct access
+
+## 📈 Performance
+
+- Vercel Edge Functions for global distribution
+- Optimized AI prompts for faster responses
+- Efficient image processing
+- Client-side caching
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is private and proprietary.

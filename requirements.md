@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Scam Hunt is an AI-powered security platform designed to identify and neutralize online impersonation scams targeting supporters of Israel and the IDF. The system provides rapid, context-aware analysis through a conversational interface powered by Google Gemini AI, educates users on evolving scam tactics, and guides them toward verified donation channels. The platform utilizes a complete AWS infrastructure for backend services while maintaining frontend deployment through Vercel for optimal performance and scalability.
+The Scam Hunt is an AI-powered security platform designed to identify and neutralize online impersonation scams targeting supporters of Israel and the IDF. The system provides rapid, context-aware analysis through a conversational interface powered by Google Gemini AI, educates users on evolving scam tactics, and guides them toward verified donation channels. The platform utilizes a hybrid architecture with Vercel handling frontend deployment and AI processing, while AWS provides backend infrastructure for data storage and file handling.
 
 ## Glossary
 
@@ -12,13 +12,11 @@ The Scam Hunt is an AI-powered security platform designed to identify and neutra
 - **Chat Interface**: The conversational user interface component for user interactions
 - **Analysis Panel**: The visualization component that displays structured analysis results
 - **Multimodal Input**: System capability to process both text and image inputs
-- **AWS Infrastructure**: Complete backend infrastructure including DynamoDB for data persistence, S3 for file storage, Lambda for serverless functions, API Gateway for API management, and CloudFront for content delivery
+- **AWS Infrastructure**: Backend infrastructure including DynamoDB for data persistence and S3 for file storage
 - **AWS DynamoDB**: NoSQL database service for persisting user analysis history, user sessions, and application data
 - **AWS S3**: Object storage service for uploaded images and static assets
-- **AWS Lambda**: Serverless compute service for backend processing and API logic
-- **AWS API Gateway**: Managed API service for routing and authentication
-- **AWS CloudFront**: Content delivery network for global performance optimization
-- **Vercel Frontend**: Frontend deployment platform for React application with edge optimization
+- **Vercel Platform**: Complete deployment platform for React application with Next.js API Routes and edge optimization
+- **Next.js API Routes**: Server-side API endpoints running on Vercel for AI processing and data management
 - **Google Gemini AI**: Advanced AI model integration for intelligent scam analysis and user interaction
 
 ## Requirements
@@ -84,17 +82,17 @@ The Scam Hunt is an AI-powered security platform designed to identify and neutra
 
 ### Requirement 6
 
-**User Story:** As a system administrator, I want secure and scalable AWS backend architecture with Vercel frontend deployment, so that the platform can handle high traffic while protecting sensitive data and providing optimal global performance.
+**User Story:** As a system administrator, I want secure and scalable hybrid architecture with Vercel handling AI processing and AWS providing data infrastructure, so that the platform can handle high traffic while protecting sensitive data and providing optimal global performance.
 
 #### Acceptance Criteria
 
-1. THE Scam Hunt Platform SHALL implement all backend API endpoints using AWS Lambda functions with API Gateway for routing and management
-2. THE AI Analysis Engine SHALL keep all API keys and sensitive logic in AWS Lambda functions, never exposing them to clients
-3. THE Scam Hunt Platform SHALL implement rate limiting using AWS API Gateway throttling and custom Lambda authorizers to prevent abuse
-4. WHEN handling file uploads, THE Scam Hunt Platform SHALL stream files directly to AWS S3 using pre-signed URLs without storing locally
-5. THE Scam Hunt Platform SHALL validate and sanitize all inputs in AWS Lambda functions before processing through safety filters
-6. THE Scam Hunt Platform SHALL deploy the frontend React application through Vercel with edge optimization and CDN integration
-7. THE Scam Hunt Platform SHALL use AWS CloudFront for global content delivery and caching of static assets
+1. THE Scam Hunt Platform SHALL implement all API endpoints using Next.js API Routes on Vercel for optimal performance and global distribution
+2. THE AI Analysis Engine SHALL keep all API keys and sensitive logic in server-side API routes, never exposing them to clients
+3. THE Scam Hunt Platform SHALL implement rate limiting using middleware in Next.js API Routes to prevent abuse
+4. WHEN handling file uploads, THE Scam Hunt Platform SHALL process files through Next.js API Routes and store in AWS S3
+5. THE Scam Hunt Platform SHALL validate and sanitize all inputs in API routes before processing through safety filters
+6. THE Scam Hunt Platform SHALL deploy the complete application through Vercel with edge optimization and global CDN
+7. THE Scam Hunt Platform SHALL use AWS DynamoDB and S3 for persistent data storage while maintaining fast access
 
 ### Requirement 7
 

@@ -1,8 +1,6 @@
 const https = require('https');
 const http = require('http');
 const { URL } = require('url');
-const { withRateLimit, urlInspectorRateLimiter } = require('../shared/rate-limiter');
-const { withSecurity, defaultSecurityMiddleware, LambdaInputSanitizer } = require('../shared/security');
 
 const handler = async (event) => {
     const headers = {
@@ -143,11 +141,8 @@ const handler = async (event) => {
     }
 };
 
-// Export handler with security and rate limiting middleware
-exports.handler = withSecurity(
-    defaultSecurityMiddleware,
-    withRateLimit(urlInspectorRateLimiter, handler)
-);
+// Export handler directly
+exports.handler = handler;
 
 function fetchUrlContent(url) {
     return new Promise((resolve, reject) => {

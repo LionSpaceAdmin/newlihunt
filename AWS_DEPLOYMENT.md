@@ -1,17 +1,23 @@
 # AWS Deployment Guide for Scam Hunt Platform
 
-This guide will help you deploy the Scam Hunt Platform to AWS using either Terraform or CloudFormation.
+This guide will help you deploy the Scam Hunt Platform backend infrastructure to AWS.
 
 ## 🏗️ Architecture Overview
 
-The platform uses the following AWS services:
+The platform uses a hybrid architecture:
 
-- **API Gateway**: RESTful API endpoints
-- **Lambda Functions**: Serverless compute for analysis and URL inspection
+### **Frontend & AI (Vercel)**
+- **Next.js Application**: Deployed on Vercel
+- **Gemini AI Integration**: Direct API calls from Next.js API routes
+- **URL Inspection**: Built-in Next.js functionality
+
+### **Backend Infrastructure (AWS)**
 - **DynamoDB**: NoSQL database for analysis history and user sessions
 - **S3**: Object storage for uploaded images
 - **IAM**: Identity and access management
 - **CloudWatch**: Logging and monitoring
+
+**Note**: Lambda functions for AI analysis have been removed to avoid duplication with Vercel deployment.
 
 ## 📋 Prerequisites
 
@@ -68,27 +74,9 @@ cd scam-hunt-platform/scripts
 
 ## 📁 Infrastructure Components
 
-### Lambda Functions
+### Infrastructure Components
 
-#### Analyze Function
-- **Purpose**: Main AI analysis using Gemini API
-- **Runtime**: Node.js 18.x
-- **Memory**: 512 MB
-- **Timeout**: 30 seconds
-- **Environment Variables**:
-  - `DYNAMODB_ANALYSIS_TABLE`: Analysis history table name
-  - `DYNAMODB_SESSIONS_TABLE`: User sessions table name
-  - `S3_UPLOADS_BUCKET`: Uploads bucket name
-  - `GEMINI_API_KEY`: API key for Gemini
-  - `ENVIRONMENT`: Deployment environment
-
-#### URL Inspector Function
-- **Purpose**: Safe URL content analysis
-- **Runtime**: Node.js 18.x
-- **Memory**: 256 MB
-- **Timeout**: 15 seconds
-- **Environment Variables**:
-  - `ENVIRONMENT`: Deployment environment
+**Note**: Lambda functions have been removed from the AWS deployment. All AI processing and URL inspection is now handled by Next.js API routes on Vercel for better performance and simpler architecture.
 
 ### DynamoDB Tables
 
@@ -111,35 +99,30 @@ cd scam-hunt-platform/scripts
 - **CORS**: Configured for web access
 
 ### API Gateway
-- **Type**: REST API
-- **Endpoints**:
-  - `POST /analyze`: Main analysis endpoint
-  - `POST /url-inspector`: URL inspection endpoint
-  - `OPTIONS /*`: CORS preflight handling
+**Status**: Removed - No longer needed as all API endpoints are handled by Next.js on Vercel
 
 ## 🔧 Configuration
 
 ### Environment Variables
 
-After deployment, update your frontend `.env.production` file:
+After AWS deployment, update your Vercel environment variables:
 
 ```bash
-# AWS Configuration
+# Gemini AI Configuration (Primary)
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# AWS Configuration (Backend only)
 AWS_REGION=us-east-1
-AWS_API_GATEWAY_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/production
 AWS_S3_UPLOADS_BUCKET=scam-hunt-platform-uploads-production
 AWS_DYNAMODB_ANALYSIS_TABLE=scam-hunt-platform-analysis-history-production
 AWS_DYNAMODB_SESSIONS_TABLE=scam-hunt-platform-user-sessions-production
 
-# API Endpoints
-NEXT_PUBLIC_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/production
-AWS_ANALYZE_ENDPOINT=https://your-api-id.execute-api.us-east-1.amazonaws.com/production/analyze
-AWS_URL_INSPECTOR_ENDPOINT=https://your-api-id.execute-api.us-east-1.amazonaws.com/production/url-inspector
-
 # Application Configuration
-NEXT_PUBLIC_APP_URL=https://scamhunt.ai
+NEXT_PUBLIC_APP_URL=https://lionsofzion.io
 ENVIRONMENT=production
 ```
+
+**Note**: No API Gateway URLs needed as all API calls are handled by Next.js API routes.
 
 ### Frontend Deployment
 

@@ -1,9 +1,9 @@
 # Implementation Plan
 
-- [x] 1. Project Foundation and AWS Infrastructure Setup
-  - Initialize React project with Next.js, TypeScript, Tailwind CSS v4, and pnpm for frontend
-  - Set up complete AWS backend infrastructure with Lambda, API Gateway, DynamoDB, and S3
-  - Configure Vercel deployment for frontend and AWS deployment pipeline for backend
+- [x] 1. Project Foundation and Hybrid Architecture Setup
+  - Initialize React project with Next.js, TypeScript, Tailwind CSS v4 for frontend
+  - Set up hybrid architecture: Vercel for frontend + AI, AWS for data storage
+  - Configure Vercel deployment with Next.js API Routes and AWS integration
   - _Requirements: 6.1, 6.6, 6.7_
 
 - [x] 1.1 Initialize frontend React project with Next.js
@@ -12,12 +12,12 @@
   - Set up Vercel deployment configuration with environment variables for API endpoints
   - _Requirements: 6.6_
 
-- [x] 1.2 Set up AWS backend infrastructure foundation
-  - Create AWS Lambda functions for analyze, history, upload, and url-inspector endpoints
-  - Configure AWS API Gateway with REST API routes, CORS settings, and rate limiting
+- [x] 1.2 Set up AWS data infrastructure
+  - ~~Create AWS Lambda functions~~ (Moved to Next.js API Routes)
+  - ~~Configure AWS API Gateway~~ (Replaced with Next.js API Routes)
   - Set up AWS DynamoDB tables for analysis history and user sessions with proper indexing
-  - Configure AWS S3 bucket for image uploads with CloudFront integration
-  - _Requirements: 6.1, 6.3, 6.4, 6.7_
+  - Configure AWS S3 bucket for image uploads
+  - _Requirements: 6.1, 6.4_
 
 - [x] 1.3 Configure AWS deployment and monitoring
   - Set up AWS SAM or CDK for infrastructure as code deployment
@@ -31,28 +31,28 @@
   - Set up error handling utilities and standardized response formatting
   - _Requirements: 1.5, 6.3, 6.5_
 
-- [x] 2. AWS Lambda AI Analysis Engine Implementation
-  - Build the AI analysis Lambda function with Google Gemini integration
-  - Implement streaming responses through API Gateway WebSocket connections
+- [x] 2. Next.js API Routes AI Analysis Engine Implementation
+  - Build AI analysis API routes with Google Gemini integration
+  - Implement direct responses through Next.js API Routes
   - Create the dual-score analysis framework with structured JSON output
   - _Requirements: 1.1, 2.1, 2.4_
 
-- [x] 2.1 Create AI analysis Lambda function foundation
-  - Implement AWS Lambda function with comprehensive system instructions for Scam Hunter persona
+- [x] 2.1 Create AI analysis API route foundation
+  - Implement Next.js API route with comprehensive system instructions for Scam Hunter persona
   - Define the dual-score framework requirements and false positive mitigation strategies
-  - Create risk detection rules and scoring system within Lambda function
+  - Create risk detection rules and scoring system within Gemini service
   - _Requirements: 2.1, 2.4, 2.5_
 
-- [x] 2.2 Implement Gemini API integration in Lambda
-  - Create Gemini API client within Lambda function with multimodal input support
+- [x] 2.2 Implement Gemini API integration in Next.js
+  - Create Gemini API client within Next.js service with multimodal input support
   - Implement server-side image processing with base64 conversion for security
-  - Add JSON extraction and parsing logic for AI text streams
+  - Add JSON extraction and parsing logic for AI responses
   - _Requirements: 1.1, 1.3, 6.2_
 
-- [x] 2.3 Build analysis API Gateway endpoint
-  - Configure API Gateway route for analysis requests with proper CORS and validation
-  - Implement WebSocket connection for streaming responses and real-time feedback
-  - Integrate Lambda function with API Gateway for complete analysis pipeline
+- [x] 2.3 Build analysis Next.js API endpoint
+  - Configure Next.js API route for analysis requests with proper CORS and validation
+  - Implement direct response handling for real-time feedback
+  - Integrate Gemini service with API route for complete analysis pipeline
   - _Requirements: 1.1, 1.4, 6.3_
 
 - [x] 2.4 Create unit tests for AI module components
@@ -73,9 +73,9 @@
   - Add quick action buttons for common analysis types and user convenience
   - _Requirements: 1.3, 5.3, 5.4_
 
-- [x] 3.2 Implement useScamAnalysis custom hook for AWS integration
-  - Create hook for managing conversation state, message history, and AWS API Gateway interactions
-  - Handle WebSocket streaming responses from AWS API Gateway with proper error handling
+- [x] 3.2 Implement useScamAnalysis custom hook for API integration
+  - Create hook for managing conversation state, message history, and Next.js API interactions
+  - Handle direct responses from Next.js API routes with proper error handling
   - Implement JSON parsing for final analysis results and state updates
   - _Requirements: 1.1, 1.4, 2.3_
 
@@ -217,7 +217,7 @@
   - Create comprehensive error handling and user guidance
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 8.1 Build URL inspection feature
+- [x] 8.1 Build URL inspection feature
   - Create /api/url-inspector endpoint for safe URL content scraping
   - Implement URL validation and content summarization for analysis
   - Add URL inspection integration to ChatInterface with safety warnings

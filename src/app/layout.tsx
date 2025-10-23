@@ -25,14 +25,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Scam Hunter - AI-Powered Scam Detection",
     description: "Advanced AI platform for detecting online impersonation scams",
-    images: ["/lion-digital-guardian/social-card/social-share_v1_16x9.webp"],
+    images: ["/og-image.png"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Scam Hunter - AI-Powered Scam Detection",
     description: "Advanced AI platform for detecting online impersonation scams",
-    images: ["/lion-digital-guardian/social-card/social-share_v1_16x9.webp"],
+    images: ["/og-image.png"],
   },
 };
 
