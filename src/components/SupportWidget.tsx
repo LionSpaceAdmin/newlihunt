@@ -15,6 +15,7 @@ const textContent = {
     generalSupport: 'General Support',
     fidfSupport: 'Support FIDF',
     closeButton: 'Close',
+    supportProject: 'Support the Project',
   },
   he: {
     title: 'תמכו במשימה שלנו',
@@ -24,6 +25,7 @@ const textContent = {
     generalSupport: 'תמיכה כללית',
     fidfSupport: 'תמכו ב-FIDF',
     closeButton: 'סגור',
+    supportProject: 'לתמיכה בפרויקט',
   },
 };
 
@@ -77,10 +79,20 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 w-14 h-14 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 transition-all duration-200 hover:scale-110 z-40 flex items-center justify-center"
+        className="fixed top-6 left-6 flex flex-col items-center gap-2 group z-40"
         title={content.title}
       >
-        <span className="text-2xl">🦁</span>
+        <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 ring-2 ring-red-500 hover:ring-red-400">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/lion-digital-guardian/app-icon/68512281-D399-4756-9206-67C2C2E83BB0.webp"
+            alt="Support"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <span className="text-xs font-medium text-gray-300 group-hover:text-white transition-colors bg-black/50 px-2 py-1 rounded backdrop-blur-sm">
+          {content.supportProject}
+        </span>
       </button>
     );
   }
