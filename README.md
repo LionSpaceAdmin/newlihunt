@@ -1,19 +1,19 @@
 # 🦁 Scam Hunt Platform
 
-An AI-powered platform for detecting online impersonation scams targeting supporters of Israel and the IDF. Built with Next.js 16 and Google Gemini 2.0 Flash.
+An AI-powered platform for detecting online impersonation scams targeting supporters of Israel and the IDF. Built with Next.js 16 and Google Gemini 2.5 Pro/Flash.
 
 ## 🏗️ Architecture
 
 **Modern Serverless Stack:**
 
 - **Frontend**: Next.js 16 with React 19 on Vercel
-- **AI Engine**: Google Gemini 2.0 Flash (Experimental)
+- **AI Engine**: Google Gemini 2.5 Pro (analysis) + 2.5 Flash (chat)
 - **Storage**: In-memory (development) / DynamoDB (production ready)
 - **Deployment**: Vercel Edge Network
 
 ## 🚀 Features
 
-- **🤖 AI-Powered Analysis**: Google Gemini 2.0 Flash for advanced scam detection
+- **🤖 AI-Powered Analysis**: Google Gemini 2.5 Pro for deep scam analysis
 - **🔍 URL Inspection**: Safe URL analysis without visiting suspicious sites
 - **📸 Multimodal Analysis**: Text + Image analysis for comprehensive scam detection
 - **💬 Conversational Interface**: Chat-based interaction for natural analysis flow
@@ -24,9 +24,9 @@ An AI-powered platform for detecting online impersonation scams targeting suppor
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 16 (Turbopack), React 19, TypeScript
-- **Styling**: Tailwind CSS v4, Custom Design System
-- **AI**: Google Gemini 2.0 Flash Experimental (@google/genai)
+- **Frontend**: Next.js 16.0, React 19.2, TypeScript 5
+- **Styling**: Tailwind CSS v4.1, Custom Design System
+- **AI**: Google Gemini 2.5 Pro + 2.5 Flash (@google/genai)
 - **Storage**: Memory Provider (dev) / DynamoDB Provider (prod-ready)
 - **Testing**: Jest, React Testing Library
 - **Code Quality**: ESLint, Prettier, Husky, lint-staged
@@ -197,7 +197,7 @@ npm test -- src/components/__tests__/ChatInterface.test.tsx
 - **Image Optimization**: Next.js Image component with WebP
 - **Code Splitting**: Automatic route-based code splitting
 - **Caching**: Smart caching strategies for API responses
-- **Optimized AI**: Efficient prompts for Gemini 2.0 Flash
+- **Optimized AI**: Efficient prompts for Gemini 2.5 Pro/Flash
 
 ## 🤝 Contributing
 
