@@ -12,8 +12,8 @@ interface AnalysisConfig {
 }
 
 const DEFAULT_CONFIG: AnalysisConfig = {
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.scamhunt.com',
-  websocketUrl: process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'wss://ws.scamhunt.com',
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://bp0rqw2q34.execute-api.us-east-1.amazonaws.com/production',
+  websocketUrl: undefined, // Disable WebSocket for now
   timeout: 30000, // 30 seconds
   retryAttempts: 3
 };
@@ -119,9 +119,12 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
     }
   }, []);
 
-  // Initialize WebSocket connection
+  // Initialize WebSocket connection (disabled for now)
   useEffect(() => {
-    connectWebSocket();
+    // Skip WebSocket connection if URL is not provided
+    if (finalConfig.websocketUrl) {
+      connectWebSocket();
+    }
 
     return () => {
       if (wsRef.current) {
@@ -131,7 +134,7 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [connectWebSocket]);
+  }, [connectWebSocket, finalConfig.websocketUrl]);
 
   // Add message to conversation
   const addMessage = useCallback((message: Omit<Message, 'id' | 'timestamp'>) => {
@@ -160,34 +163,7 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
       imageUrl
     });
 
-    // Try WebSocket first
-    if (wsRef.current && connectionStatus === 'connected') {
-      try {
-        const message = {
-          action: 'analyze',
-          message: content.trim(),
-          // Handle both S3 URLs and base64 data URLs
-          imageUrl: imageUrl && !imageUrl.startsWith('data:') ? imageUrl : undefined,
-          imageBase64: imageUrl && imageUrl.startsWith('data:') ? imageUrl.split(',')[1] : undefined,
-          imageMimeType: imageUrl && imageUrl.startsWith('data:') ? imageUrl.split(';')[0].split(':')[1] : undefined
-        };
-
-        wsRef.current.send(JSON.stringify(message));
-        
-        // Set timeout for WebSocket response
-        timeoutRef.current = setTimeout(() => {
-          setIsLoading(false);
-          setError('Analysis timeout. Please try again.');
-        }, finalConfig.timeout);
-
-        return;
-      } catch (err) {
-        console.error('WebSocket send failed:', err);
-        // Fall back to REST API
-      }
-    }
-
-    // Fallback to REST API
+    // Use REST API directly (WebSocket disabled)
     await sendViaRestAPI(content, imageUrl);
   }, [addMessage, connectionStatus, finalConfig.timeout]);
 

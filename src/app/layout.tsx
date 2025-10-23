@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://lionsofzion.io'),
   title: "Scam Hunter - AI-Powered Scam Detection",
   description: "Protect yourself from online impersonation scams targeting supporters of Israel and the IDF with our advanced AI analysis platform.",
   keywords: "scam detection, AI security, Israel support, IDF, fraud prevention, online safety",

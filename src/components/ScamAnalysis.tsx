@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { analyzeScam } from '@/lib/gemini-service';
+// Remove direct gemini import - we'll use AWS API Gateway instead
 import { FullAnalysisResult, Message } from '@/types/analysis';
 import { fileToBase64, validateImageFile } from '@/utils/helpers';
 import AnalysisPanel from './AnalysisPanel';
@@ -104,7 +104,29 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({ lang = 'en', analysis = nul
         imageMimeType = uploadedFile.type;
       }
 
-      const analysisResult = await analyzeScam(inputText, imageBase64, imageMimeType);
+      // Call AWS API Gateway instead of direct Gemini
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!apiUrl) {
+        throw new Error('API URL not configured');
+      }
+
+      const response = await fetch(`${apiUrl}/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: inputText,
+          imageBase64,
+          imageMimeType
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const analysisResult = await response.json();
       setResult(analysisResult);
     } catch (err) {
       console.error('Analysis error:', err);
