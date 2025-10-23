@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FullAnalysisResult } from '@/types/analysis';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useScamAnalysis } from '../useScamAnalysis';
@@ -212,7 +212,7 @@ describe('useScamAnalysis', () => {
     await act(async () => {
       try {
         await result.current.sendMessage('Test message');
-      } catch (error) {
+      } catch {
         // Expected to throw
       }
     });

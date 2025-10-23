@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Classification, FullAnalysisResult, Severity } from '@/types/analysis';
 import { StorageService, resetStorageService } from '../storage-service';
 import { StorageConfig, StoredAnalysis } from '../types';

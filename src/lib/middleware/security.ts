@@ -302,10 +302,12 @@ export class SecurityLogger {
     return this.events.filter(event => event.type === type).slice(-limit);
   }
 
-  private static async sendToMonitoring(): Promise<void> {
+  private static async sendToMonitoring(event: SecurityEvent): Promise<void> {
     // Implement monitoring service integration
     // This could be AWS CloudWatch, DataDog, etc.
     try {
+      // Log the event for now
+      console.log('Security event:', event);
       // Example: Send to CloudWatch Logs
       if (process.env.AWS_REGION) {
         // Implementation would go here

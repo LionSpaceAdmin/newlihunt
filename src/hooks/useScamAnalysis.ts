@@ -85,6 +85,7 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
       console.error('Failed to create WebSocket connection:', err);
       setConnectionStatus('disconnected');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finalConfig.websocketUrl, finalConfig.retryAttempts]);
 
   // Handle WebSocket messages
@@ -132,6 +133,7 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
           console.log('Unknown WebSocket message type:', data.type);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -146,8 +148,10 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
       if (wsRef.current) {
         wsRef.current.close();
       }
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      // Store ref value before cleanup
+      const timeout = timeoutRef.current;
+      if (timeout) {
+        clearTimeout(timeout);
       }
     };
   }, [connectWebSocket, finalConfig.websocketUrl]);
@@ -183,7 +187,8 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
       // Use REST API directly (WebSocket disabled)
       await sendViaRestAPI(content, imageUrl);
     },
-    [addMessage, connectionStatus, finalConfig.timeout]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [addMessage]
   );
 
   // REST API fallback
@@ -311,8 +316,10 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      // Store ref value before cleanup
+      const timeout = timeoutRef.current;
+      if (timeout) {
+        clearTimeout(timeout);
       }
     };
   }, []);
