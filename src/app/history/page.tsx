@@ -251,6 +251,43 @@ const HistoryPage: React.FC = () => {
             ))}
           </div>
         )}
+        
+        {/* Support Footer */}
+        {filteredHistory.length > 0 && (
+          <div className="mt-8 p-6 bg-dark-gray rounded-lg border border-gray-600">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <span className="text-2xl">🦁</span>
+                <h3 className="text-lg font-semibold text-white">
+                  Support Our Mission
+                </h3>
+              </div>
+              <p className="text-gray-400 text-sm mb-4">
+                Help us continue protecting the digital front and exposing fake accounts
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <a
+                  href="https://buymeacoffee.com/danielhanukayeb/e/471429"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <span>🎯</span>
+                  Support This Project
+                </a>
+                <a
+                  href="https://www.fidf.org/donate"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <span>🇮🇱</span>
+                  Support FIDF
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

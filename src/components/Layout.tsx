@@ -9,6 +9,7 @@ import BrandLogo from './BrandLogo';
 import ErrorBoundary, { ChatErrorBoundary, AnalysisErrorBoundary } from './ErrorBoundary';
 import HelpSystem from './HelpSystem';
 import OnboardingFlow from './OnboardingFlow';
+import SupportWidget from './SupportWidget';
 import { useScamAnalysis } from '@/hooks/useScamAnalysis';
 
 interface LayoutProps {
@@ -192,6 +193,9 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
         
         {/* Help System */}
         <HelpSystem lang={lang} />
+        
+        {/* Support Widget */}
+        <SupportWidget lang={lang} />
         
         {/* Onboarding Flow */}
         {showOnboarding && (

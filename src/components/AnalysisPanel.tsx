@@ -370,6 +370,42 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
             <li key={index} className="text-lg">{rec}</li>
           ))}
         </ul>
+        
+        {/* Support Information */}
+        <div className="mt-6 pt-4 border-t border-gray-600">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-2xl">🦁</span>
+            <h3 className="text-lg font-semibold text-white">
+              {lang === 'he' ? 'תמכו במשימה שלנו' : 'Support Our Mission'}
+            </h3>
+          </div>
+          <p className="text-gray-400 text-sm mb-4">
+            {lang === 'he' 
+              ? 'עזרו לנו להמשיך לחשף חשבונות מזויפים ולהגן על האמת ברשת'
+              : 'Help us continue exposing fake accounts and defending truth online'
+            }
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href="https://buymeacoffee.com/danielhanukayeb/e/471429"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors flex items-center gap-1"
+            >
+              <span>🎯</span>
+              {lang === 'he' ? 'תמכו בפרויקט' : 'Support Project'}
+            </a>
+            <a
+              href="https://www.fidf.org/donate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors flex items-center gap-1"
+            >
+              <span>🇮🇱</span>
+              {lang === 'he' ? 'תמכו ב-FIDF' : 'Support FIDF'}
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Detected Rules */}

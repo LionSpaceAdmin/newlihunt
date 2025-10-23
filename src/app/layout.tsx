@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -47,6 +48,22 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Analytics />
+        
+        {/* Buy Me a Coffee Widget Script */}
+        <script 
+          data-name="BMC-Widget" 
+          data-cfasync="false" 
+          src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" 
+          data-id="danielhanukayeb" 
+          data-description="Support me on Buy me a coffee!" 
+          data-message="🦁 Thank you for visiting! Your support helps us keep the digital front strong — exposing fake accounts and defending truth online. Join the pride. Roar for Israel. 🇮🇱🔥" 
+          data-color="#FF5F5F" 
+          data-position="Right" 
+          data-x_margin="18" 
+          data-y_margin="18"
+          async
+        />
       </body>
     </html>
   );

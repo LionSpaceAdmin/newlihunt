@@ -264,7 +264,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
     inputRef.current?.focus();
   }, [clearConversation]);
 
-  const renderMessage = (message: any) => {
+  const renderMessage = (message: Message) => {
     const isUser = message.role === 'user';
     
     return (
