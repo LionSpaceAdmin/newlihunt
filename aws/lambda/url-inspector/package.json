@@ -1,0 +1,12 @@
+{
+  "name": "url-inspector-function",
+  "version": "1.0.0",
+  "description": "AWS Lambda function for safe URL content inspection",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "^2.1691.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

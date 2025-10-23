@@ -1,0 +1,13 @@
+{
+  "name": "websocket-message-function",
+  "version": "1.0.0",
+  "description": "WebSocket message handler for streaming scam analysis",
+  "main": "index.js",
+  "dependencies": {
+    "@google/generative-ai": "^1.26.0",
+    "aws-sdk": "^2.1691.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

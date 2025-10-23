@@ -1,0 +1,12 @@
+{
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"message\": \"I received this message asking for urgent donation to help IDF soldiers. The sender claims to be from an official organization but the email looks suspicious. Can you analyze this?\", \"conversationHistory\": []}",
+  "requestContext": {
+    "identity": {
+      "sourceIp": "127.0.0.1"
+    }
+  }
+}
