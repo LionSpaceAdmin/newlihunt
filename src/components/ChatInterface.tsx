@@ -101,6 +101,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
     sendMessage,
     clearConversation,
     retryLastAnalysis,
+    addMessage,
   } = useScamAnalysis();
 
   const t = textContent[lang];
@@ -165,10 +166,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
         "Someone is asking me to donate to help Israeli families affected by the conflict. They provided a link but I'm not sure if it's legitimate.",
       website:
         "I found this website claiming to collect donations for Israeli causes. Can you help me verify if it's trustworthy?",
-      webSearch:
-        'I want to search the web for information about a specific topic.',
-      analyzeXProfile:
-        'Analyze this X profile: ',
+      webSearch: 'I want to search the web for information about a specific topic.',
+      analyzeXProfile: 'Analyze this X profile: ',
     };
 
     const prompt = prompts[actionType as keyof typeof prompts];
@@ -237,9 +236,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
         await sendMessage(`Web Search Results for "${query}":\n\n${result.results}`);
       } catch (error) {
         console.error('Web search error:', error);
-        await sendMessage(
-          `⚠️ Web search failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-        );
+        // Don't send error message to analysis - just show it as a system message
+        const errorMessage = `⚠️ Web search failed: ${error instanceof Error ? error.message : 'Internal server error'}`;
+
+        // Add error message without triggering analysis
+        addMessage({
+          role: 'assistant',
+          content: errorMessage,
+        });
       } finally {
         setWebSearchLoading(null);
       }
@@ -347,8 +351,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
     return (
       <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
         <div
-          className={`max-w-[80%] rounded-lg px-4 py-3 ${isUser ? 'bg-accent-blue text-white' : 'bg-dark-gray text-gray-100'
-            }`}
+          className={`max-w-[80%] rounded-lg px-4 py-3 ${
+            isUser ? 'bg-accent-blue text-white' : 'bg-dark-gray text-gray-100'
+          }`}
         >
           {message.imageUrl && (
             <div className="mb-2">
@@ -393,12 +398,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
           {connectionStatus && (
             <div className="flex items-center space-x-2">
               <div
-                className={`w-2 h-2 rounded-full ${connectionStatus === 'connected'
-                  ? 'bg-green-500'
-                  : connectionStatus === 'connecting'
-                    ? 'bg-yellow-500 animate-pulse'
-                    : 'bg-red-500'
-                  }`}
+                className={`w-2 h-2 rounded-full ${
+                  connectionStatus === 'connected'
+                    ? 'bg-green-500'
+                    : connectionStatus === 'connecting'
+                      ? 'bg-yellow-500 animate-pulse'
+                      : 'bg-red-500'
+                }`}
               />
               <span className="text-xs text-gray-400">
                 {connectionStatus === 'connected'
@@ -414,12 +420,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
           {storageStatus && storageStatus !== 'idle' && (
             <div className="flex items-center space-x-2">
               <div
-                className={`w-2 h-2 rounded-full ${storageStatus === 'saved'
-                  ? 'bg-green-500'
-                  : storageStatus === 'saving'
-                    ? 'bg-blue-500 animate-pulse'
-                    : 'bg-red-500'
-                  }`}
+                className={`w-2 h-2 rounded-full ${
+                  storageStatus === 'saved'
+                    ? 'bg-green-500'
+                    : storageStatus === 'saving'
+                      ? 'bg-blue-500 animate-pulse'
+                      : 'bg-red-500'
+                }`}
               />
               <span className="text-xs text-gray-400">
                 {storageStatus === 'saved'
@@ -714,7 +721,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
                           className="w-full h-full object-contain"
                         />
                       </div>
-                      <span>Suspicious URLs detected. Consider inspecting them before proceeding.</span>
+                      <span>
+                        Suspicious URLs detected. Consider inspecting them before proceeding.
+                      </span>
                     </div>
                   </div>
                 )}
@@ -724,10 +733,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
         )}
 
         <div
-          className={`relative border-2 border-dashed rounded-lg transition-colors ${dragActive
-            ? 'border-accent-blue bg-blue-900/10'
-            : 'border-gray-600 hover:border-gray-500'
-            }`}
+          className={`relative border-2 border-dashed rounded-lg transition-colors ${
+            dragActive
+              ? 'border-accent-blue bg-blue-900/10'
+              : 'border-gray-600 hover:border-gray-500'
+          }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -736,10 +746,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
             {/* File Upload Button */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className={`flex-shrink-0 p-3 sm:p-2 transition-colors touch-manipulation ${uploadProgress
-                ? 'text-blue-400 cursor-not-allowed'
-                : 'text-gray-400 hover:text-accent-blue active:text-accent-blue'
-                }`}
+              className={`flex-shrink-0 p-3 sm:p-2 transition-colors touch-manipulation ${
+                uploadProgress
+                  ? 'text-blue-400 cursor-not-allowed'
+                  : 'text-gray-400 hover:text-accent-blue active:text-accent-blue'
+              }`}
               disabled={isLoading || uploadProgress !== null}
               title="Upload image"
               aria-label="Upload image"

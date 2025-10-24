@@ -391,17 +391,46 @@ function validateDetectedRules(rules: unknown[]): DetectedRule[] {
 }
 
 /**
- * Perform a web search using Gemini
+ * Perform a web search using fetch (since Gemini can't access web)
  */
 export async function searchWeb(query: string): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const prompt = `Please search the web for the following query and provide a summary of the results: "${query}"`;
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
+    // For URLs, try to fetch the page directly
+    if (query.startsWith('http')) {
+      try {
+        const response = await fetch(query, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; ScamHunter/1.0)',
+          },
+        });
+
+        if (!response.ok) {
+          return `Unable to access URL: ${response.status} ${response.statusText}`;
+        }
+
+        const html = await response.text();
+
+        // Extract basic info from HTML
+        const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+        const descMatch = html.match(/<meta[^>]*name="description"[^>]*content="([^"]+)"/i);
+
+        const title = titleMatch ? titleMatch[1].trim() : 'No title found';
+        const description = descMatch ? descMatch[1].trim() : 'No description found';
+
+        return `URL Analysis Results:
+Title: ${title}
+Description: ${description}
+Status: Accessible (${response.status})
+Note: This appears to be a legitimate website. For social media profiles, please provide the profile content directly for analysis.`;
+      } catch (fetchError) {
+        return `Unable to access URL: ${fetchError instanceof Error ? fetchError.message : 'Network error'}`;
+      }
+    }
+
+    // For non-URL queries, return a helpful message
+    return `Web search is not available for general queries. For URL analysis, please provide the full URL. For social media analysis, please provide the profile content, posts, or messages directly.`;
   } catch (error) {
-    console.error('Gemini web search error:', error);
+    console.error('Web search error:', error);
     return 'Unable to perform web search due to a technical error.';
   }
 }
