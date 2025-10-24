@@ -1,23 +1,23 @@
 'use client';
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import Image from 'next/image';
+import { useScamAnalysis } from '@/hooks/useScamAnalysis';
 import { FullAnalysisResult, Message } from '@/types/analysis';
 import { formatTimestamp } from '@/utils/helpers';
 import {
-  uploadImage,
-  validateImageFile,
   createImagePreview,
   formatFileSize,
+  uploadImage,
   UploadProgress,
+  validateImageFile,
 } from '@/utils/uploadService';
-import { useScamAnalysis } from '@/hooks/useScamAnalysis';
 import {
   detectURLs,
-  isLikelySuspiciousURL,
-  inspectURL,
   formatURLInspectionResult,
+  inspectURL,
+  isLikelySuspiciousURL,
 } from '@/utils/urlUtils';
+import Image from 'next/image';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 interface ChatInterfaceProps {
   onAnalysisComplete: (analysis: FullAnalysisResult) => void;
@@ -33,6 +33,8 @@ const textContent = {
       email: 'Check Suspicious Email',
       donation: 'Verify Donation Request',
       website: 'Inspect Website',
+      webSearch: 'Search the Web',
+      analyzeXProfile: 'Analyze X Profile',
     },
     sending: 'Analyzing...',
     typing: 'Scam Hunter is typing...',
@@ -56,6 +58,8 @@ const textContent = {
       email: 'בדוק אימייל חשוד',
       donation: 'אמת בקשת תרומה',
       website: 'בדוק אתר אינטרנט',
+      webSearch: 'חפש באינטרנט',
+      analyzeXProfile: 'נתח פרופיל X',
     },
     sending: 'מנתח...',
     typing: 'צייד הרמאויות כותב...',
@@ -80,6 +84,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [urlInspectionLoading, setUrlInspectionLoading] = useState<string | null>(null);
+  const [webSearchLoading, setWebSearchLoading] = useState<string | null>(null);
   const [detectedURLs, setDetectedURLs] = useState<string[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -160,6 +165,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
         "Someone is asking me to donate to help Israeli families affected by the conflict. They provided a link but I'm not sure if it's legitimate.",
       website:
         "I found this website claiming to collect donations for Israeli causes. Can you help me verify if it's trustworthy?",
+      webSearch:
+        'I want to search the web for information about a specific topic.',
+      analyzeXProfile:
+        'Analyze this X profile: ',
     };
 
     const prompt = prompts[actionType as keyof typeof prompts];
@@ -192,15 +201,47 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
           await sendMessage(`URL Inspection Results:\n\n${inspectionMessage}`);
         } else {
           // Show error message
-          await sendMessage(`❌ URL inspection failed: ${result.error || 'Unknown error'}`);
+          await sendMessage(`⚠️ URL inspection failed: ${result.error || 'Unknown error'}`);
         }
       } catch (error) {
         console.error('URL inspection error:', error);
         await sendMessage(
-          `❌ URL inspection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+          `⚠️ URL inspection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
       } finally {
         setUrlInspectionLoading(null);
+      }
+    },
+    [sendMessage]
+  );
+
+  // Handle Web Search
+  const handleWebSearch = useCallback(
+    async (query: string) => {
+      setWebSearchLoading(query);
+
+      try {
+        const response = await fetch('/api/web-search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Web search request failed');
+        }
+
+        const result = await response.json();
+        await sendMessage(`Web Search Results for "${query}":\n\n${result.results}`);
+      } catch (error) {
+        console.error('Web search error:', error);
+        await sendMessage(
+          `⚠️ Web search failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      } finally {
+        setWebSearchLoading(null);
       }
     },
     [sendMessage]
@@ -306,9 +347,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
     return (
       <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
         <div
-          className={`max-w-[80%] rounded-lg px-4 py-3 ${
-            isUser ? 'bg-accent-blue text-white' : 'bg-dark-gray text-gray-100'
-          }`}
+          className={`max-w-[80%] rounded-lg px-4 py-3 ${isUser ? 'bg-accent-blue text-white' : 'bg-dark-gray text-gray-100'
+            }`}
         >
           {message.imageUrl && (
             <div className="mb-2">
@@ -353,13 +393,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
           {connectionStatus && (
             <div className="flex items-center space-x-2">
               <div
-                className={`w-2 h-2 rounded-full ${
-                  connectionStatus === 'connected'
-                    ? 'bg-green-500'
-                    : connectionStatus === 'connecting'
-                      ? 'bg-yellow-500 animate-pulse'
-                      : 'bg-red-500'
-                }`}
+                className={`w-2 h-2 rounded-full ${connectionStatus === 'connected'
+                  ? 'bg-green-500'
+                  : connectionStatus === 'connecting'
+                    ? 'bg-yellow-500 animate-pulse'
+                    : 'bg-red-500'
+                  }`}
               />
               <span className="text-xs text-gray-400">
                 {connectionStatus === 'connected'
@@ -375,13 +414,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
           {storageStatus && storageStatus !== 'idle' && (
             <div className="flex items-center space-x-2">
               <div
-                className={`w-2 h-2 rounded-full ${
-                  storageStatus === 'saved'
-                    ? 'bg-green-500'
-                    : storageStatus === 'saving'
-                      ? 'bg-blue-500 animate-pulse'
-                      : 'bg-red-500'
-                }`}
+                className={`w-2 h-2 rounded-full ${storageStatus === 'saved'
+                  ? 'bg-green-500'
+                  : storageStatus === 'saving'
+                    ? 'bg-blue-500 animate-pulse'
+                    : 'bg-red-500'
+                  }`}
               />
               <span className="text-xs text-gray-400">
                 {storageStatus === 'saved'
@@ -633,13 +671,51 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
                             </>
                           )}
                         </button>
+                        <button
+                          onClick={() => handleWebSearch(url)}
+                          disabled={webSearchLoading === url || isLoading}
+                          className="ml-3 px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                        >
+                          {webSearchLoading === url ? (
+                            <>
+                              <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                              <span>Searching...</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                className="w-3 h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                              </svg>
+                              <span>Web Search</span>
+                            </>
+                          )}
+                        </button>
                       </div>
                     );
                   })}
                 </div>
                 {detectedURLs.some(isLikelySuspiciousURL) && (
                   <div className="mt-3 p-2 bg-red-900/20 border border-red-600/30 rounded text-xs text-red-300">
-                    ⚠️ Suspicious URLs detected. Consider inspecting them before proceeding.
+                    <div className="flex items-center space-x-1">
+                      <div className="w-3 h-3">
+                        <img
+                          src="/lion-digital-guardian/status-warning/lion-warning-triangle_v1_1x1.webp"
+                          alt="Warning"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <span>Suspicious URLs detected. Consider inspecting them before proceeding.</span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -648,11 +724,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
         )}
 
         <div
-          className={`relative border-2 border-dashed rounded-lg transition-colors ${
-            dragActive
-              ? 'border-accent-blue bg-blue-900/10'
-              : 'border-gray-600 hover:border-gray-500'
-          }`}
+          className={`relative border-2 border-dashed rounded-lg transition-colors ${dragActive
+            ? 'border-accent-blue bg-blue-900/10'
+            : 'border-gray-600 hover:border-gray-500'
+            }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -661,11 +736,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
             {/* File Upload Button */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className={`flex-shrink-0 p-3 sm:p-2 transition-colors touch-manipulation ${
-                uploadProgress
-                  ? 'text-blue-400 cursor-not-allowed'
-                  : 'text-gray-400 hover:text-accent-blue active:text-accent-blue'
-              }`}
+              className={`flex-shrink-0 p-3 sm:p-2 transition-colors touch-manipulation ${uploadProgress
+                ? 'text-blue-400 cursor-not-allowed'
+                : 'text-gray-400 hover:text-accent-blue active:text-accent-blue'
+                }`}
               disabled={isLoading || uploadProgress !== null}
               title="Upload image"
               aria-label="Upload image"

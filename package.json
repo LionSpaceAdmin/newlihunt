@@ -22,13 +22,17 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@google/genai": "^1.26.0",
+    "@google/generative-ai": "^0.24.1",
+    "@react-three/drei": "^10.7.6",
+    "@react-three/fiber": "^9.4.0",
     "@vercel/analytics": "^1.5.0",
     "aws-sdk": "^2.1692.0",
     "isomorphic-dompurify": "^2.30.1",
+    "nanoid": "^5.1.6",
     "next": "16.0.0",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.0.0",
@@ -40,6 +44,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.180.0",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",

@@ -79,7 +79,7 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed top-6 left-6 flex flex-col items-center gap-2 group z-40"
+        className="fixed top-6 right-6 flex flex-col items-center gap-2 group z-40"
         title={content.title}
       >
         <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 ring-2 ring-red-500 hover:ring-red-400">
@@ -104,7 +104,13 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
         <div className="flex items-center justify-between p-6 border-b border-gray-600">
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <span>🦁</span>
+              <div className="w-6 h-6">
+                <img
+                  src="/lion-digital-guardian/app-icon/68512281-D399-4756-9206-67C2C2E83BB0.webp"
+                  alt="Lion Guardian"
+                  className="w-full h-full object-contain rounded"
+                />
+              </div>
               {content.title}
             </h2>
             <p className="text-sm text-gray-400 mt-1">{content.description}</p>
@@ -136,7 +142,11 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
               <div className="font-bold text-lg">{content.fidfSupport}</div>
               <div className="text-sm text-blue-50 mt-1">Support Friends of the IDF</div>
             </div>
-            <span className="text-3xl">🇮🇱</span>
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            </div>
           </button>
 
           {/* Project Support */}
@@ -150,7 +160,11 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
                 Direct support for Scam Hunter development
               </div>
             </div>
-            <span className="text-2xl">🎯</span>
+            <div className="w-8 h-8">
+              <svg className="w-full h-full text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            </div>
           </button>
 
           {/* General Support */}

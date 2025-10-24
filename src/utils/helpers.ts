@@ -1,31 +1,58 @@
+import { nanoid } from 'nanoid';
+
 /**
- * Convert a File object to base64 string
+ * Generate a unique message ID
  */
-export const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
-      const base64 = result.split(',')[1];
-      resolve(base64);
-    };
-    reader.onerror = error => reject(error);
-  });
+export const generateMessageId = (): string => {
+  return nanoid();
 };
 
 /**
- * Validate file type and size for image uploads
+ * Format timestamp for display
+ */
+export const formatTimestamp = (date: Date): string => {
+  return new Intl.DateTimeFormat('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(date);
+};
+
+/**
+ * Format date for display
+ */
+export const formatDate = (date: Date): string => {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
+};
+
+/**
+ * Format file size in human readable format
+ */
+export const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+/**
+ * Validate image file
  */
 export const validateImageFile = (file: File): { isValid: boolean; error?: string } => {
   const maxSize = 10 * 1024 * 1024; // 10MB
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
   if (!allowedTypes.includes(file.type)) {
     return {
       isValid: false,
-      error: 'Invalid file type. Please upload JPEG, PNG, GIF, or WebP images only.',
+      error: 'Invalid file type. Please upload JPEG, PNG, WebP, or GIF images only.',
     };
   }
 
@@ -40,28 +67,38 @@ export const validateImageFile = (file: File): { isValid: boolean; error?: strin
 };
 
 /**
- * Format timestamp for display
+ * Convert file to base64
  */
-export const formatTimestamp = (date: Date): string => {
-  return new Intl.DateTimeFormat('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  }).format(date);
+export const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        // Remove data URL prefix to get just the base64 data
+        const base64 = reader.result.split(',')[1];
+        resolve(base64);
+      } else {
+        reject(new Error('Failed to convert file to base64'));
+      }
+    };
+    reader.onerror = error => reject(error);
+  });
 };
 
 /**
- * Generate unique ID for messages
+ * Truncate text to specified length
  */
-export const generateMessageId = (): string => {
-  return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+export const truncateText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
 };
 
 /**
- * Sanitize user input to prevent XSS
+ * Sanitize text for display
  */
-export const sanitizeInput = (input: string): string => {
-  return input
+export const sanitizeText = (text: string): string => {
+  return text
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
@@ -70,108 +107,204 @@ export const sanitizeInput = (input: string): string => {
 };
 
 /**
- * Extract domain from URL
+ * Generate a random color for avatars
  */
-export const extractDomain = (url: string): string | null => {
-  try {
-    const urlObj = new URL(url);
-    return urlObj.hostname;
-  } catch {
-    return null;
+export const generateAvatarColor = (seed: string): string => {
+  const colors = [
+    '#3B82F6', '#EF4444', '#10B981', '#F59E0B', 
+    '#8B5CF6', '#06B6D4', '#F97316', '#84CC16'
+  ];
+  
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
   }
+  
+  return colors[Math.abs(hash) % colors.length];
 };
 
 /**
- * Check if string is a valid URL
+ * Debounce function
  */
-export const isValidUrl = (string: string): boolean => {
-  try {
-    new URL(string);
-    return true;
-  } catch {
-    return false;
-  }
+export const debounce = <T extends (...args: unknown[]) => unknown>(
+  func: T,
+  wait: number
+): ((...args: Parameters<T>) => void) => {
+  let timeout: NodeJS.Timeout;
+  
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
 };
 
 /**
- * Format risk score for display with color coding
+ * Check if running in browser
  */
-export const getRiskScoreColor = (score: number): string => {
-  if (score >= 70) return 'text-red-500';
-  if (score >= 40) return 'text-yellow-500';
-  return 'text-green-500';
+export const isBrowser = (): boolean => {
+  return typeof window !== 'undefined';
 };
 
 /**
- * Format credibility score for display with color coding
+ * Get user's preferred language
  */
-export const getCredibilityScoreColor = (score: number): string => {
-  if (score >= 70) return 'text-green-500';
-  if (score >= 40) return 'text-yellow-500';
-  return 'text-red-500';
+export const getUserLanguage = (): 'en' | 'he' => {
+  if (!isBrowser()) return 'en';
+  
+  const stored = localStorage.getItem('scam-hunter-language');
+  if (stored === 'he' || stored === 'en') return stored;
+  
+  const browserLang = navigator.language.toLowerCase();
+  return browserLang.startsWith('he') ? 'he' : 'en';
 };
 
 /**
- * Get classification color for display
+ * Set user's preferred language
  */
-export const getClassificationColor = (classification: string): string => {
-  switch (classification) {
-    case 'SAFE':
-      return 'text-green-500 bg-green-100';
-    case 'SUSPICIOUS':
-      return 'text-yellow-600 bg-yellow-100';
-    case 'HIGH_RISK':
-      return 'text-red-600 bg-red-100';
-    default:
-      return 'text-gray-600 bg-gray-100';
-  }
-};
-
-/**
- * Get severity color for detected rules
- */
-export const getSeverityColor = (severity: string): string => {
-  switch (severity) {
-    case 'HIGH':
-      return 'bg-red-500';
-    case 'MEDIUM':
-      return 'bg-yellow-500';
-    case 'LOW':
-      return 'bg-blue-500';
-    default:
-      return 'bg-gray-500';
-  }
-};
-
-/**
- * Truncate text with ellipsis
- */
-export const truncateText = (text: string, maxLength: number): string => {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + '...';
+export const setUserLanguage = (lang: 'en' | 'he'): void => {
+  if (!isBrowser()) return;
+  localStorage.setItem('scam-hunter-language', lang);
 };
 
 /**
  * Copy text to clipboard
  */
 export const copyToClipboard = async (text: string): Promise<boolean> => {
+  if (!isBrowser()) return false;
+  
   try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    // Fallback for older browsers
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
       return true;
-    } catch {
+    } else {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const success = document.execCommand('copy');
       document.body.removeChild(textArea);
-      return false;
+      return success;
+    }
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error);
+    return false;
+  }
+};
+
+/**
+ * Generate a unique session ID
+ */
+export const generateSessionId = (): string => {
+  return `session_${Date.now()}_${nanoid(8)}`;
+};
+
+/**
+ * Get or create anonymous user ID
+ */
+export const getAnonymousUserId = (): string => {
+  if (!isBrowser()) return generateSessionId();
+  
+  let userId = localStorage.getItem('scam-hunter-user-id');
+  if (!userId) {
+    userId = `user_${Date.now()}_${nanoid(12)}`;
+    localStorage.setItem('scam-hunter-user-id', userId);
+  }
+  
+  return userId;
+};
+
+/**
+ * Format analysis classification for display
+ */
+export const formatClassification = (classification: string, lang: 'en' | 'he' = 'en'): string => {
+  const translations = {
+    en: {
+      SAFE: 'Safe',
+      SUSPICIOUS: 'Suspicious', 
+      HIGH_RISK: 'High Risk',
+    },
+    he: {
+      SAFE: 'בטוח',
+      SUSPICIOUS: 'חשוד',
+      HIGH_RISK: 'סיכון גבוה',
+    },
+  };
+  
+  return translations[lang][classification as keyof typeof translations.en] || classification;
+};
+
+/**
+ * Calculate time ago string
+ */
+export const timeAgo = (date: Date, lang: 'en' | 'he' = 'en'): string => {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  const intervals = {
+    en: {
+      year: 31536000,
+      month: 2592000,
+      week: 604800,
+      day: 86400,
+      hour: 3600,
+      minute: 60,
+    },
+    he: {
+      year: 31536000,
+      month: 2592000,
+      week: 604800,
+      day: 86400,
+      hour: 3600,
+      minute: 60,
+    },
+  };
+  
+  const labels = {
+    en: {
+      year: ['year', 'years'],
+      month: ['month', 'months'],
+      week: ['week', 'weeks'],
+      day: ['day', 'days'],
+      hour: ['hour', 'hours'],
+      minute: ['minute', 'minutes'],
+      now: 'just now',
+      ago: 'ago',
+    },
+    he: {
+      year: ['שנה', 'שנים'],
+      month: ['חודש', 'חודשים'],
+      week: ['שבוע', 'שבועות'],
+      day: ['יום', 'ימים'],
+      hour: ['שעה', 'שעות'],
+      minute: ['דקה', 'דקות'],
+      now: 'עכשיו',
+      ago: 'לפני',
+    },
+  };
+  
+  if (diffInSeconds < 60) {
+    return labels[lang].now;
+  }
+  
+  for (const [unit, seconds] of Object.entries(intervals[lang])) {
+    const interval = Math.floor(diffInSeconds / seconds);
+    if (interval >= 1) {
+      const unitLabels = labels[lang][unit as keyof typeof labels.en];
+      const label = interval === 1 ? unitLabels[0] : unitLabels[1];
+      
+      if (lang === 'he') {
+        return `${labels[lang].ago} ${interval} ${label}`;
+      } else {
+        return `${interval} ${label} ${labels[lang].ago}`;
+      }
     }
   }
+  
+  return labels[lang].now;
 };

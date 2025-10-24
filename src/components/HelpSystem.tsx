@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
+import React, { useCallback, useState } from 'react';
 
 interface HelpSystemProps {
   lang?: 'en' | 'he';
@@ -104,9 +104,9 @@ The AI considers multiple factors including language patterns, urgency tactics, 
         content: `Share your analysis results safely:
 
 **Quick Actions:**
-• 📋 Copy summary to clipboard
-• 📤 Share via native sharing (mobile)
-• 💾 Access full export menu
+• Copy summary to clipboard
+• Share via native sharing (mobile)
+• Access full export menu
 
 **Export Options:**
 • **Copy Summary**: Brief overview for quick sharing
@@ -411,11 +411,10 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ lang = 'en' }) => {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setSelectedCategory(null)}
-                    className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                      selectedCategory === null
-                        ? 'bg-accent-blue text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
+                    className={`px-3 py-1 text-sm rounded-full transition-colors ${selectedCategory === null
+                      ? 'bg-accent-blue text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
                   >
                     All Topics
                   </button>
@@ -423,11 +422,10 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ lang = 'en' }) => {
                     <button
                       key={key}
                       onClick={() => setSelectedCategory(key)}
-                      className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                        selectedCategory === key
-                          ? 'bg-accent-blue text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
+                      className={`px-3 py-1 text-sm rounded-full transition-colors ${selectedCategory === key
+                        ? 'bg-accent-blue text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
                     >
                       {label}
                     </button>

@@ -1,328 +1,302 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { getHistoryService } from '@/lib/history-service';
-import { StoredAnalysis } from '@/lib/storage/types';
-import { Classification } from '@/types/analysis';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import Navigation from '@/components/Navigation';
 import StatusIcon from '@/components/StatusIcon';
-import BrandLogo from '@/components/BrandLogo';
+import { getHistoryService, HistoryEntry } from '@/lib/history-service';
+import { Classification } from '@/types/analysis';
+import { formatDate, formatTimestamp, timeAgo } from '@/utils/helpers';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 
-const HistoryPage: React.FC = () => {
-  const [history, setHistory] = useState<StoredAnalysis[]>([]);
-  const [loading, setLoading] = useState(true);
+const textContent = {
+  en: {
+    title: 'Analysis History',
+    subtitle: 'Your previous scam analysis results',
+    empty: 'No Analysis History',
+    emptyDescription: 'You haven\'t run any analyses yet. Start by analyzing suspicious content on the main page.',
+    startAnalyzing: 'Start Analyzing',
+    loading: 'Loading history...',
+    error: 'Failed to load history',
+    retry: 'Retry',
+    clearAll: 'Clear All History',
+    confirmClear: 'Are you sure you want to clear all analysis history? This action cannot be undone.',
+    cleared: 'History cleared successfully',
+    viewDetails: 'View Details',
+    riskScore: 'Risk',
+    credibilityScore: 'Credibility',
+    detectedRules: 'rules detected',
+    recommendations: 'recommendations',
+  },
+  he: {
+    title: 'היסטוריית ניתוחים',
+    subtitle: 'תוצאות ניתוחי הרמאויות הקודמים שלך',
+    empty: 'אין היסטוריית ניתוחים',
+    emptyDescription: 'עדיין לא הרצת ניתוחים. התחל על ידי ניתוח תוכן חשוד בעמוד הראשי.',
+    startAnalyzing: 'התחל לנתח',
+    loading: 'טוען היסטוריה...',
+    error: 'נכשל בטעינת ההיסטוריה',
+    retry: 'נסה שוב',
+    clearAll: 'נקה את כל ההיסטוריה',
+    confirmClear: 'האם אתה בטוח שברצונך לנקות את כל היסטוריית הניתוחים? פעולה זו לא ניתנת לביטול.',
+    cleared: 'ההיסטוריה נוקתה בהצלחה',
+    viewDetails: 'צפה בפרטים',
+    riskScore: 'סיכון',
+    credibilityScore: 'אמינות',
+    detectedRules: 'כללים זוהו',
+    recommendations: 'המלצות',
+  },
+};
+
+interface HistoryPageProps {
+  lang?: 'en' | 'he';
+}
+
+const HistoryPage: React.FC<HistoryPageProps> = ({ lang = 'en' }) => {
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterClassification, setFilterClassification] = useState<Classification | 'ALL'>('ALL');
-  const [provider, setProvider] = useState<'dynamodb' | 'memory' | null>(null);
+  const [isClearing, setIsClearing] = useState(false);
+
+  const t = textContent[lang];
 
   useEffect(() => {
     loadHistory();
   }, []);
 
   const loadHistory = async () => {
+    setIsLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
-
       const historyService = getHistoryService();
-      const response = await historyService.getUserHistory(100);
-
-      if (response.success && response.history) {
-        setHistory(response.history);
-        setProvider(response.provider || null);
-      } else {
-        setError(response.error || 'Failed to load history');
-      }
+      const entries = await historyService.getHistory();
+      setHistory(entries);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      console.error('Failed to load history:', err);
+      setError(t.error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const filteredHistory = history.filter(analysis => {
-    const matchesSearch =
-      searchTerm === '' ||
-      analysis.input.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      analysis.result.summary.toLowerCase().includes(searchTerm.toLowerCase());
+  const handleClearHistory = async () => {
+    if (!confirm(t.confirmClear)) return;
 
-    const matchesFilter =
-      filterClassification === 'ALL' ||
-      analysis.result.analysisData.classification === filterClassification;
-
-    return matchesSearch && matchesFilter;
-  });
-
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(date));
+    setIsClearing(true);
+    try {
+      const historyService = getHistoryService();
+      await historyService.clearHistory();
+      setHistory([]);
+      alert(t.cleared);
+    } catch (err) {
+      console.error('Failed to clear history:', err);
+      alert('Failed to clear history');
+    } finally {
+      setIsClearing(false);
+    }
   };
 
   const getClassificationColor = (classification: Classification) => {
     switch (classification) {
       case Classification.SAFE:
-        return 'text-green-400';
+        return 'text-success-green';
       case Classification.SUSPICIOUS:
-        return 'text-yellow-400';
+        return 'text-warning-yellow';
       case Classification.HIGH_RISK:
-        return 'text-red-400';
+        return 'text-danger-red';
       default:
         return 'text-gray-400';
     }
   };
 
-  const truncateText = (text: string, maxLength: number = 100) => {
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading your analysis history...</p>
+      <div className="min-h-screen bg-black">
+        <Navigation lang={lang} />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin w-8 h-8 border-2 border-accent-blue border-t-transparent rounded-full mx-auto mb-4" />
+              <p className="text-gray-400">{t.loading}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black">
+        <Navigation lang={lang} />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-red-900/20 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">{t.error}</h3>
+              <button
+                onClick={loadHistory}
+                className="px-4 py-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                {t.retry}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="bg-dark-gray border-b border-gray-800 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/"
-                className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
-              >
-                <BrandLogo size="sm" />
-              </Link>
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-white">Analysis History</h1>
-                <p className="text-sm text-gray-400">
-                  {history.length} {history.length === 1 ? 'analysis' : 'analyses'}
-                  {provider && (
-                    <span className="ml-2 px-2 py-1 text-xs bg-gray-800 rounded">
-                      {provider === 'memory' ? 'Session Only' : 'Persistent'}
-                    </span>
-                  )}
-                </p>
-              </div>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-black">
+        <Navigation lang={lang} />
+
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">{t.title}</h1>
+              <p className="text-gray-400">{t.subtitle}</p>
             </div>
 
-            <Link
-              href="/"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              New Analysis
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <svg
-                className="w-5 h-5 text-red-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span className="text-red-400">{error}</span>
-            </div>
-            <button
-              onClick={loadHistory}
-              className="mt-2 text-sm text-red-300 hover:text-red-200 underline"
-            >
-              Try again
-            </button>
-          </div>
-        )}
-
-        {/* Search and Filter Controls */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search analyses..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <select
-            value={filterClassification}
-            onChange={e => setFilterClassification(e.target.value as Classification | 'ALL')}
-            className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="ALL">All Classifications</option>
-            <option value={Classification.SAFE}>Safe</option>
-            <option value={Classification.SUSPICIOUS}>Suspicious</option>
-            <option value={Classification.HIGH_RISK}>High Risk</option>
-          </select>
-        </div>
-
-        {/* History List */}
-        {filteredHistory.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
-              <Image
-                src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp"
-                alt="No History"
-                width={256}
-                height={192}
-                className="w-full h-full object-cover opacity-50"
-              />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-2">
-              {searchTerm || filterClassification !== 'ALL'
-                ? 'No matching analyses'
-                : 'No analysis history'}
-            </h3>
-            <p className="text-gray-400 mb-4">
-              {searchTerm || filterClassification !== 'ALL'
-                ? 'Try adjusting your search or filter criteria.'
-                : 'Start by analyzing suspicious content to build your history.'}
-            </p>
-            {(searchTerm || filterClassification !== 'ALL') && (
+            {history.length > 0 && (
               <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setFilterClassification('ALL');
-                }}
-                className="text-blue-400 hover:text-blue-300 underline"
+                onClick={handleClearHistory}
+                disabled={isClearing}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Clear filters
+                {isClearing ? 'Clearing...' : t.clearAll}
               </button>
             )}
           </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredHistory.map(analysis => (
+
+          {/* Content */}
+          {history.length === 0 ? (
+            // Empty State
+            <div className="text-center py-16">
+              <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
+                <Image
+                  src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp"
+                  alt="No History"
+                  width={256}
+                  height={192}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">{t.empty}</h3>
+              <p className="text-gray-400 mb-6 max-w-md mx-auto">{t.emptyDescription}</p>
               <Link
-                key={analysis.id}
-                href={`/history/${analysis.id}`}
-                className="block bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg p-6 transition-colors"
+                href="/"
+                className="inline-flex items-center px-6 py-3 bg-accent-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <StatusIcon
-                        classification={analysis.result.analysisData.classification}
-                        size="sm"
-                      />
-                      <span
-                        className={`text-sm font-medium ${getClassificationColor(analysis.result.analysisData.classification)}`}
-                      >
-                        {analysis.result.analysisData.classification}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {formatDate(analysis.timestamp)}
-                      </span>
+                {t.startAnalyzing}
+              </Link>
+            </div>
+          ) : (
+            // History List
+            <div className="space-y-4">
+              {history.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="bg-dark-gray rounded-lg p-6 hover:bg-gray-800 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4 flex-1">
+                      {/* Dashboard Icon */}
+                      <div className="w-12 h-8 rounded overflow-hidden flex-shrink-0 mt-1">
+                        <Image
+                          src="/lion-digital-guardian/report-card/analysis-dashboard_v1_16x9.webp"
+                          alt="Analysis Report"
+                          width={48}
+                          height={32}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+
+                      <div className="flex-1">
+                        {/* Header */}
+                        <div className="flex items-center space-x-3 mb-3">
+                          <StatusIcon
+                            classification={entry.analysis.analysisData.classification}
+                            size="sm"
+                          />
+                          <span className={`font-medium ${getClassificationColor(entry.analysis.analysisData.classification)}`}>
+                            {entry.analysis.analysisData.classification}
+                          </span>
+                          <span className="text-gray-400 text-sm">
+                            {timeAgo(entry.timestamp, lang)}
+                          </span>
+                        </div>
+
+                        {/* Summary */}
+                        <p className="text-gray-300 mb-4 line-clamp-2">
+                          {entry.analysis.summary}
+                        </p>
+
+                        {/* Scores */}
+                        <div className="flex items-center space-x-6 mb-4">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-400">{t.riskScore}:</span>
+                            <span className={`font-medium ${entry.analysis.analysisData.riskScore > 69
+                              ? 'text-danger-red'
+                              : entry.analysis.analysisData.riskScore > 30
+                                ? 'text-warning-yellow'
+                                : 'text-success-green'
+                              }`}>
+                              {entry.analysis.analysisData.riskScore}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-400">{t.credibilityScore}:</span>
+                            <span className={`font-medium ${entry.analysis.analysisData.credibilityScore > 69
+                              ? 'text-success-green'
+                              : entry.analysis.analysisData.credibilityScore > 30
+                                ? 'text-warning-yellow'
+                                : 'text-danger-red'
+                              }`}>
+                              {entry.analysis.analysisData.credibilityScore}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="flex items-center space-x-4 text-sm text-gray-400">
+                          <span>
+                            {entry.analysis.analysisData.detectedRules.length} {t.detectedRules}
+                          </span>
+                          <span>
+                            {entry.analysis.analysisData.recommendations.length} {t.recommendations}
+                          </span>
+                          <span>
+                            {formatDate(entry.timestamp)} {formatTimestamp(entry.timestamp)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    <h3 className="text-white font-medium mb-2">
-                      {truncateText(analysis.input.message, 80)}
-                    </h3>
-
-                    <p className="text-gray-400 text-sm mb-3">
-                      {truncateText(analysis.result.summary, 120)}
-                    </p>
-
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <span>Risk: {analysis.result.analysisData.riskScore}/100</span>
-                      <span>Credibility: {analysis.result.analysisData.credibilityScore}/100</span>
-                      {analysis.result.analysisData.detectedRules.length > 0 && (
-                        <span>{analysis.result.analysisData.detectedRules.length} flags</span>
-                      )}
-                      {analysis.feedback && (
-                        <span
-                          className={
-                            analysis.feedback === 'positive' ? 'text-green-400' : 'text-red-400'
-                          }
-                        >
-                          {analysis.feedback === 'positive' ? '👍' : '👎'} Feedback given
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="ml-4 flex-shrink-0">
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    {/* Action Button */}
+                    <Link
+                      href={`/history/${entry.id}`}
+                      className="ml-4 px-4 py-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
+                      {t.viewDetails}
+                    </Link>
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* Support Footer */}
-        {filteredHistory.length > 0 && (
-          <div className="mt-8 p-6 bg-dark-gray rounded-lg border border-gray-600">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <span className="text-2xl">🦁</span>
-                <h3 className="text-lg font-semibold text-white">Support Our Mission</h3>
-              </div>
-              <p className="text-gray-400 text-sm mb-4">
-                Help us continue protecting the digital front and exposing fake accounts
-              </p>
-              <div className="flex flex-wrap justify-center gap-3">
-                <a
-                  href="https://buymeacoffee.com/danielhanukayeb/e/471429"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <span>🎯</span>
-                  Support This Project
-                </a>
-                <a
-                  href="https://www.fidf.org/donate"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <span>🇮🇱</span>
-                  Support FIDF
-                </a>
-              </div>
+              ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 

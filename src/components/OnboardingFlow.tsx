@@ -44,9 +44,15 @@ const onboardingContent = {
               scams, especially those targeting supporters of Israel and the IDF.
             </p>
             <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4">
-              <p className="text-blue-300 text-sm">
-                🛡️ <strong>Your safety is our priority.</strong> We analyze content without storing
-                personal information.
+              <p className="text-blue-300 text-sm flex items-start space-x-2">
+                <div className="w-4 h-4 mt-0.5 flex-shrink-0">
+                  <img
+                    src="/lion-digital-guardian/status-success/digital-shield-success_v1_1x1.webp"
+                    alt="Shield"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <span><strong>Your safety is our priority.</strong> We analyze content without storing personal information.</span>
               </p>
             </div>
           </div>
@@ -91,9 +97,13 @@ const onboardingContent = {
             </div>
 
             <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-4">
-              <p className="text-yellow-300 text-sm">
-                💡 <strong>Pro Tip:</strong> Include as much context as possible for more accurate
-                analysis.
+              <p className="text-yellow-300 text-sm flex items-start space-x-2">
+                <div className="w-4 h-4 mt-0.5 flex-shrink-0">
+                  <svg className="w-full h-full" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </div>
+                <span><strong>Pro Tip:</strong> Include as much context as possible for more accurate analysis.</span>
               </p>
             </div>
           </div>
@@ -211,7 +221,16 @@ const onboardingContent = {
         content: (
           <div className="space-y-4">
             <div className="bg-red-900/20 border border-red-600/30 rounded-lg p-4">
-              <h4 className="font-medium text-red-300 mb-2">🚨 Red Flags to Watch For:</h4>
+              <h4 className="font-medium text-red-300 mb-2 flex items-center space-x-2">
+                <div className="w-4 h-4">
+                  <img
+                    src="/lion-digital-guardian/status-warning/lion-warning-triangle_v1_1x1.webp"
+                    alt="Warning"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <span>Red Flags to Watch For:</span>
+              </h4>
               <ul className="text-sm text-red-200 space-y-1">
                 <li>• Urgent requests for immediate donations</li>
                 <li>• Requests for personal information or passwords</li>
@@ -261,9 +280,13 @@ const onboardingContent = {
               with detailed results.
             </p>
             <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4">
-              <p className="text-blue-300 text-sm">
-                💡 <strong>Remember:</strong> You can access help anytime by clicking the help
-                button in the bottom-right corner.
+              <p className="text-blue-300 text-sm flex items-start space-x-2">
+                <div className="w-4 h-4 mt-0.5 flex-shrink-0">
+                  <svg className="w-full h-full" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </div>
+                <span><strong>Remember:</strong> You can access help anytime by clicking the help button in the bottom-right corner.</span>
               </p>
             </div>
           </div>
@@ -302,9 +325,15 @@ const onboardingContent = {
               ברשת, במיוחד כאלה המכוונות לתומכי ישראל וצה&quot;ל.
             </p>
             <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4">
-              <p className="text-blue-300 text-sm">
-                🛡️ <strong>הבטיחות שלכם היא העדיפות שלנו.</strong> אנחנו מנתחים תוכן מבלי לשמור מידע
-                אישי.
+              <p className="text-blue-300 text-sm flex items-start space-x-2">
+                <div className="w-4 h-4 mt-0.5 flex-shrink-0">
+                  <img
+                    src="/lion-digital-guardian/status-success/digital-shield-success_v1_1x1.webp"
+                    alt="Shield"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <span><strong>הבטיחות שלכם היא העדיפות שלנו.</strong> אנחנו מנתחים תוכן מבלי לשמור מידע אישי.</span>
               </p>
             </div>
           </div>
@@ -362,7 +391,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ lang = 'en', onComplete
         onComplete();
       }
     }, 0);
-    
+
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -425,13 +454,12 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ lang = 'en', onComplete
               <button
                 key={index}
                 onClick={() => setCurrentStep(index)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentStep
-                    ? 'bg-accent-blue'
-                    : index < currentStep
-                      ? 'bg-success-green'
-                      : 'bg-gray-600'
-                }`}
+                className={`w-2 h-2 rounded-full transition-colors ${index === currentStep
+                  ? 'bg-accent-blue'
+                  : index < currentStep
+                    ? 'bg-success-green'
+                    : 'bg-gray-600'
+                  }`}
               />
             ))}
           </div>

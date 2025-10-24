@@ -235,6 +235,44 @@ body {
   }
 }
 
+/* Buy Me a Coffee Widget Customization */
+#bmc-wbtn {
+  right: auto !important;
+  left: 18px !important;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffcc02 100%) !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 4px 15px rgba(255, 107, 53, 0.3),
+    0 0 20px rgba(247, 147, 30, 0.2) !important;
+  transition: all 0.3s ease !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+#bmc-wbtn:hover {
+  transform: translateY(-2px) scale(1.05) !important;
+  box-shadow: 
+    0 6px 25px rgba(255, 107, 53, 0.4),
+    0 0 30px rgba(247, 147, 30, 0.3) !important;
+  background: linear-gradient(135deg, #ff7b45 0%, #f8a31e 50%, #ffdc12 100%) !important;
+}
+
+#bmc-wbtn img {
+  margin-right: 8px !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
+}
+
+/* Enhanced text styling for the support message */
+#bmc-wbtn span {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+}
+
 /* Print styles */
 @media print {
   body {

@@ -1,383 +1,317 @@
 'use client';
 
-import { getHistoryService } from '@/lib/history-service';
-import { StoredAnalysis } from '@/lib/storage/types';
-import Image from 'next/image';
+import AnalysisPanel from '@/components/AnalysisPanel';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import Navigation from '@/components/Navigation';
+import { getHistoryService, HistoryEntry } from '@/lib/history-service';
+import { formatDate, formatTimestamp } from '@/utils/helpers';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-import StatusIcon from '@/components/StatusIcon';
+const textContent = {
+  en: {
+    title: 'Analysis Report',
+    backToHistory: 'Back to History',
+    loading: 'Loading analysis...',
+    notFound: 'Analysis Not Found',
+    notFoundDescription: 'The requested analysis could not be found. It may have been deleted or the link is invalid.',
+    error: 'Failed to Load Analysis',
+    retry: 'Retry',
+    analysisDate: 'Analysis Date',
+    processingTime: 'Processing Time',
+    inputContent: 'Original Input',
+    conversationHistory: 'Conversation History',
+    user: 'You',
+    assistant: 'Scam Hunter',
+    deleteAnalysis: 'Delete Analysis',
+    confirmDelete: 'Are you sure you want to delete this analysis? This action cannot be undone.',
+    deleted: 'Analysis deleted successfully',
+  },
+  he: {
+    title: 'דוח ניתוח',
+    backToHistory: 'חזור להיסטוריה',
+    loading: 'טוען ניתוח...',
+    notFound: 'ניתוח לא נמצא',
+    notFoundDescription: 'הניתוח המבוקש לא נמצא. ייתכן שהוא נמחק או שהקישור לא תקין.',
+    error: 'נכשל בטעינת הניתוח',
+    retry: 'נסה שוב',
+    analysisDate: 'תאריך ניתוח',
+    processingTime: 'זמן עיבוד',
+    inputContent: 'תוכן מקורי',
+    conversationHistory: 'היסטוריית שיחה',
+    user: 'אתה',
+    assistant: 'צייד הרמאויות',
+    deleteAnalysis: 'מחק ניתוח',
+    confirmDelete: 'האם אתה בטוח שברצונך למחוק ניתוח זה? פעולה זו לא ניתנת לביטול.',
+    deleted: 'הניתוח נמחק בהצלחה',
+  },
+};
 
-import ScamAnalysis from '@/components/ScamAnalysis';
+interface ReportPageProps {
+  lang?: 'en' | 'he';
+}
 
-const AnalysisDetailPage: React.FC = () => {
+const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
   const params = useParams();
+  const router = useRouter();
   const reportId = params?.reportId as string;
 
-  const [analysis, setAnalysis] = useState<StoredAnalysis | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [entry, setEntry] = useState<HistoryEntry | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadAnalysis = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const historyService = getHistoryService();
-      const response = await historyService.getAnalysis(reportId);
-
-      if (response.success && response.analysis) {
-        setAnalysis(response.analysis);
-      } else {
-        setError('Analysis not found');
-      }
-    } catch (err) {
-      console.error('Failed to load analysis:', err);
-      setError('Failed to load analysis');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const t = textContent[lang];
 
   useEffect(() => {
     if (reportId) {
       loadAnalysis();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportId]);
 
-  const submitFeedback = async (feedback: 'positive' | 'negative') => {
-    if (!analysis) return;
+  const loadAnalysis = async () => {
+    if (!reportId) return;
+
+    setIsLoading(true);
+    setError(null);
 
     try {
-      setFeedbackSubmitting(true);
-
       const historyService = getHistoryService();
-      const response = await historyService.submitFeedback(analysis.id, feedback);
+      const analysisEntry = await historyService.getAnalysisById(reportId);
 
-      if (response.success) {
-        // Update local state
-        setAnalysis(prev => (prev ? { ...prev, feedback } : null));
+      if (!analysisEntry) {
+        setError('not_found');
       } else {
-        console.error('Failed to submit feedback:', response.error);
+        setEntry(analysisEntry);
       }
     } catch (err) {
-      console.error('Failed to submit feedback:', err);
+      console.error('Failed to load analysis:', err);
+      setError('load_error');
     } finally {
-      setFeedbackSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }).format(new Date(date));
+  const handleDelete = async () => {
+    if (!entry || !confirm(t.confirmDelete)) return;
+
+    setIsDeleting(true);
+    try {
+      const historyService = getHistoryService();
+      const success = await historyService.deleteAnalysis(entry.id);
+
+      if (success) {
+        alert(t.deleted);
+        router.push('/history');
+      } else {
+        alert('Failed to delete analysis');
+      }
+    } catch (err) {
+      console.error('Failed to delete analysis:', err);
+      alert('Failed to delete analysis');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading analysis details...</p>
+      <div className="min-h-screen bg-black">
+        <Navigation lang={lang} />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin w-8 h-8 border-2 border-accent-blue border-t-transparent rounded-full mx-auto mb-4" />
+              <p className="text-gray-400">{t.loading}</p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (error || !analysis) {
+  if (error === 'not_found') {
     return (
       <div className="min-h-screen bg-black">
-        <header className="bg-dark-gray border-b border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <Link
-                href="/history"
-                className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
-              >
-                <svg
-                  className="w-5 h-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
+        <Navigation lang={lang} />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center max-w-md">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-700 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span className="text-gray-400">Back to History</span>
-              </Link>
-            </div>
-          </div>
-        </header>
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">
-            <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
-              <Image
-                src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp"
-                alt="Analysis Not Found"
-                width={256}
-                height={192}
-                className="w-full h-full object-cover opacity-50"
-              />
-            </div>
-            <h1 className="text-2xl font-bold text-white mb-4">Analysis Not Found</h1>
-            <p className="text-gray-400 mb-6">
-              {error || 'The requested analysis could not be found or may have been removed.'}
-            </p>
-            <div className="space-x-4">
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">{t.notFound}</h3>
+              <p className="text-gray-400 mb-6">{t.notFoundDescription}</p>
               <Link
                 href="/history"
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
               >
-                View History
-              </Link>
-              <Link
-                href="/"
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-              >
-                New Analysis
+                {t.backToHistory}
               </Link>
             </div>
           </div>
         </div>
       </div>
     );
+  }
+
+  if (error === 'load_error') {
+    return (
+      <div className="min-h-screen bg-black">
+        <Navigation lang={lang} />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-red-900/20 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">{t.error}</h3>
+              <div className="space-x-4">
+                <button
+                  onClick={loadAnalysis}
+                  className="px-4 py-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  {t.retry}
+                </button>
+                <Link
+                  href="/history"
+                  className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  {t.backToHistory}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!entry) {
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="bg-dark-gray border-b border-gray-800 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+    <ErrorBoundary>
+      <div className="min-h-screen bg-black">
+        <Navigation lang={lang} />
+
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
               <Link
                 href="/history"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800"
               >
-                <svg
-                  className="w-5 h-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                <span className="text-gray-400">History</span>
               </Link>
-
-              <div className="flex items-center space-x-3">
-                <StatusIcon
-                  classification={analysis.result.analysisData.classification}
-                  size="sm"
-                />
-                <div>
-                  <h1 className="text-lg font-bold text-white">Analysis Details</h1>
-                  <p className="text-sm text-gray-400">{formatDate(analysis.timestamp)}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              {/* Feedback Buttons */}
-              {!analysis.feedback && (
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-400">Was this helpful?</span>
-                  <button
-                    onClick={() => submitFeedback('positive')}
-                    disabled={feedbackSubmitting}
-                    className="p-2 text-gray-400 hover:text-green-400 transition-colors disabled:opacity-50"
-                    title="Helpful"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L9 7v13m-3-4h-2m0-4h2m0-4h2"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => submitFeedback('negative')}
-                    disabled={feedbackSubmitting}
-                    className="p-2 text-gray-400 hover:text-red-400 transition-colors disabled:opacity-50"
-                    title="Not helpful"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L15 17V4m-3 4H9m1-4H9m1 4h1"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              )}
-
-              {analysis.feedback && (
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-400">Feedback:</span>
-                  <span
-                    className={`text-sm ${analysis.feedback === 'positive' ? 'text-green-400' : 'text-red-400'}`}
-                  >
-                    {analysis.feedback === 'positive' ? '👍 Helpful' : '👎 Not helpful'}
-                  </span>
-                </div>
-              )}
-
-              <Link
-                href="/"
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-              >
-                New Analysis
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Original Input Section */}
-        <div className="mb-8 bg-gray-900 border border-gray-800 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Original Input</h2>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Message</label>
-              <div className="bg-gray-800 rounded-lg p-4">
-                <p className="text-white whitespace-pre-wrap">{analysis.input.message}</p>
-              </div>
-            </div>
-
-            {analysis.input.imageUrl && (
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Attached Image
-                </label>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <Image
-                    src={analysis.input.imageUrl}
-                    alt="Analysis input"
-                    width={400}
-                    height={300}
-                    className="max-w-full h-auto rounded-lg"
-                    style={{ objectFit: 'contain' }}
-                  />
-                </div>
+                <h1 className="text-3xl font-bold text-white">{t.title}</h1>
+                <p className="text-gray-400">
+                  {t.analysisDate}: {formatDate(entry.timestamp)} {formatTimestamp(entry.timestamp)}
+                </p>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Analysis Results */}
-        <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-          <div className="p-6 border-b border-gray-800">
-            <h2 className="text-lg font-semibold text-white">Analysis Results</h2>
-          </div>
-
-          <div className="p-6">
-            <ScamAnalysis analysis={analysis.result} />
-          </div>
-        </div>
-
-        {/* Metadata Section */}
-        <div className="mt-8 bg-gray-900 border border-gray-800 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Analysis Metadata</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-400">Analysis ID:</span>
-              <span className="ml-2 text-white font-mono">{analysis.id}</span>
             </div>
 
-            <div>
-              <span className="text-gray-400">Processing Time:</span>
-              <span className="ml-2 text-white">{analysis.metadata.processingTime}ms</span>
-            </div>
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isDeleting ? 'Deleting...' : t.deleteAnalysis}
+            </button>
+          </div>
 
-            <div>
-              <span className="text-gray-400">User Agent:</span>
-              <span className="ml-2 text-white text-xs">
-                {analysis.metadata.userAgent || 'Unknown'}
-              </span>
-            </div>
-
-            <div>
-              <span className="text-gray-400">IP Hash:</span>
-              <span className="ml-2 text-white font-mono">{analysis.metadata.ipHash}</span>
+          {/* Metadata */}
+          <div className="bg-dark-gray rounded-lg p-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <span className="text-gray-400">{t.analysisDate}:</span>
+                <span className="text-white ml-2">
+                  {formatDate(entry.timestamp)} {formatTimestamp(entry.timestamp)}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-400">{t.processingTime}:</span>
+                <span className="text-white ml-2">{entry.processingTime}ms</span>
+              </div>
+              <div>
+                <span className="text-gray-400">ID:</span>
+                <span className="text-white ml-2 font-mono text-xs">{entry.id}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Conversation History */}
-        {analysis.conversation.length > 0 && (
-          <div className="mt-8 bg-gray-900 border border-gray-800 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Conversation History</h2>
-
-            <div className="space-y-4">
-              {analysis.conversation.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-3xl rounded-lg p-4 ${
-                      message.role === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-800 text-gray-100'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs opacity-75">
-                        {message.role === 'user' ? 'You' : 'Scam Hunter'}
-                      </span>
-                      <span className="text-xs opacity-75">
-                        {new Date(message.timestamp).toLocaleTimeString()}
-                      </span>
-                    </div>
-
-                    <div className="whitespace-pre-wrap">{message.content}</div>
-
-                    {message.imageUrl && (
-                      <div className="mt-3">
-                        <Image
-                          src={message.imageUrl}
-                          alt="Message attachment"
-                          width={400}
-                          height={300}
-                          className="max-w-full h-auto rounded-lg"
-                          style={{ objectFit: 'contain' }}
-                        />
-                      </div>
-                    )}
+          {/* Original Input */}
+          {entry.input && (
+            <div className="bg-dark-gray rounded-lg p-6 mb-8">
+              <h2 className="text-xl font-bold text-white mb-4">{t.inputContent}</h2>
+              <div className="bg-light-gray rounded-lg p-4">
+                <p className="text-gray-300 whitespace-pre-wrap">{entry.input.message}</p>
+                {entry.input.imageUrl && (
+                  <div className="mt-3 text-sm text-gray-400">
+                    📎 Image attached
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Analysis Results */}
+          <AnalysisPanel
+            analysis={entry.analysis}
+            conversation={entry.conversation}
+            lang={lang}
+          />
+
+          {/* Conversation History */}
+          {entry.conversation && entry.conversation.length > 0 && (
+            <div className="bg-dark-gray rounded-lg p-6 mt-8">
+              <h2 className="text-xl font-bold text-white mb-4">{t.conversationHistory}</h2>
+              <div className="space-y-4">
+                {entry.conversation.map((message, index) => (
+                  <div
+                    key={message.id || index}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-lg p-4 ${message.role === 'user'
+                          ? 'bg-accent-blue text-white'
+                          : 'bg-light-gray text-gray-300'
+                        }`}
+                    >
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-xs font-medium opacity-75">
+                          {message.role === 'user' ? t.user : t.assistant}
+                        </span>
+                        <span className="text-xs opacity-50">
+                          {formatTimestamp(message.timestamp)}
+                        </span>
+                      </div>
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                      {message.imageUrl && (
+                        <div className="mt-2 text-xs opacity-75">
+                          📎 Image attached
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 
-export default AnalysisDetailPage;
+export default ReportPage;

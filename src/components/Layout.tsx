@@ -3,10 +3,10 @@
 import { useScamAnalysis } from '@/hooks/useScamAnalysis';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-import BrandLogo from './BrandLogo';
 import ChatInterface from './ChatInterface';
 import ErrorBoundary, { AnalysisErrorBoundary, ChatErrorBoundary } from './ErrorBoundary';
 import HelpSystem from './HelpSystem';
+import Navigation from './Navigation';
 import OnboardingFlow from './OnboardingFlow';
 import ScamAnalysis from './ScamAnalysis';
 import StatusIcon from './StatusIcon';
@@ -67,48 +67,33 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
     return (
       <ErrorBoundary>
         <div className="h-screen bg-black flex flex-col">
+          {/* Mobile Navigation */}
+          <Navigation lang={lang} />
+
           {/* Mobile Header */}
-          <header className="bg-dark-gray border-b border-gray-800 p-4">
-            <div className="flex items-center justify-between">
+          {showAnalysis && (
+            <header className="bg-dark-gray border-b border-gray-800 p-4">
               <div className="flex items-center space-x-3">
-                {showAnalysis && (
-                  <button
-                    onClick={handleBackToChat}
-                    className="p-2 text-text-secondary hover:text-text-primary transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 19l-7-7 7-7"
-                      />
-                    </svg>
-                  </button>
-                )}
+                <button
+                  onClick={handleBackToChat}
+                  className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
                 <div>
-                  <h1 className="text-lg font-bold text-white">
-                    {showAnalysis ? 'Analysis Results' : 'Scam Hunter'}
-                  </h1>
-                  <p className="text-sm text-gray-400">
-                    {showAnalysis ? 'Detailed security assessment' : 'AI-powered scam detection'}
-                  </p>
+                  <h1 className="text-lg font-bold text-white">Analysis Results</h1>
+                  <p className="text-sm text-gray-400">Detailed security assessment</p>
                 </div>
               </div>
-
-              {/* Mobile Menu Button */}
-              <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
-            </div>
-          </header>
+            </header>
+          )}
 
           {/* Mobile Content */}
           <div className="flex-1 overflow-hidden">
@@ -136,72 +121,90 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
   // Desktop layout - dual panel
   return (
     <ErrorBoundary>
-      <div className="h-screen bg-black flex">
-        {/* Left Panel - Chat Interface */}
-        <div className="w-1/2 border-r border-gray-800 flex flex-col">
-          <header className="bg-dark-gray border-b border-gray-800 p-6">
-            <BrandLogo size="lg" />
-          </header>
+      <div className="h-screen bg-black flex flex-col relative">
+        {/* Subtle background pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.02] pointer-events-none"
+          style={{
+            backgroundImage: 'url(/lion-digital-guardian/background-pattern/cyber-grid_v1_tile.webp)',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '400px 400px',
+          }}
+        />
 
-          <div className="flex-1">
-            <ChatErrorBoundary>
-              <ChatInterface onAnalysisComplete={handleAnalysisComplete} lang={lang} />
-            </ChatErrorBoundary>
-          </div>
-        </div>
+        {/* Desktop Navigation */}
+        <Navigation lang={lang} />
 
-        {/* Right Panel - Analysis Results */}
-        <div className="w-1/2 flex flex-col">
-          <header className="bg-dark-gray border-b border-gray-800 p-6">
-            <div className="flex items-center justify-between">
+        <div className="flex-1 flex">
+          {/* Left Panel - Chat Interface */}
+          <div className="w-1/2 border-r border-gray-800 flex flex-col">
+            <header className="bg-dark-gray border-b border-gray-800 p-6">
               <div>
-                <h2 className="text-xl font-bold text-white">Analysis Results</h2>
-                <p className="text-sm text-gray-400">
-                  {currentAnalysis ? 'Security assessment complete' : 'Waiting for analysis...'}
-                </p>
+                <h1 className="text-xl font-bold text-white mb-1">Scam Hunter</h1>
+                <p className="text-sm text-gray-400">AI-powered scam detection</p>
               </div>
+            </header>
 
-              {currentAnalysis && (
-                <div className="flex items-center space-x-2">
-                  <StatusIcon
-                    classification={currentAnalysis.analysisData.classification}
-                    size="sm"
-                  />
-                  <span className="text-sm font-medium text-gray-300">
-                    {currentAnalysis.analysisData.classification}
-                  </span>
+            <div className="flex-1">
+              <ChatErrorBoundary>
+                <ChatInterface onAnalysisComplete={handleAnalysisComplete} lang={lang} />
+              </ChatErrorBoundary>
+            </div>
+          </div>
+
+          {/* Right Panel - Analysis Results */}
+          <div className="w-1/2 flex flex-col">
+            <header className="bg-dark-gray border-b border-gray-800 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-white">Analysis Results</h2>
+                  <p className="text-sm text-gray-400">
+                    {currentAnalysis ? 'Security assessment complete' : 'Waiting for analysis...'}
+                  </p>
+                </div>
+
+                {currentAnalysis && (
+                  <div className="flex items-center space-x-2">
+                    <StatusIcon
+                      classification={currentAnalysis.analysisData.classification}
+                      size="sm"
+                    />
+                    <span className="text-sm font-medium text-gray-300">
+                      {currentAnalysis.analysisData.classification}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </header>
+
+            <div className="flex-1 overflow-y-auto">
+              {currentAnalysis ? (
+                <AnalysisErrorBoundary>
+                  <div className="p-6">
+                    <ScamAnalysis analysis={currentAnalysis} conversation={messages} lang={lang} />
+                  </div>
+                </AnalysisErrorBoundary>
+              ) : (
+                <div className="flex-1 flex items-center justify-center p-6">
+                  <div className="text-center max-w-md">
+                    <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
+                      <Image
+                        src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp"
+                        alt="Ready for Analysis"
+                        width={256}
+                        height={192}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-2">Ready for Analysis</h3>
+                    <p className="text-gray-400 leading-relaxed">
+                      Submit suspicious content in the chat to receive a detailed security assessment
+                      with risk scores and recommendations.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
-          </header>
-
-          <div className="flex-1 overflow-y-auto">
-            {currentAnalysis ? (
-              <AnalysisErrorBoundary>
-                <div className="p-6">
-                  <ScamAnalysis analysis={currentAnalysis} conversation={messages} lang={lang} />
-                </div>
-              </AnalysisErrorBoundary>
-            ) : (
-              <div className="flex-1 flex items-center justify-center p-6">
-                <div className="text-center max-w-md">
-                  <div className="w-32 h-24 mx-auto mb-6 rounded-lg overflow-hidden">
-                    <Image
-                      src="/lion-digital-guardian/empty-state/calm-guardian_v1_4x3.webp"
-                      alt="Ready for Analysis"
-                      width={256}
-                      height={192}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Ready for Analysis</h3>
-                  <p className="text-gray-400 leading-relaxed">
-                    Submit suspicious content in the chat to receive a detailed security assessment
-                    with risk scores and recommendations.
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

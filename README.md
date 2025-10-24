@@ -1,52 +1,96 @@
-# 🦁 Scam Hunt Platform
+# 🦁 Scam Hunt Platform - Digital Guardian
 
-An AI-powered platform for detecting online impersonation scams targeting supporters of Israel and the IDF. Built with Next.js 16 and Google Gemini 2.5 Pro/Flash.
+An AI-powered security platform designed to identify and neutralize online impersonation scams targeting supporters of Israel and the IDF. Built with cutting-edge technology and professional Lion Digital Guardian branding.
+
+## 🛡️ Mission
+
+Protecting supporters of Israel and the IDF from sophisticated online scams through advanced AI analysis, real-time threat detection, and comprehensive security assessment. Our platform serves as a digital guardian, standing watch against those who seek to exploit and deceive.
 
 ## 🏗️ Architecture
 
-**Modern Serverless Stack:**
+**Enterprise-Grade Serverless Stack:**
 
-- **Frontend**: Next.js 16 with React 19 on Vercel
-- **AI Engine**: Google Gemini 2.5 Pro (analysis) + 2.5 Flash (chat)
-- **Storage**: In-memory (development) / DynamoDB (production ready)
-- **Deployment**: Vercel Edge Network
+- **Frontend**: Next.js 16 with React 19 deployed on Vercel Edge Network
+- **AI Engine**: Google Gemini 2.5 Pro for deep analysis + 2.5 Flash for conversational interface
+- **Backend**: Complete AWS infrastructure (Lambda, API Gateway, DynamoDB, S3, CloudFront)
+- **Security**: Multi-layer protection with rate limiting, input sanitization, and anonymous user identification
+- **Graphics**: Professional Lion Digital Guardian visual identity system
 
-## 🚀 Features
+## ✨ Key Features
 
-- **🤖 AI-Powered Analysis**: Google Gemini 2.5 Pro for deep scam analysis
-- **🔍 URL Inspection**: Safe URL analysis without visiting suspicious sites
-- **📸 Multimodal Analysis**: Text + Image analysis for comprehensive scam detection
-- **💬 Conversational Interface**: Chat-based interaction for natural analysis flow
-- **📊 Analysis History**: Save and review past analyses with detailed reports
-- **🎨 Modern UI**: Beautiful, responsive design with dark mode
-- **🦁 Digital Guardian**: Lion-themed branding representing strength and protection
-- **🌐 Multilingual**: Support for English and Hebrew
+### 🤖 **AI-Powered Analysis Engine**
+- **Dual-Score Framework**: Risk Score (0-100) + Credibility Score (0-100)
+- **Multimodal Detection**: Analyze text, images, and URLs simultaneously
+- **Real-time Streaming**: Live analysis results with engaging visual feedback
+- **False Positive Mitigation**: Advanced contextual analysis to minimize incorrect flags
 
-## 🛠️ Tech Stack
+### 🔍 **Comprehensive Threat Detection**
+- **URL Inspection**: Safe analysis of suspicious links without visiting them
+- **Image Analysis**: Detect manipulated images and fake screenshots
+- **Behavioral Pattern Recognition**: Identify sophisticated impersonation tactics
+- **Donation Scam Protection**: Specialized detection for fake charity requests
 
-- **Frontend**: Next.js 16.0, React 19.2, TypeScript 5
-- **Styling**: Tailwind CSS v4.1, Custom Design System
-- **AI**: Google Gemini 2.5 Pro + 2.5 Flash (@google/genai)
-- **Storage**: Memory Provider (dev) / DynamoDB Provider (prod-ready)
-- **Testing**: Jest, React Testing Library
-- **Code Quality**: ESLint v9, Prettier, Husky, lint-staged
-- **Deployment**: Vercel Edge Network
+### 💬 **Conversational Security Interface**
+- **Chat-Based Analysis**: Natural language interaction for threat assessment
+- **Quick Action Buttons**: Streamlined analysis for common scam types
+- **Visual Feedback**: Professional graphics and status indicators
+- **Multilingual Support**: Full Hebrew and English localization
+
+### 📊 **Analysis History & Reporting**
+- **Persistent Storage**: AWS DynamoDB with graceful in-memory fallback
+- **Detailed Reports**: Comprehensive analysis with reasoning and recommendations
+- **Export Capabilities**: PDF, JSON, and social sharing options
+- **Feedback System**: User rating system for continuous improvement
+
+### 🎨 **Professional Visual Identity**
+- **Lion Digital Guardian Branding**: Custom graphics throughout the platform
+- **Matte Black Theme**: High-contrast design for accessibility
+- **Responsive Design**: Optimized for desktop and mobile (320px-2560px)
+- **Loading Animations**: Engaging lion-awakening graphics during processing
+
+## 🛠️ Technology Stack
+
+### Frontend
+- **Framework**: Next.js 16.0 with React 19.2
+- **Language**: TypeScript 5 with strict mode
+- **Styling**: Tailwind CSS v4.1 with custom design system
+- **Package Manager**: pnpm for efficient dependency management
+- **Deployment**: Vercel with edge optimization and global CDN
+
+### Backend (AWS Infrastructure)
+- **Compute**: AWS Lambda functions with Node.js 20 runtime
+- **API Management**: AWS API Gateway with REST API and WebSocket support
+- **Database**: AWS DynamoDB with on-demand scaling
+- **File Storage**: AWS S3 with CloudFront integration
+- **CDN**: AWS CloudFront for global content delivery
+- **Monitoring**: AWS CloudWatch for logging and metrics
+
+### AI Integration
+- **AI Model**: Google Gemini 2.5 Pro via @google/genai SDK
+- **Processing**: Server-side AI processing in Lambda functions
+- **Streaming**: WebSocket connections for real-time AI responses
+- **Security**: All API keys secured in AWS Lambda environment
+
+### Quality Assurance
+- **Testing**: Jest, React Testing Library, E2E testing
+- **Code Quality**: ESLint v9, Prettier, Husky pre-commit hooks
+- **Security**: Advanced input validation, rate limiting, CSP headers
 
 ## 📋 Prerequisites
 
 - Node.js 18+ (recommended: 20+)
-- npm or yarn
+- pnpm (recommended) or npm
 - Google Gemini API Key ([Get one here](https://aistudio.google.com/app/apikey))
-- AWS Account (optional, for production storage)
+- AWS Account (for production deployment)
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### 1. Clone and Install
 
 ```bash
 git clone <repository>
 cd scam-hunt-platform
-npm install
+pnpm install
 ```
 
 ### 2. Environment Setup
@@ -55,185 +99,228 @@ npm install
 cp .env.local.example .env.local
 ```
 
-Edit `.env.local`:
+Configure your `.env.local`:
 
 ```bash
+# Required
 GEMINI_API_KEY=your_gemini_api_key_here
-```
 
-### 3. Run Development Server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to see the application.
-
-## 📁 Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── api/               # API Routes (Vercel Serverless Functions)
-│   │   ├── analyze/       # AI analysis endpoint
-│   │   ├── history/       # Analysis history CRUD
-│   │   └── url-inspector/ # Safe URL inspection
-│   ├── history/           # History pages
-│   └── page.tsx           # Main application
-├── components/            # React components
-│   ├── Layout.tsx         # Main layout with dual-panel design
-│   ├── ChatInterface.tsx  # Conversational UI
-│   ├── ScamAnalysis.tsx   # Analysis results display
-│   └── SupportWidget.tsx  # Donation/support widget
-├── hooks/                 # Custom React hooks
-│   └── useScamAnalysis.ts # Main analysis hook
-├── lib/                   # Core services
-│   ├── gemini-service.ts  # Gemini AI integration
-│   ├── history-service.ts # Analysis history management
-│   ├── middleware/        # Security & rate limiting
-│   ├── security/          # Advanced security features
-│   └── storage/           # Storage providers (Memory/DynamoDB)
-├── types/                 # TypeScript definitions
-└── utils/                 # Utility functions
-```
-
-## 🔧 API Endpoints
-
-### Analysis
-- `POST /api/analyze` - AI-powered scam analysis with multimodal support
-  - Accepts: text, images, URLs
-  - Returns: Comprehensive analysis with risk scores
-
-### History
-- `GET /api/history` - List all analysis history
-- `POST /api/history` - Save new analysis
-- `GET /api/history/[id]` - Get specific analysis
-- `POST /api/history/[id]/feedback` - Submit feedback
-
-### Utilities
-- `POST /api/url-inspector` - Safe URL inspection without visiting
-
-## 🚀 Deployment
-
-### Quick Deploy to Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/LionSpaceAdmin/newlihunt)
-
-### Manual Deployment
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Login to Vercel
-vercel login
-
-# Deploy to production
-vercel --prod
-```
-
-### Environment Variables
-
-Required in Vercel dashboard or `.env.local`:
-
-```bash
-GEMINI_API_KEY=your_gemini_api_key_here
-NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
-```
-
-Optional (for production storage):
-```bash
+# Optional (for AWS deployment)
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=your_aws_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret
 DYNAMODB_TABLE_NAME=scam-hunt-analyses
 ```
 
-## 📚 Documentation
-
-- [Spec Documentation](./.kiro/specs/scam-hunt-platform/) - Complete project specifications
-  - [Requirements](./.kiro/specs/scam-hunt-platform/requirements.md)
-  - [Design](./.kiro/specs/scam-hunt-platform/design.md)
-  - [Tasks](./.kiro/specs/scam-hunt-platform/tasks.md)
-- [AWS Deployment](./aws/README.md) - AWS SAM deployment guide
-
-## 🧪 Testing
+### 3. Development Server
 
 ```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm test -- --watch
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run specific test file
-npm test -- src/components/__tests__/ChatInterface.test.tsx
+pnpm dev
 ```
 
-### Test Coverage
+Visit [http://localhost:3000](http://localhost:3000) to access the platform.
 
-- Unit tests for components and hooks
-- Integration tests for API routes
-- E2E tests for complete workflows
-- Security and performance tests
+## 📁 Project Structure
+
+```
+src/
+├── app/                      # Next.js App Router
+│   ├── api/                 # Serverless API Routes
+│   │   ├── analyze/         # AI analysis endpoint
+│   │   ├── history/         # Analysis history management
+│   │   ├── upload/          # Secure image upload
+│   │   └── url-inspector/   # Safe URL analysis
+│   ├── history/             # Analysis history pages
+│   ├── profile/             # User profile and statistics
+│   └── layout.tsx           # Root layout with metadata
+├── components/              # React Components
+│   ├── Layout.tsx           # Main dual-panel layout
+│   ├── ChatInterface.tsx    # Conversational analysis interface
+│   ├── AnalysisPanel.tsx    # Results visualization
+│   ├── StatusIcon.tsx       # Professional status graphics
+│   ├── FlagCard.tsx         # Risk factor display
+│   ├── OnboardingFlow.tsx   # User onboarding experience
+│   └── SupportWidget.tsx    # Mission support integration
+├── hooks/                   # Custom React Hooks
+│   └── useScamAnalysis.ts   # Main analysis state management
+├── lib/                     # Core Services
+│   ├── ai/                  # AI integration modules
+│   ├── storage/             # Storage providers (Memory/DynamoDB)
+│   ├── security/            # Security and validation
+│   └── exportUtils.ts       # Report generation utilities
+├── types/                   # TypeScript definitions
+└── utils/                   # Utility functions
+```
+
+## 🔧 API Endpoints
+
+### Core Analysis
+- `POST /api/analyze` - Comprehensive AI-powered scam analysis
+  - **Input**: Text, images, URLs, conversation history
+  - **Output**: Streaming response with structured JSON analysis
+  - **Features**: Dual-score framework, risk detection, recommendations
+
+### History Management
+- `GET /api/history` - Retrieve user's analysis history
+- `POST /api/history` - Save completed analysis
+- `GET /api/history/[id]` - Get specific analysis details
+- `POST /api/history/[id]/feedback` - Submit user feedback
+
+### Security Utilities
+- `POST /api/upload` - Secure image upload to AWS S3
+- `POST /api/url-inspector` - Safe URL content analysis
+
+## 🚀 Deployment Options
+
+### Vercel (Recommended)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-repo/scam-hunt-platform)
+
+```bash
+# Install Vercel CLI
+pnpm add -g vercel
+
+# Deploy to production
+vercel --prod
+```
+
+### AWS Infrastructure
+
+Complete AWS deployment using SAM or CDK:
+
+```bash
+# Deploy AWS backend
+cd aws/
+sam build
+sam deploy --guided
+```
+
+## 🧪 Testing & Quality
+
+### Test Suite
+```bash
+# Run all tests
+pnpm test
+
+# Watch mode
+pnpm test:watch
+
+# Coverage report
+pnpm test:coverage
+
+# E2E tests
+pnpm test:e2e
+```
+
+### Code Quality
+```bash
+# Linting
+pnpm lint
+
+# Type checking
+pnpm type-check
+
+# Format code
+pnpm format
+```
 
 ## 🔒 Security Features
 
-- **Input Sanitization**: Advanced validation for all user inputs
-- **Rate Limiting**: Per-IP rate limiting on API endpoints
-- **Security Headers**: CSP, HSTS, X-Frame-Options, etc.
-- **Safe URL Inspection**: Analyze URLs without visiting them
-- **User Privacy**: Anonymous user identification with hashing
-- **Security Monitoring**: Event logging and monitoring system
-- **XSS Protection**: DOMPurify for content sanitization
+### Multi-Layer Protection
+- **Input Sanitization**: DOMPurify and custom validation
+- **Rate Limiting**: IP-based and session-based throttling
+- **Security Headers**: CSP, HSTS, X-Frame-Options
+- **Anonymous Identification**: Privacy-preserving user tracking
+- **Safe URL Analysis**: Inspect without visiting suspicious sites
 
-## 📈 Performance
+### AWS Security
+- **API Key Protection**: Secured in Lambda environment variables
+- **Pre-signed URLs**: Secure S3 file uploads with expiration
+- **Lambda Authorizers**: Custom authentication and authorization
+- **CloudWatch Monitoring**: Security event logging and alerting
 
-- **Edge Network**: Vercel Edge Functions for global low-latency
-- **Turbopack**: Next.js 16 with Turbopack for faster builds
+## 📈 Performance Optimizations
+
+### Frontend
+- **Edge Network**: Vercel global CDN deployment
 - **Image Optimization**: Next.js Image component with WebP
-- **Code Splitting**: Automatic route-based code splitting
-- **Caching**: Smart caching strategies for API responses
-- **Optimized AI**: Efficient prompts for Gemini 2.5 Pro/Flash
+- **Code Splitting**: Automatic route-based optimization
+- **Lazy Loading**: Progressive component loading
+
+### Backend
+- **Streaming Responses**: Real-time AI analysis feedback
+- **Connection Pooling**: Efficient AWS service connections
+- **Caching Strategy**: Smart API response caching
+- **Lambda Cold Start Optimization**: Minimal initialization time
+
+## 🎨 Visual Design System
+
+### Lion Digital Guardian Graphics
+- **Brand Identity**: Consistent lion-themed visual elements
+- **Status Icons**: Professional success/warning graphics
+- **Loading States**: Engaging lion-awakening animations
+- **Empty States**: Calm-guardian placeholder graphics
+- **Background Patterns**: Subtle cyber-grid textures
+
+### Design Principles
+- **Accessibility**: High contrast, screen reader support
+- **Responsiveness**: Fluid layouts across all devices
+- **Professional Appearance**: Enterprise-grade visual hierarchy
+- **Consistent Branding**: Unified Lion Digital Guardian identity
+
+## 📚 Documentation
+
+### Project Specifications
+- [Requirements Document](./.kiro/specs/scam-hunt-platform/requirements.md) - EARS-compliant requirements
+- [Design Document](./.kiro/specs/scam-hunt-platform/design.md) - Architecture and component design
+- [Implementation Tasks](./.kiro/specs/scam-hunt-platform/tasks.md) - Development roadmap
+
+### Technical Guides
+- [AWS Deployment Guide](./aws/README.md) - Infrastructure setup
+- [Security Implementation](./docs/security.md) - Security best practices
+- [API Documentation](./docs/api.md) - Endpoint specifications
 
 ## 🤝 Contributing
 
-We welcome contributions! Please follow these steps:
+We welcome contributions to strengthen our digital defense capabilities:
 
+### Development Process
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Run tests (`npm test`)
-5. Run linting (`npm run lint`)
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
+2. Create feature branch (`git checkout -b feature/enhanced-detection`)
+3. Implement changes with tests
+4. Run quality checks (`pnpm lint && pnpm test`)
+5. Submit pull request with detailed description
 
-### Code Quality
+### Code Standards
+- TypeScript strict mode compliance
+- ESLint configuration adherence
+- Comprehensive test coverage
+- Security-first development practices
 
-- ESLint configuration enforced
-- Prettier for code formatting
-- Husky pre-commit hooks
-- TypeScript strict mode
+## 🎯 Support Our Mission
 
-## � Supporet the Project
+This platform is dedicated to protecting supporters of Israel and the IDF from online threats.
 
-This project is dedicated to protecting supporters of Israel and the IDF from online scams. 
+### Ways to Support
+- **🇮🇱 [Support FIDF](https://www.fidf.org/donate)** - Friends of the IDF official donation
+- **🎯 [Support This Project](https://buymeacoffee.com/danielhanukayeb/e/471429)** - Direct project support
+- **⭐ Star this Repository** - Help others discover this security tool
+- **🔄 Share with Community** - Spread awareness about online scam protection
 
-**Support options:**
-- 🇮🇱 [Support FIDF](https://www.fidf.org/donate) - Friends of the IDF
-- 🎯 [Support This Project](https://buymeacoffee.com/danielhanukayeb/e/471429)
-- ☕ [Buy Me a Coffee](https://www.buymeacoffee.com/danielhanukayeb)
+### Mission Impact
+- **Scam Detection**: Advanced AI-powered threat identification
+- **Community Protection**: Safeguarding Israel supporters worldwide
+- **Education**: Raising awareness about evolving scam tactics
+- **Digital Defense**: Strengthening online security for vulnerable communities
 
 ## 📄 License
 
-This project is private and proprietary.
+This project is proprietary and confidential. All rights reserved.
 
 ---
 
-**🦁 Join the pride. Roar for Israel. 🇮🇱🔥**
+**🦁 Digital Guardian - Protecting the Pride**
 
-Built with ❤️ for the safety of Israel supporters worldwide.
+*Built with dedication for the safety and security of Israel supporters worldwide. Together, we stand guard against digital deception and defend the truth online.*
+
+**Am Yisrael Chai 🇮🇱**

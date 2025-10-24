@@ -1,15 +1,15 @@
-import React, { useState, useCallback } from 'react';
-import { FullAnalysisResult, Message } from '@/types/analysis';
-import FlagCard from './FlagCard';
-import { submitFeedback } from '@/lib/feedback-service';
 import {
-  downloadTextReport,
-  downloadJSONReport,
   copyToClipboard,
+  downloadJSONReport,
+  downloadTextReport,
+  ExportOptions,
   shareAnalysis,
   validateSharingPrivacy,
-  ExportOptions,
 } from '@/lib/exportUtils';
+import { submitFeedback } from '@/lib/feedback-service';
+import { FullAnalysisResult, Message } from '@/types/analysis';
+import React, { useCallback, useState } from 'react';
+import FlagCard from './FlagCard';
 
 interface AnalysisPanelProps {
   analysis: FullAnalysisResult;
@@ -191,7 +191,9 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
               className="p-2 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
               title={t.copySummary}
             >
-              📋
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+              </svg>
             </button>
 
             {/* Native Share Button */}
@@ -200,7 +202,9 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
               className="p-2 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
               title={t.shareNative}
             >
-              📤
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
             </button>
 
             {/* Export Menu */}
@@ -210,7 +214,9 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
                 className="p-2 rounded-full bg-accent-blue text-white hover:bg-blue-600 transition-colors"
                 title={t.exportReport}
               >
-                💾
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
+                </svg>
               </button>
 
               {showExportMenu && (
@@ -222,7 +228,13 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
                     {!privacyCheck.safe && (
                       <div className="mb-3 p-2 bg-yellow-900/20 border border-yellow-600/30 rounded text-xs">
                         <div className="flex items-center space-x-1 mb-1">
-                          <span className="text-yellow-400">⚠️</span>
+                          <div className="w-4 h-4">
+                            <img
+                              src="/lion-digital-guardian/status-warning/lion-warning-triangle_v1_1x1.webp"
+                              alt="Warning"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
                           <span className="text-yellow-300 font-medium">{t.privacyWarning}</span>
                         </div>
                         <p className="text-yellow-200">{t.privacyNotice}</p>
@@ -245,7 +257,12 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
                           }}
                           className="w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600 rounded"
                         >
-                          📋 {t.copySummary}
+                          <div className="flex items-center space-x-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                            </svg>
+                            <span>{t.copySummary}</span>
+                          </div>
                         </button>
                         <button
                           onClick={() => {
@@ -263,7 +280,12 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
                           }}
                           className="w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600 rounded"
                         >
-                          📱 {t.copySocial}
+                          <div className="flex items-center space-x-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M17 3H7c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 16c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm2.5-6H9.5V7h5v6z" />
+                            </svg>
+                            <span>{t.copySocial}</span>
+                          </div>
                         </button>
                       </div>
 
@@ -400,7 +422,13 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
         {/* Support Information */}
         <div className="mt-6 pt-4 border-t border-gray-600">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-2xl">🦁</span>
+            <div className="w-8 h-8">
+              <img
+                src="/lion-digital-guardian/app-icon/68512281-D399-4756-9206-67C2C2E83BB0.webp"
+                alt="Lion Guardian"
+                className="w-full h-full object-contain rounded-lg"
+              />
+            </div>
             <h3 className="text-lg font-semibold text-white">
               {lang === 'he' ? 'תמכו במשימה שלנו' : 'Support Our Mission'}
             </h3>
@@ -417,8 +445,12 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
               rel="noopener noreferrer"
               className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors flex items-center gap-1"
             >
-              <span>🎯</span>
-              {lang === 'he' ? 'תמכו בפרויקט' : 'Support Project'}
+              <div className="flex items-center space-x-1">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <span>{lang === 'he' ? 'תמכו בפרויקט' : 'Support Project'}</span>
+              </div>
             </a>
             <a
               href="https://www.fidf.org/donate"
@@ -426,8 +458,14 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
               rel="noopener noreferrer"
               className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors flex items-center gap-1"
             >
-              <span>🇮🇱</span>
-              {lang === 'he' ? 'תמכו ב-FIDF' : 'Support FIDF'}
+              <div className="flex items-center space-x-1">
+                <div className="w-4 h-4 bg-blue-600 rounded-sm flex items-center justify-center">
+                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                </div>
+                <span>{lang === 'he' ? 'תמכו ב-FIDF' : 'Support FIDF'}</span>
+              </div>
             </a>
           </div>
         </div>

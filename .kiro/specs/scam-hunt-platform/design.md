@@ -376,6 +376,71 @@ interface ErrorResponse {
 - Client-side conversation history caching
 - S3 URL caching for uploaded images
 
+## Visual Design and Graphics Integration
+
+### Graphics Asset Management
+
+The platform utilizes a comprehensive set of custom Lion Digital Guardian graphics organized by purpose and context:
+
+#### Brand Identity Assets
+- **App Icons**: Two variants (webp and png) for different use cases
+  - `app-icon/68512281-D399-4756-9206-67C2C2E83BB0.webp` - Primary brand icon
+  - `app-icon/72C93FB8-22F5-481E-B332-949C5ABF7B5F.png` - Alternative format
+
+#### Status and Feedback Graphics
+- **Success States**: `status-success/digital-shield-success_v1_1x1.webp`
+  - Used for safe analysis results, positive feedback, and security confirmations
+- **Warning States**: `status-warning/lion-warning-triangle_v1_1x1.webp`
+  - Used for suspicious content, risk alerts, and caution indicators
+
+#### Contextual Interface Graphics
+- **Hero Banner**: `hero-banner/landing-visual_v1_16x9.webp`
+  - Primary landing page visual and onboarding screens
+- **Loading Animation**: `loading-screen/lion-awakening_v1_3x4.webp`
+  - Analysis processing states and system initialization
+- **Empty States**: `empty-state/calm-guardian_v1_4x3.webp`
+  - No content scenarios, history pages, and placeholder states
+- **Analysis Dashboard**: `report-card/analysis-dashboard_v1_16x9.webp`
+  - Analysis results visualization and report generation
+
+#### Background and Texture Elements
+- **Cyber Grid Pattern**: `background-pattern/cyber-grid_v1_tile.webp`
+  - Subtle background texture for depth without readability interference
+- **Social Sharing**: `social-card/social-share_v1_16x9.webp`
+  - Open Graph and social media preview images
+
+### Graphics Implementation Strategy
+
+#### Component-Level Integration
+```typescript
+interface GraphicsContext {
+  statusIcons: {
+    success: string;
+    warning: string;
+    loading: string;
+  };
+  brandAssets: {
+    primaryLogo: string;
+    alternativeLogo: string;
+  };
+  contextualGraphics: {
+    hero: string;
+    emptyState: string;
+    dashboard: string;
+  };
+  backgroundElements: {
+    cyberGrid: string;
+  };
+}
+```
+
+#### Usage Guidelines
+- **Status Icons**: Replace all emoji usage with appropriate graphics
+- **Loading States**: Use lion-awakening for all processing indicators
+- **Empty States**: Consistent calm-guardian across all no-content scenarios
+- **Background Patterns**: Cyber-grid as subtle overlay with low opacity
+- **Brand Consistency**: Primary app icon for navigation, alternative for help systems
+
 ## Security Implementation
 
 ### Input Validation

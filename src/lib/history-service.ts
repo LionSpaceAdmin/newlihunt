@@ -1,67 +1,204 @@
-import { StoredAnalysis } from './storage/types';
 import { FullAnalysisResult, Message } from '@/types/analysis';
-import { getUserId } from './user-identification';
+import { getAnonymousUserId } from '@/utils/helpers';
+
+export interface HistoryEntry {
+  id: string;
+  userId: string;
+  timestamp: Date;
+  analysis: FullAnalysisResult;
+  conversation: Message[];
+  input: {
+    message: string;
+    imageUrl?: string;
+  };
+  processingTime: number;
+  userAgent?: string;
+}
 
 export interface SaveAnalysisRequest {
   analysis: FullAnalysisResult;
   conversation: Message[];
-  input: { message: string; imageUrl?: string };
-  processingTime?: number;
+  input: {
+    message: string;
+    imageUrl?: string;
+  };
+  processingTime: number;
 }
 
-export interface HistoryResponse {
-  success: boolean;
-  history?: StoredAnalysis[];
-  provider?: 'dynamodb' | 'memory';
-  error?: string;
-  message?: string;
-}
-
-export interface AnalysisResponse {
-  success: boolean;
-  analysis?: StoredAnalysis;
-  provider?: 'dynamodb' | 'memory';
-  error?: string;
-  message?: string;
-}
-
-export interface SaveResponse {
+export interface SaveAnalysisResponse {
   success: boolean;
   id?: string;
-  provider?: 'dynamodb' | 'memory';
   error?: string;
-  message?: string;
 }
 
-export class HistoryService {
-  private baseUrl: string;
+export interface HistoryService {
+  saveAnalysis(request: SaveAnalysisRequest): Promise<SaveAnalysisResponse>;
+  getHistory(userId?: string): Promise<HistoryEntry[]>;
+  getAnalysisById(id: string): Promise<HistoryEntry | null>;
+  deleteAnalysis(id: string): Promise<boolean>;
+  clearHistory(userId?: string): Promise<boolean>;
+}
+
+/**
+ * Local storage implementation of history service
+ */
+class LocalHistoryService implements HistoryService {
+  private readonly storageKey = 'scam-hunter-history';
+  private readonly maxEntries = 100;
+
+  async saveAnalysis(request: SaveAnalysisRequest): Promise<SaveAnalysisResponse> {
+    try {
+      const userId = getAnonymousUserId();
+      const id = `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const entry: HistoryEntry = {
+        id,
+        userId,
+        timestamp: new Date(),
+        analysis: request.analysis,
+        conversation: request.conversation,
+        input: request.input,
+        processingTime: request.processingTime,
+        userAgent: typeof window !== 'undefined' ? navigator.userAgent : undefined,
+      };
+
+      // Get existing history
+      const history = await this.getHistory();
+      
+      // Add new entry at the beginning
+      history.unshift(entry);
+      
+      // Keep only the most recent entries
+      if (history.length > this.maxEntries) {
+        history.splice(this.maxEntries);
+      }
+
+      // Save back to storage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(this.storageKey, JSON.stringify(history));
+      }
+
+      return { success: true, id };
+    } catch (error) {
+      console.error('Failed to save analysis to history:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  async getHistory(userId?: string): Promise<HistoryEntry[]> {
+    try {
+      if (typeof window === 'undefined') return [];
+
+      const stored = localStorage.getItem(this.storageKey);
+      if (!stored) return [];
+
+      const history: HistoryEntry[] = JSON.parse(stored);
+      
+      // Convert timestamp strings back to Date objects
+      const processedHistory = history.map(entry => ({
+        ...entry,
+        timestamp: new Date(entry.timestamp),
+        conversation: entry.conversation.map(msg => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        })),
+      }));
+
+      // Filter by user ID if provided
+      if (userId) {
+        return processedHistory.filter(entry => entry.userId === userId);
+      }
+
+      // Filter by current user
+      const currentUserId = getAnonymousUserId();
+      return processedHistory.filter(entry => entry.userId === currentUserId);
+    } catch (error) {
+      console.error('Failed to get history:', error);
+      return [];
+    }
+  }
+
+  async getAnalysisById(id: string): Promise<HistoryEntry | null> {
+    try {
+      const history = await this.getHistory();
+      return history.find(entry => entry.id === id) || null;
+    } catch (error) {
+      console.error('Failed to get analysis by ID:', error);
+      return null;
+    }
+  }
+
+  async deleteAnalysis(id: string): Promise<boolean> {
+    try {
+      const history = await this.getHistory();
+      const filteredHistory = history.filter(entry => entry.id !== id);
+      
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(this.storageKey, JSON.stringify(filteredHistory));
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to delete analysis:', error);
+      return false;
+    }
+  }
+
+  async clearHistory(userId?: string): Promise<boolean> {
+    try {
+      if (userId) {
+        // Clear history for specific user
+        const allHistory = JSON.parse(localStorage.getItem(this.storageKey) || '[]');
+        const filteredHistory = allHistory.filter((entry: HistoryEntry) => entry.userId !== userId);
+        
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(this.storageKey, JSON.stringify(filteredHistory));
+        }
+      } else {
+        // Clear all history
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem(this.storageKey);
+        }
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to clear history:', error);
+      return false;
+    }
+  }
+}
+
+/**
+ * API-based history service (for future implementation)
+ */
+class APIHistoryService implements HistoryService {
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string = '/api') {
     this.baseUrl = baseUrl;
   }
 
-  async saveAnalysis(request: SaveAnalysisRequest): Promise<SaveResponse> {
+  async saveAnalysis(request: SaveAnalysisRequest): Promise<SaveAnalysisResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/history`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...request,
-          userId: getUserId(),
-        }),
+        body: JSON.stringify(request),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || data.error || 'Failed to save analysis');
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error('Failed to save analysis:', error);
+      console.error('Failed to save analysis via API:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -69,87 +206,92 @@ export class HistoryService {
     }
   }
 
-  async getUserHistory(limit: number = 50): Promise<HistoryResponse> {
+  async getHistory(userId?: string): Promise<HistoryEntry[]> {
     try {
-      const userId = getUserId();
       const url = new URL(`${this.baseUrl}/history`, window.location.origin);
-      url.searchParams.set('userId', userId);
-      url.searchParams.set('limit', limit.toString());
+      if (userId) {
+        url.searchParams.set('userId', userId);
+      }
 
       const response = await fetch(url.toString());
-      const data = await response.json();
-
+      
       if (!response.ok) {
-        throw new Error(data.message || data.error || 'Failed to retrieve history');
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      return data;
+      const data = await response.json();
+      return data.history || [];
     } catch (error) {
-      console.error('Failed to retrieve history:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
+      console.error('Failed to get history via API:', error);
+      return [];
     }
   }
 
-  async getAnalysis(id: string): Promise<AnalysisResponse> {
+  async getAnalysisById(id: string): Promise<HistoryEntry | null> {
     try {
       const response = await fetch(`${this.baseUrl}/history/${id}`);
-      const data = await response.json();
-
+      
+      if (response.status === 404) {
+        return null;
+      }
+      
       if (!response.ok) {
-        throw new Error(data.message || data.error || 'Failed to retrieve analysis');
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error('Failed to retrieve analysis:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
+      console.error('Failed to get analysis by ID via API:', error);
+      return null;
     }
   }
 
-  async submitFeedback(id: string, feedback: 'positive' | 'negative'): Promise<SaveResponse> {
+  async deleteAnalysis(id: string): Promise<boolean> {
     try {
       const response = await fetch(`${this.baseUrl}/history/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ feedback }),
+        method: 'DELETE',
       });
 
-      const data = await response.json();
+      return response.ok;
+    } catch (error) {
+      console.error('Failed to delete analysis via API:', error);
+      return false;
+    }
+  }
 
-      if (!response.ok) {
-        throw new Error(data.message || data.error || 'Failed to submit feedback');
+  async clearHistory(userId?: string): Promise<boolean> {
+    try {
+      const url = new URL(`${this.baseUrl}/history`, window.location.origin);
+      if (userId) {
+        url.searchParams.set('userId', userId);
       }
 
-      return data;
+      const response = await fetch(url.toString(), {
+        method: 'DELETE',
+      });
+
+      return response.ok;
     } catch (error) {
-      console.error('Failed to submit feedback:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
+      console.error('Failed to clear history via API:', error);
+      return false;
     }
   }
 }
 
-// Singleton instance
-let historyServiceInstance: HistoryService | null = null;
+// Service factory
+let historyService: HistoryService | null = null;
 
 export function getHistoryService(): HistoryService {
-  if (!historyServiceInstance) {
-    historyServiceInstance = new HistoryService();
+  if (!historyService) {
+    // Use local storage by default, can be switched to API later
+    historyService = new LocalHistoryService();
+    
+    // Uncomment to use API service instead:
+    // historyService = new APIHistoryService();
   }
-  return historyServiceInstance;
+  
+  return historyService;
 }
 
-// For testing purposes
-export function resetHistoryService(): void {
-  historyServiceInstance = null;
-}
+// Export service classes for testing
+export { APIHistoryService, LocalHistoryService };

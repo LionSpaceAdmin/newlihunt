@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
+import React, { useCallback, useState } from 'react';
 // Remove direct gemini import - we'll use AWS API Gateway instead
 import { FullAnalysisResult, Message } from '@/types/analysis';
 import { fileToBase64, validateImageFile } from '@/utils/helpers';
@@ -238,7 +238,9 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({
                   className="cursor-pointer inline-flex flex-col items-center"
                 >
                   <div className="w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center mb-3">
-                    <span className="text-gray-300">📎</span>
+                    <svg className="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clipRule="evenodd" />
+                    </svg>
                   </div>
                   <span className="text-accent-blue font-medium">{t.uploadButton}</span>
                   <span className="text-gray-400 text-sm">{t.uploadHint}</span>
@@ -269,7 +271,15 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({
       {/* Loading State */}
       {isAnalyzing && (
         <div className="bg-dark-gray p-6 rounded-lg text-center">
-          <div className="animate-spin w-8 h-8 border-2 border-accent-blue border-t-transparent rounded-full mx-auto mb-4" />
+          <div className="w-16 h-20 mx-auto mb-4 rounded-lg overflow-hidden animate-pulse">
+            <Image
+              src="/lion-digital-guardian/loading-screen/lion-awakening_v1_3x4.webp"
+              alt="Analyzing..."
+              width={64}
+              height={80}
+              className="w-full h-full object-cover"
+            />
+          </div>
           <h3 className="text-lg font-semibold text-white mb-2">{t.loadingText}</h3>
           <p className="text-gray-400">{t.loadingSubtext}</p>
         </div>
