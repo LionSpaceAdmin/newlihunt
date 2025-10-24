@@ -240,7 +240,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
         const errorMessage = `⚠️ Web search failed: ${error instanceof Error ? error.message : 'Internal server error'}`;
 
         // Add error message without triggering analysis
-        addMessage({
+        addMessage?.({
           role: 'assistant',
           content: errorMessage,
         });
