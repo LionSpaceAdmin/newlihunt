@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-useless-escape */
 import { SecurityEvent, SecurityLogger } from '@/lib/middleware/security';
 
 export interface SecurityMetrics {

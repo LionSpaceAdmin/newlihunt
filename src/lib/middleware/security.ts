@@ -154,6 +154,7 @@ export class InputSanitizer {
     }
 
     // Remove null bytes and control characters
+    // eslint-disable-next-line no-control-regex
     let sanitized = input.replace(/\0/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 
     // HTML encode dangerous characters
@@ -214,11 +215,14 @@ export class InputSanitizer {
     }
 
     // Remove path traversal attempts and dangerous characters
-    return filename
-      .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
-      .replace(/^\.+/, '_')
-      .replace(/\.+$/, '_')
-      .substring(0, 255);
+    return (
+      filename
+        // eslint-disable-next-line no-control-regex
+        .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
+        .replace(/^\.+/, '_')
+        .replace(/\.+$/, '_')
+        .substring(0, 255)
+    );
   }
 
   public static detectSQLInjection(input: string): boolean {

@@ -23,8 +23,11 @@ const textContent = {
     credibilityScore: 'Credibility Score',
     classification: 'Classification',
     safe: 'SAFE',
+    trusted: 'TRUSTED',
+    authentic: 'AUTHENTIC',
     suspicious: 'SUSPICIOUS',
     highRisk: 'HIGH_RISK',
+    fake_scam: 'FAKE / SCAM',
     summary: 'Summary',
     reasoning: 'Reasoning',
     recommendations: 'Recommendations',
@@ -54,8 +57,11 @@ const textContent = {
     credibilityScore: 'ציון אמינות',
     classification: 'סיווג',
     safe: 'בטוח',
+    trusted: 'מהימן',
+    authentic: 'אותנטי',
     suspicious: 'חשוד',
     highRisk: 'בסיכון גבוה',
+    fake_scam: 'מזויף / הונאה',
     summary: 'סיכום',
     reasoning: 'הנמקה',
     recommendations: 'המלצות',
@@ -92,10 +98,14 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
   const getClassificationColor = (classification: string) => {
     switch (classification) {
       case 'SAFE':
+      case 'TRUSTED':
         return 'bg-success-green';
+      case 'AUTHENTIC':
+        return 'bg-blue-500'; // New: Medium risk + High credibility
       case 'SUSPICIOUS':
         return 'bg-warning-yellow';
       case 'HIGH_RISK':
+      case 'FAKE_SCAM':
         return 'bg-danger-red';
       default:
         return 'bg-gray-500';
@@ -192,7 +202,11 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
               title={t.copySummary}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
 
@@ -203,7 +217,11 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
               title={t.shareNative}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
 
@@ -259,7 +277,11 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
                         >
                           <div className="flex items-center space-x-2">
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                              <path
+                                fillRule="evenodd"
+                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                                clipRule="evenodd"
+                              />
                             </svg>
                             <span>{t.copySummary}</span>
                           </div>

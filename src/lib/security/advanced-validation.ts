@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-control-regex */
+/* eslint-disable no-useless-escape */
 import { SecurityLogger } from '@/lib/middleware/security';
 
 export interface ValidationResult {

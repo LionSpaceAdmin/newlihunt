@@ -2,6 +2,10 @@ export enum Classification {
   SAFE = 'SAFE',
   SUSPICIOUS = 'SUSPICIOUS',
   HIGH_RISK = 'HIGH_RISK',
+  // LionsOfZion v1.3 - New classifications from matrix
+  TRUSTED = 'TRUSTED', // Low risk + High credibility
+  AUTHENTIC = 'AUTHENTIC', // Medium risk + High credibility
+  FAKE_SCAM = 'FAKE_SCAM', // High risk + Low credibility (alias for HIGH_RISK)
 }
 
 export enum Severity {
@@ -16,6 +20,14 @@ export interface DetectedRule {
   severity: Severity;
   description: string;
   points: number; // Positive for risk, negative for credibility
+  category?: 'Legitimate' | 'Suspicious' | 'Fake'; // LionsOfZion v1.3 - Signal categorization
+  imageIntelligence?: {
+    // Optional field for reverse image search findings
+    isStolen?: boolean;
+    isAIGenerated?: boolean;
+    isReused?: boolean;
+    source?: string;
+  };
 }
 
 export interface DebiasingStatus {
