@@ -197,6 +197,11 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
       setIsLoading(true);
 
       try {
+        const conversationHistory = messages.map(message => ({
+          role: message.role,
+          parts: [{ text: message.content }],
+        }));
+
         const requestBody = {
           message: content,
           // Handle both S3 URLs and base64 data URLs
@@ -207,7 +212,7 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
             imageUrl && imageUrl.startsWith('data:')
               ? imageUrl.split(';')[0].split(':')[1]
               : undefined,
-          conversationHistory: messages.slice(-5), // Send last 5 messages for context
+          conversationHistory: conversationHistory,
         };
 
         const response = await fetch(`${finalConfig.apiUrl}/analyze`, {

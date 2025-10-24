@@ -15,7 +15,10 @@ interface RateLimitEntry {
 }
 
 // In-memory store for rate limiting (in production, use Redis)
-const rateLimitStore = new Map<string, RateLimitEntry>();
+export const rateLimitStore = new Map<string, RateLimitEntry>();
+
+// Queue for sequential processing of checkRateLimit calls
+const queue: Promise<any>[] = [];
 
 // Cleanup expired entries every 5 minutes
 setInterval(
@@ -77,36 +80,65 @@ export class RateLimiter {
     resetTime: number;
     retryAfter?: number;
   }> {
-    const key = this.getClientKey(request);
-    const now = Date.now();
+    const operation = async () => {
+      const key = this.getClientKey(request);
+      const now = Date.now();
 
-    let entry = rateLimitStore.get(key);
+      let entry = rateLimitStore.get(key);
 
-    // Initialize or reset if window has passed
-    if (!entry || entry.resetTime < now) {
-      entry = {
-        count: 0,
-        resetTime: now + this.config.windowMs,
+      // Initialize or reset if window has passed
+      if (!entry || entry.resetTime < now) {
+        entry = {
+          count: 0,
+          resetTime: now + this.config.windowMs,
+        };
+        rateLimitStore.set(key, entry);
+      }
+
+      const allowed = entry.count < this.config.maxRequests;
+
+      // Increment count if request is allowed
+      if (allowed) {
+        entry.count++;
+      }
+
+      const remaining = Math.max(0, this.config.maxRequests - entry.count);
+      const retryAfter = allowed ? undefined : Math.ceil((entry.resetTime - now) / 1000);
+
+      return {
+        allowed,
+        limit: this.config.maxRequests,
+        remaining,
+        resetTime: entry.resetTime,
+        retryAfter,
       };
-      rateLimitStore.set(key, entry);
-    }
-
-    const allowed = entry.count < this.config.maxRequests;
-    const remaining = Math.max(0, this.config.maxRequests - entry.count);
-    const retryAfter = allowed ? undefined : Math.ceil((entry.resetTime - now) / 1000);
-
-    // Increment count if request is allowed
-    if (allowed) {
-      entry.count++;
-    }
-
-    return {
-      allowed,
-      limit: this.config.maxRequests,
-      remaining,
-      resetTime: entry.resetTime,
-      retryAfter,
     };
+
+    // Add the operation to the queue
+    const promise = Promise.resolve().then(() => operation());
+    queue.push(promise);
+    // Remove the promise from the queue once it's settled
+    promise.finally(() => {
+      const index = queue.indexOf(promise);
+      if (index > -1) {
+        queue.splice(index, 1);
+      }
+    });
+
+    return promise;
+  }
+
+  public cleanup() {
+    const now = Date.now();
+    for (const [key, entry] of rateLimitStore.entries()) {
+      if (entry.resetTime < now) {
+        rateLimitStore.delete(key);
+      }
+    }
+  }
+
+  public getStore() {
+    return rateLimitStore;
   }
 
   public createMiddleware() {
@@ -131,12 +163,6 @@ export class RateLimiter {
 
         return response;
       }
-
-      // Add rate limit headers to successful responses
-      const response = NextResponse.next();
-      response.headers.set('X-RateLimit-Limit', result.limit.toString());
-      response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
-      response.headers.set('X-RateLimit-Reset', result.resetTime.toString());
 
       return null; // Allow request to continue
     };

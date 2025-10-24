@@ -9,7 +9,7 @@ import {
 import { submitFeedback } from '@/lib/feedback-service';
 import { FullAnalysisResult, Message } from '@/types/analysis';
 import React, { useCallback, useState } from 'react';
-import FlagCard from './FlagCard';
+
 
 interface AnalysisPanelProps {
   analysis: FullAnalysisResult;
@@ -95,22 +95,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
   const t = textContent[lang];
   const { analysisData, summary } = analysis;
 
-  const getClassificationColor = (classification: string) => {
-    switch (classification) {
-      case 'SAFE':
-      case 'TRUSTED':
-        return 'bg-success-green';
-      case 'AUTHENTIC':
-        return 'bg-blue-500'; // New: Medium risk + High credibility
-      case 'SUSPICIOUS':
-        return 'bg-warning-yellow';
-      case 'HIGH_RISK':
-      case 'FAKE_SCAM':
-        return 'bg-danger-red';
-      default:
-        return 'bg-gray-500';
-    }
-  };
+
 
   const handleFeedback = useCallback(
     async (type: 'up' | 'down') => {
@@ -342,104 +327,34 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
         </div>
       </div>
 
-      {/* Scores and Classification */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-dark-gray p-6 rounded-lg shadow-lg text-center">
-          <h3 className="text-xl font-semibold text-white mb-3">{t.riskScore}</h3>
-          <div className="relative w-32 h-32 mx-auto">
-            <svg className="w-full h-full" viewBox="0 0 100 100">
-              <circle
-                className="text-gray-700 stroke-current"
-                strokeWidth="10"
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-              ></circle>
-              <circle
-                className={`${analysisData.riskScore > 69 ? 'text-danger-red' : analysisData.riskScore > 30 ? 'text-warning-yellow' : 'text-success-green'} stroke-current`}
-                strokeWidth="10"
-                strokeLinecap="round"
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-                strokeDasharray={`${analysisData.riskScore * 2.51}, 251.2`}
-                transform="rotate(-90 50 50)"
-              ></circle>
-              <text
-                x="50"
-                y="55"
-                font-family="Arial"
-                fontSize="20"
-                fill="white"
-                textAnchor="middle"
-                dominantBaseline="middle"
-              >
-                {analysisData.riskScore}
-              </text>
-            </svg>
-          </div>
+      {/* Factors */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-dark-gray p-6 rounded-lg shadow-lg">
+          <h3 className="text-xl font-semibold text-white mb-3">Risk Factors</h3>
+          <ul className="list-disc list-inside space-y-2">
+            {analysisData.riskFactors.map((factor, index) => (
+              <li key={index} className="text-lg text-red-400">
+                {factor}
+              </li>
+            ))}
+          </ul>
         </div>
-
-        <div className="bg-dark-gray p-6 rounded-lg shadow-lg text-center">
-          <h3 className="text-xl font-semibold text-white mb-3">{t.credibilityScore}</h3>
-          <div className="relative w-32 h-32 mx-auto">
-            <svg className="w-full h-full" viewBox="0 0 100 100">
-              <circle
-                className="text-gray-700 stroke-current"
-                strokeWidth="10"
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-              ></circle>
-              <circle
-                className={`${analysisData.credibilityScore > 69 ? 'text-success-green' : analysisData.credibilityScore > 30 ? 'text-warning-yellow' : 'text-danger-red'} stroke-current`}
-                strokeWidth="10"
-                strokeLinecap="round"
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-                strokeDasharray={`${analysisData.credibilityScore * 2.51}, 251.2`}
-                transform="rotate(-90 50 50)"
-              ></circle>
-              <text
-                x="50"
-                y="55"
-                font-family="Arial"
-                fontSize="20"
-                fill="white"
-                textAnchor="middle"
-                dominantBaseline="middle"
-              >
-                {analysisData.credibilityScore}
-              </text>
-            </svg>
-          </div>
-        </div>
-
-        <div className="bg-dark-gray p-6 rounded-lg shadow-lg text-center flex flex-col justify-center items-center">
-          <h3 className="text-xl font-semibold text-white mb-3">{t.classification}</h3>
-          <div
-            className={`px-5 py-2 rounded-full text-white font-bold text-lg ${getClassificationColor(analysisData.classification)}`}
-          >
-            {t[analysisData.classification.toLowerCase() as keyof typeof t]}
-          </div>
+        <div className="bg-dark-gray p-6 rounded-lg shadow-lg">
+          <h3 className="text-xl font-semibold text-white mb-3">Credibility Factors</h3>
+          <ul className="list-disc list-inside space-y-2">
+            {analysisData.credibilityFactors.map((factor, index) => (
+              <li key={index} className="text-lg text-green-400">
+                {factor}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
       {/* Recommendations */}
       <div className="bg-dark-gray p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-white mb-4">{t.recommendations}</h2>
-        <ul className="list-disc list-inside space-y-2">
-          {analysisData.recommendations.map((rec, index) => (
-            <li key={index} className="text-lg">
-              {rec}
-            </li>
-          ))}
-        </ul>
+        <p className="text-lg leading-relaxed">{analysisData.recommendation}</p>
 
         {/* Support Information */}
         <div className="mt-6 pt-4 border-t border-gray-600">
@@ -491,65 +406,6 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ analysis, conversation, l
             </a>
           </div>
         </div>
-      </div>
-
-      {/* Detected Rules */}
-      <div className="bg-dark-gray p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-white mb-4">{t.detectedRules}</h2>
-        <div className="space-y-4">
-          {analysisData.detectedRules.map(rule => (
-            <FlagCard key={rule.id} rule={rule} lang={lang} />
-          ))}
-        </div>
-      </div>
-
-      {/* Reasoning */}
-      <div className="bg-dark-gray p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-white mb-4">{t.reasoning}</h2>
-        <p className="text-lg leading-relaxed">{analysisData.reasoning}</p>
-      </div>
-
-      {/* Debiasing Status */}
-      <div className="bg-dark-gray p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-white mb-4">{t.debiasingStatus}</h2>
-        <ul className="list-disc list-inside space-y-2">
-          <li>
-            {t.anonymousProfileNeutralized}:{' '}
-            <span
-              className={
-                analysisData.debiasingStatus.anonymous_profile_neutralized
-                  ? 'text-success-green'
-                  : 'text-danger-red'
-              }
-            >
-              {analysisData.debiasingStatus.anonymous_profile_neutralized ? 'Yes' : 'No'}
-            </span>
-          </li>
-          <li>
-            {t.patrioticTokensNeutralized}:{' '}
-            <span
-              className={
-                analysisData.debiasingStatus.patriotic_tokens_neutralized
-                  ? 'text-success-green'
-                  : 'text-danger-red'
-              }
-            >
-              {analysisData.debiasingStatus.patriotic_tokens_neutralized ? 'Yes' : 'No'}
-            </span>
-          </li>
-          <li>
-            {t.sentimentPenaltyCapped}:{' '}
-            <span
-              className={
-                analysisData.debiasingStatus.sentiment_penalty_capped
-                  ? 'text-success-green'
-                  : 'text-danger-red'
-              }
-            >
-              {analysisData.debiasingStatus.sentiment_penalty_capped ? 'Yes' : 'No'}
-            </span>
-          </li>
-        </ul>
       </div>
     </div>
   );

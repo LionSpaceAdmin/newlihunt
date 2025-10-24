@@ -176,23 +176,7 @@ export class InputSanitizer {
     if (!input || typeof input !== 'string') {
       return '';
     }
-
-    // Server-safe HTML sanitization
-    return input
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-      .replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '')
-      .replace(/<link\b[^<]*(?:(?!<\/link>)<[^<]*)*<\/link>/gi, '')
-      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '') // Remove event handlers
-      .replace(/javascript:/gi, '') // Remove javascript: URLs
-      .replace(/data:/gi, '') // Remove data: URLs
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;');
+    return input.replace(/(<([^>]+)>)/gi, '');
   }
 
   public static validateEmail(email: string): boolean {
@@ -214,15 +198,15 @@ export class InputSanitizer {
       return 'unknown';
     }
 
-    // Remove path traversal attempts and dangerous characters
-    return (
-      filename
-        // eslint-disable-next-line no-control-regex
-        .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
-        .replace(/^\.+/, '_')
-        .replace(/\.+$/, '_')
-        .substring(0, 255)
-    );
+    // Remove path traversal attempts
+    let sanitized = filename.replace(/\.\.[\/\\]/g, '');
+
+    // Replace leading dots
+    sanitized = sanitized.replace(/^\.+/, '_');
+
+    // Remove dangerous characters
+    // eslint-disable-next-line no-control-regex
+    return sanitized.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').substring(0, 255);
   }
 
   public static detectSQLInjection(input: string): boolean {

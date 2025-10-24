@@ -47,7 +47,7 @@ export const uploadImage = async (
     if (!validation.isValid) {
       return {
         success: false,
-        error: 'Invalid file',
+        error: validation.error, // Use the specific error from validation
         message: validation.error || 'File validation failed',
         retryable: false,
       };

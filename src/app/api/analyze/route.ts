@@ -6,11 +6,7 @@ interface AnalyzeRequest {
   imageBase64?: string;
   imageMimeType?: string;
   imageUrl?: string;
-  conversationHistory?: Array<{
-    role: 'user' | 'assistant';
-    content: string;
-    imageUrl?: string;
-  }>;
+  conversationHistory?: { role: string; parts: { text: string }[] }[];
 }
 
 // Simple input sanitization
@@ -36,7 +32,7 @@ function sanitizeText(text: string, maxLength: number = 10000): string {
 async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, imageBase64, imageMimeType, imageUrl }: AnalyzeRequest = body;
+    const { message, imageBase64, imageMimeType, imageUrl, conversationHistory }: AnalyzeRequest = body;
 
     // Validate input
     if (!message && !imageBase64 && !imageUrl) {
@@ -109,14 +105,7 @@ async function handlePOST(request: NextRequest) {
 
     // Call Gemini API for analysis with timeout
     const startTime = Date.now();
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Analysis timeout after 30 seconds')), 30000);
-    });
-
-    const analysisResult = (await Promise.race([
-      analyzeScam(sanitizedMessage, processedImageBase64, processedImageMimeType),
-      timeoutPromise,
-    ])) as any;
+    const analysisResult = (await analyzeScam(sanitizedMessage, conversationHistory || [], processedImageBase64, processedImageMimeType)) as any;
 
     // Add metadata
     const result = {
@@ -127,15 +116,12 @@ async function handlePOST(request: NextRequest) {
         processingTime: Date.now() - startTime,
         inputLength: sanitizedMessage.length,
         hasImage: !!processedImageBase64,
-        version: '2.1.0',
       },
     };
 
     // Log successful analysis
     console.log('Analysis completed:', {
-      riskScore: analysisResult.analysisData.riskScore,
       classification: analysisResult.analysisData.classification,
-      detectedRulesCount: analysisResult.analysisData.detectedRules.length,
       processingTime: result.metadata.processingTime,
       hasImage: !!processedImageBase64,
       inputLength: sanitizedMessage.length,
