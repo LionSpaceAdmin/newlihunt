@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { analyzeScam } from '@/lib/gemini-service';
+import { NextRequest, NextResponse } from 'next/server';
 
 interface AnalyzeRequest {
   message: string;
@@ -107,13 +107,16 @@ async function handlePOST(request: NextRequest) {
       processedImageMimeType = imageMimeType;
     }
 
-    // Call Gemini API for analysis
+    // Call Gemini API for analysis with timeout
     const startTime = Date.now();
-    const analysisResult = await analyzeScam(
-      sanitizedMessage,
-      processedImageBase64,
-      processedImageMimeType
-    );
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Analysis timeout after 25 seconds')), 25000);
+    });
+
+    const analysisResult = (await Promise.race([
+      analyzeScam(sanitizedMessage, processedImageBase64, processedImageMimeType),
+      timeoutPromise,
+    ])) as any;
 
     // Add metadata
     const result = {

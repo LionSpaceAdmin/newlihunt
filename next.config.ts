@@ -3,7 +3,7 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   // Enable React Compiler for better performance
   reactCompiler: true,
-  
+
   // Optimize images
   images: {
     formats: ['image/webp', 'image/avif'],
@@ -17,15 +17,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  
+
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: ['@google/generative-ai'],
   },
-  
+
   // Turbopack configuration (Next.js 16 default)
   turbopack: {},
-  
+
   // Security headers
   async headers() {
     return [
@@ -36,11 +36,11 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com https://cdnjs.buymeacoffee.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://generativelanguage.googleapis.com https://vitals.vercel-insights.com",
+              "connect-src 'self' https://generativelanguage.googleapis.com https://vitals.vercel-insights.com https://buymeacoffee.com https://cdnjs.buymeacoffee.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
@@ -58,7 +58,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  
+
   // Redirects for better SEO
   async redirects() {
     return [
@@ -69,22 +69,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  
+
   // Environment variables validation
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  
+
   // Output configuration for deployment
   output: 'standalone',
-  
+
   // Disable x-powered-by header
   poweredByHeader: false,
-  
+
   // Compress responses
   compress: true,
-  
-
 };
 
 export default nextConfig;

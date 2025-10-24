@@ -190,7 +190,15 @@ export async function analyzeScam(
   imageMimeType?: string
 ): Promise<FullAnalysisResult> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-pro',
+      generationConfig: {
+        temperature: 0.1,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+      },
+    });
 
     // Prepare the prompt
     const prompt = `${SYSTEM_PROMPT}\n\nAnalyze this content for scam indicators:\n\n${text}`;
