@@ -12,7 +12,7 @@ interface AnalysisConfig {
 }
 
 const DEFAULT_CONFIG: AnalysisConfig = {
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || '/api',
+  apiUrl: '/api', // Always use relative API path
   websocketUrl: undefined, // Disable WebSocket for now
   timeout: 30000, // 30 seconds
   retryAttempts: 3,

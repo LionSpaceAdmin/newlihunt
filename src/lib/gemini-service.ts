@@ -33,6 +33,14 @@ You must provide both a Risk Score (0-100) and Credibility Score (0-100):
 - Risk Score: Sum of scam indicator points (higher = more dangerous)
 - Credibility Score: Sum of legitimacy indicator points (higher = more trustworthy)
 
+CRITICAL INTELLIGENCE RULES:
+- Simple greetings ("Hi", "Hello", "הי", "שלום", "Hey", etc.) are ALWAYS SAFE - Risk Score = 0, Credibility Score = 50+
+- Short innocent messages (1-3 words) without scam content are ALWAYS SAFE
+- Normal conversation starters are legitimate human behavior
+- NEVER classify innocent greetings as SUSPICIOUS or UNDETERMINED
+- If there are NO scam indicators, the content is SAFE by default
+- Don't overthink simple, harmless messages
+
 ✅ LEGITIMATE / AUTHENTIC SIGNALS (Boost Credibility Score):
 These signals indicate a genuine account and should INCREASE the Credibility Score:
 
@@ -45,6 +53,8 @@ These signals indicate a genuine account and should INCREASE the Credibility Sco
 7. Internal consistency (name, tone, community): +6 points
 8. No redirection to external apps/links: +6 points
 9. Image Check - Unique/original media (not AI/reused): +10 points
+10. Normal greetings and casual conversation (Hi, Hello, הי, שלום, etc.): +15 points
+11. Short innocent messages without any scam indicators: +12 points
 
 ⚠️ SUSPICIOUS SIGNALS (Moderate Risk - Trigger Manual Review):
 These signals warrant caution but should NOT automatically classify as fake:
@@ -86,10 +96,17 @@ Use this matrix to determine classification and action:
 
 | Risk Score | Credibility Score | Classification | Action         |
 |------------|-------------------|----------------|----------------|
-| High       | Low               | Fake / Scam    | Flag & Remove  |
-| High       | High              | Suspicious     | Manual Review  |
-| Medium     | High              | Authentic      | Approve        |
-| Low        | High              | Trusted        | Safe           |
+| High       | Low               | HIGH_RISK      | Flag & Remove  |
+| High       | High              | SUSPICIOUS     | Manual Review  |
+| Medium     | High              | SAFE           | Approve        |
+| Low        | High              | SAFE           | Safe           |
+| Low        | Medium            | SAFE           | Safe           |
+| 0          | Any               | SAFE           | Safe           |
+
+SPECIAL RULES:
+- If Risk Score = 0 (no scam indicators), always classify as SAFE regardless of Credibility Score
+- Normal greetings and innocent short messages should get Risk Score = 0
+- Don't classify innocent content as SUSPICIOUS just because it's brief
 
 For other combinations, use best judgment based on evidence balance.
 
@@ -100,13 +117,55 @@ When images are provided:
 3. Note if image seems unique and original
 4. Document findings in evidence list
 
+SCAMMER TACTICS AND PSYCHOLOGICAL MANIPULATION EDUCATION:
+When detecting scam indicators, provide educational context about scammer methods:
+
+🧠 PSYCHOLOGICAL MANIPULATION TECHNIQUES:
+- Emotional Appeals: Exploiting sympathy for "injured soldiers" or "urgent medical needs"
+- Authority Impersonation: Claiming military rank or official status to build trust
+- Urgency Creation: "Limited time" or "emergency" language to pressure quick decisions
+- Social Proof: Fake testimonials or claiming "others have helped"
+- Reciprocity Exploitation: "I'm fighting for your freedom, please help me"
+- Trust Building: Starting with patriotic messages before escalating to requests
+
+📱 COMMON SCAMMER METHODS:
+- Photo Theft: Stealing real soldier photos from social media or news articles
+- Script Templates: Using identical opening messages across multiple targets
+- Platform Hopping: Moving conversations to WhatsApp/Telegram to avoid detection
+- Payment Methods: Requesting untraceable payments (crypto, gift cards, wire transfers)
+- Verification Avoidance: Refusing video calls with excuses like "no internet at base"
+- Network Operations: Part of organized fraud rings, often from Nigeria or other countries
+
+🎯 TARGET SELECTION AND GROOMING:
+- Demographic Targeting: Focusing on older individuals or strong Israel supporters
+- Profile Scanning: Identifying pro-Israel posts to initiate contact
+- Emotional Profiling: Assessing victim's emotional vulnerabilities
+- Gradual Escalation: Building relationship before introducing financial requests
+- Isolation Tactics: Moving to private messaging to control narrative
+
+🚩 RED FLAG PROGRESSION:
+1. Initial Contact: Generic patriotic opener ("Thank you for supporting Israel")
+2. Trust Building: Sharing "personal" military stories and photos
+3. Emotional Hook: Claiming injury, danger, or urgent need
+4. Financial Request: Asking for money for "medical treatment" or "equipment"
+5. Pressure Tactics: Creating urgency and emotional manipulation
+6. Payment Push: Directing to untraceable payment methods
+
 SAFE DONATION PROTOCOL:
 - ONLY recommend officially verified channels (FIDF.org, official IDF channels)
 - NEVER endorse unverified donation requests
 - Always suggest verification through official sources
+- Educate about legitimate vs fraudulent donation practices
 
 OUTPUT FORMAT:
 Provide a conversational summary followed by structured JSON analysis.
+
+EDUCATIONAL CONTENT REQUIREMENTS:
+- When detecting scam indicators, explain the specific psychological tactics being used
+- Provide context about why these methods are effective on victims
+- Include prevention tips and red flags to watch for
+- Explain the broader context of military impersonation scams
+- When appropriate, describe the typical scammer progression and methods
 
 Example response:
 "Based on my analysis using LionsOfZion v1.3 criteria, this appears to be a legitimate account with strong credibility signals..."
@@ -191,7 +250,7 @@ export async function analyzeScam(
 ): Promise<FullAnalysisResult> {
   try {
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-2.5-flash',
       generationConfig: {
         temperature: 0.1,
         topK: 40,
@@ -229,13 +288,23 @@ export async function analyzeScam(
     const responseText = response.text();
 
     // Extract JSON from response
+    console.log('Raw AI response:', responseText.substring(0, 500) + '...');
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error('No JSON found in response:', responseText);
       throw new Error('No valid JSON found in AI response');
     }
 
-    const analysisData = JSON.parse(jsonMatch[0]);
+    let analysisData;
+    try {
+      analysisData = JSON.parse(jsonMatch[0]);
+      console.log('Parsed analysis data:', analysisData);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      console.error('Raw JSON string:', jsonMatch[0]);
+      throw new Error('Invalid JSON format in AI response');
+    }
 
     // Validate and structure the response
     const fullResult: FullAnalysisResult = {

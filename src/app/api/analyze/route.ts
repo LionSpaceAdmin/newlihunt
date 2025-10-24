@@ -110,7 +110,7 @@ async function handlePOST(request: NextRequest) {
     // Call Gemini API for analysis with timeout
     const startTime = Date.now();
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Analysis timeout after 25 seconds')), 25000);
+      setTimeout(() => reject(new Error('Analysis timeout after 30 seconds')), 30000);
     });
 
     const analysisResult = (await Promise.race([
@@ -144,12 +144,15 @@ async function handlePOST(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error('Analysis error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
 
     // Determine error type and status code
     let statusCode = 500;
     let errorMessage = 'Internal server error';
 
     if (error instanceof Error) {
+      console.error('Error message:', error.message);
+
       if (
         error.message.includes('Invalid input') ||
         error.message.includes('Missing input') ||
@@ -164,6 +167,9 @@ async function handlePOST(request: NextRequest) {
       } else if (error.message.includes('quota') || error.message.includes('rate limit')) {
         statusCode = 429;
         errorMessage = 'Rate limit exceeded';
+      } else if (error.message.includes('JSON')) {
+        statusCode = 502;
+        errorMessage = 'AI response parsing error';
       }
     }
 
