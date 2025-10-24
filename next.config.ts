@@ -76,7 +76,7 @@ const nextConfig: NextConfig = {
   },
 
   // Output configuration for deployment
-  output: 'standalone',
+  // output: 'standalone', // Removed for Vercel compatibility
 
   // Disable x-powered-by header
   poweredByHeader: false,
