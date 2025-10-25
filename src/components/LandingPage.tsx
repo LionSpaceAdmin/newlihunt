@@ -152,13 +152,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ lang = 'en' }) => {
             <section className="relative overflow-hidden">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
-                    <div
-                        className="w-full h-full bg-repeat"
-                        style={{
-                            backgroundImage: 'url(/lion-digital-guardian/background-pattern/cyber-grid_v1_tile.webp)',
-                            backgroundSize: '200px 200px',
-                        }}
-                    />
+                    <div className="w-full h-full bg-repeat bg-[url('/lion-digital-guardian/background-pattern/cyber-grid_v1_tile.webp')] bg-size-[200px_200px]" />
                 </div>
 
                 <div className="relative container mx-auto px-4 py-20">

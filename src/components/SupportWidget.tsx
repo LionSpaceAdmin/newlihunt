@@ -83,7 +83,6 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
         title={content.title}
       >
         <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 ring-2 ring-red-500 hover:ring-red-400">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/lion-digital-guardian/app-icon/68512281-D399-4756-9206-67C2C2E83BB0.webp"
             alt="Support"
@@ -118,6 +117,7 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
           <button
             onClick={() => setIsOpen(false)}
             className="p-2 text-gray-400 hover:text-white transition-colors"
+            title={content.closeButton}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -187,7 +187,6 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
               rel="noopener noreferrer"
               className="block w-full transform hover:scale-[1.02] transition-transform duration-200"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://img.buymeacoffee.com/button-api/?text=Buy me a lions&emoji=🦁&slug=danielhanukayeb&button_colour=f20707&font_colour=ffffff&font_family=Cookie&outline_colour=ffffff&coffee_colour=FFDD00"
                 alt="Buy Me A Coffee"
@@ -195,13 +194,13 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
               />
             </a>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="px-6 pb-6">
-          <p className="text-xs text-gray-500 text-center">
-            🦁 Join the pride. Roar for Israel. 🇮🇱🔥
-          </p>
+          {/* Footer */}
+          <div className="px-6 pb-6">
+            <p className="text-xs text-gray-500 text-center">
+              🦁 Join the pride. Roar for Israel. 🇮🇱🔥
+            </p>
+          </div>
         </div>
       </div>
     </div>
