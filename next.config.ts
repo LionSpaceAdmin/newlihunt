@@ -24,7 +24,10 @@ const nextConfig: NextConfig = {
   },
 
   // Turbopack configuration (Next.js 16 default)
-  turbopack: {},
+  turbopack: {
+    // Specify the project root for Turbopack
+    root: __dirname,
+  },
 
   // Security headers
   async headers() {

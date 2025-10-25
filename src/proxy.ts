@@ -70,8 +70,8 @@ function buildContentSecurityPolicy(): string {
 
     // Scripts: Allow self, inline scripts for Next.js, and Vercel analytics
     isDevelopment
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live"
-      : "script-src 'self' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com",
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://cdnjs.buymeacoffee.com"
+      : "script-src 'self' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com https://cdnjs.buymeacoffee.com",
 
     // Styles: Allow self, inline styles, and Google Fonts
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
