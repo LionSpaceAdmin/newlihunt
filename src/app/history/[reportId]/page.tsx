@@ -1,14 +1,17 @@
 'use client';
 
 import { AnalysisPanel } from '@/components/AnalysisPanel';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Navigation from '@/components/Navigation';
+import { copyToClipboard, downloadJSONReport, downloadTextReport } from '@/lib/exportUtils';
 import { getHistoryService, HistoryEntry } from '@/lib/history-service';
 import { Message } from '@/types/analysis';
 import { formatDate, formatTimestamp } from '@/utils/helpers';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import { FiShare2 } from 'react-icons/fi';
 
 const textContent = {
   en: {
@@ -62,6 +65,8 @@ const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const t = textContent[lang];
 
@@ -95,7 +100,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
   };
 
   const handleDelete = async () => {
-    if (!entry || !confirm(t.confirmDelete)) return;
+    if (!entry) return;
 
     setIsDeleting(true);
     try {
@@ -103,14 +108,11 @@ const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
       const success = await historyService.deleteAnalysis(entry.id);
 
       if (success) {
-        alert(t.deleted);
+        setShowDeleteModal(false);
         router.push('/history');
-      } else {
-        alert('Failed to delete analysis');
       }
     } catch (err) {
       console.error('Failed to delete analysis:', err);
-      alert('Failed to delete analysis');
     } finally {
       setIsDeleting(false);
     }
@@ -222,13 +224,55 @@ const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
               </div>
             </div>
 
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isDeleting ? 'Deleting...' : t.deleteAnalysis}
-            </button>
+            <div className="flex items-center space-x-2">
+              {/* Export Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800"
+                  title="Export options"
+                >
+                  <FiShare2 size={20} />
+                </button>
+                {showExportMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10">
+                    <button
+                      onClick={() => { copyToClipboard(entry.analysis, 'summary', entry.conversation); setShowExportMenu(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-t-lg"
+                    >
+                      Copy Summary
+                    </button>
+                    <button
+                      onClick={() => { copyToClipboard(entry.analysis, 'full', entry.conversation); setShowExportMenu(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                    >
+                      Copy Full Report
+                    </button>
+                    <button
+                      onClick={() => { downloadTextReport(entry.analysis, entry.conversation); setShowExportMenu(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                    >
+                      Download Text
+                    </button>
+                    <button
+                      onClick={() => { downloadJSONReport(entry.analysis, entry.conversation); setShowExportMenu(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg"
+                    >
+                      Download JSON
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Delete Button */}
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {t.deleteAnalysis}
+              </button>
+            </div>
           </div>
 
           {/* Metadata */}
@@ -284,8 +328,8 @@ const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
                   >
                     <div
                       className={`max-w-[80%] rounded-lg p-4 ${message.role === 'user'
-                          ? 'bg-accent-blue text-white'
-                          : 'bg-light-gray text-gray-300'
+                        ? 'bg-accent-blue text-white'
+                        : 'bg-light-gray text-gray-300'
                         }`}
                     >
                       <div className="flex items-center space-x-2 mb-2">
@@ -309,6 +353,19 @@ const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
             </div>
           )}
         </div>
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDelete}
+          title={t.deleteAnalysis}
+          message={t.confirmDelete}
+          confirmText="Delete"
+          cancelText={lang === 'he' ? 'ביטול' : 'Cancel'}
+          isDanger
+          isLoading={isDeleting}
+        />
       </div>
     </ErrorBoundary>
   );

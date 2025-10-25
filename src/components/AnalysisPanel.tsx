@@ -1,10 +1,12 @@
 'use client';
 
+import { copyToClipboard, downloadJSONReport, downloadTextReport } from '@/lib/exportUtils';
+import { submitFeedback } from '@/lib/feedback-service';
 import { FullAnalysisResult } from '@/types/analysis';
-import { FiAlertTriangle, FiCheckCircle, FiInfo } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { FiAlertTriangle, FiCheckCircle, FiInfo, FiShare2, FiThumbsDown, FiThumbsUp } from 'react-icons/fi';
 import { FlagCard } from './FlagCard';
-import StatusIcon from './StatusIcon';
 
 interface AnalysisPanelProps {
   analysisResult: FullAnalysisResult | null;
@@ -20,6 +22,18 @@ export function AnalysisPanel({
   analysisResult,
   isLoading,
 }: AnalysisPanelProps) {
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
+  const handleFeedback = async (feedbackType: 'up' | 'down') => {
+    if (!analysisResult) return;
+    await submitFeedback({
+      analysisId: analysisResult.metadata.timestamp,
+      feedbackType,
+    });
+    setFeedbackSubmitted(true);
+  };
+
   if (isLoading) {
     return (
       <motion.div
@@ -108,7 +122,7 @@ export function AnalysisPanel({
       {/* Header */}
       <div className="flex items-center pb-4 border-b border-gray-700">
         {renderIcon()}
-        <div>
+        <div className="flex-1">
           <h2
             className={`text-2xl font-bold ${getClassificationClass()}`}
             style={{ textShadow: '0 0 10px currentColor' }}
@@ -118,6 +132,43 @@ export function AnalysisPanel({
           <p className="text-sm text-gray-400">
             Analysis complete - {new Date(metadata.timestamp).toLocaleString()}
           </p>
+        </div>
+        <div className="relative ml-auto">
+          <button
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800"
+            title="Export options"
+          >
+            <FiShare2 size={20} />
+          </button>
+          {showExportMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10">
+              <button
+                onClick={() => { copyToClipboard(analysisResult, 'summary'); setShowExportMenu(false); }}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-t-lg"
+              >
+                Copy Summary
+              </button>
+              <button
+                onClick={() => { copyToClipboard(analysisResult, 'full'); setShowExportMenu(false); }}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+              >
+                Copy Full Report
+              </button>
+              <button
+                onClick={() => { downloadTextReport(analysisResult); setShowExportMenu(false); }}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+              >
+                Download Text
+              </button>
+              <button
+                onClick={() => { downloadJSONReport(analysisResult); setShowExportMenu(false); }}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg"
+              >
+                Download JSON
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -179,7 +230,33 @@ export function AnalysisPanel({
           </p>
         </div>
       )}
+
+      {/* Feedback Section */}
+      <div className="pt-6 mt-6 border-t border-gray-700 text-center">
+        {!feedbackSubmitted ? (
+          <>
+            <h3 className="text-lg font-semibold text-white mb-3">Was this analysis helpful?</h3>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => handleFeedback('up')}
+                className="flex items-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 font-semibold rounded-lg hover:bg-green-800 hover:border-green-700 hover:text-white transition-colors"
+              >
+                <FiThumbsUp />
+                <span>Yes</span>
+              </button>
+              <button
+                onClick={() => handleFeedback('down')}
+                className="flex items-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 font-semibold rounded-lg hover:bg-red-800 hover:border-red-700 hover:text-white transition-colors"
+              >
+                <FiThumbsDown />
+                <span>No</span>
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="text-lg text-green-400">Thank you for your feedback!</p>
+        )}
+      </div>
     </motion.div>
   );
 }
-

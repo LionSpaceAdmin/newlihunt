@@ -31,6 +31,41 @@ const nextConfig: NextConfig = {
 
   // Security headers
   async headers() {
+    const isDevelopment = process.env.NODE_ENV === 'development';
+
+    const csp = [
+      "default-src 'self'",
+      `script-src 'self' 'unsafe-inline' ${isDevelopment ? "'unsafe-eval'" : ''} https://vercel.live https://va.vercel-scripts.com https://cdnjs.buymeacoffee.com https://*.buymeacoffee.com`,
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "img-src 'self' data: https: blob:",
+      "media-src 'self' data: https:",
+      `connect-src 'self' https: wss: ${isDevelopment ? "ws: http://localhost:*" : ''} https://*.buymeacoffee.com`,
+      "frame-src 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      ...(isDevelopment ? [] : ['upgrade-insecure-requests']),
+      'block-all-mixed-content',
+    ].join('; ');
+
+    const permissionsPolicy = [
+      'camera=()',
+      'microphone=()',
+      'geolocation=()',
+      'payment=()',
+      'usb=()',
+      'magnetometer=()',
+      'gyroscope=()',
+      'accelerometer=()',
+      'ambient-light-sensor=()',
+      'autoplay=()',
+      'encrypted-media=()',
+      'fullscreen=(self)',
+      'picture-in-picture=()',
+    ].join(', ');
+
     return [
       {
         source: '/(.*)',
@@ -42,6 +77,30 @@ const nextConfig: NextConfig = {
           {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: permissionsPolicy,
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: csp,
           },
         ],
       },

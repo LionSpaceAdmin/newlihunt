@@ -195,7 +195,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ lang = 'en' }) => {
                             >
                                 {t.hero.cta}
                             </Link>
-                            <button className="px-8 py-4 border border-gray-600 text-gray-300 font-semibold rounded-lg hover:bg-gray-800 hover:border-gray-500 transition-colors">
+                            <button 
+                                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                                className="px-8 py-4 border border-gray-600 text-gray-300 font-semibold rounded-lg hover:bg-gray-800 hover:border-gray-500 transition-colors">
                                 {t.hero.learnMore}
                             </button>
                         </div>
@@ -204,7 +206,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ lang = 'en' }) => {
             </section>
 
             {/* Features Section */}
-            <section className="py-20 bg-dark-gray">
+            <section id="features" className="py-20 bg-dark-gray">
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
                         <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">

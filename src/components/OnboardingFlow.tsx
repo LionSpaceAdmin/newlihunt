@@ -279,7 +279,7 @@ const onboardingContent = {
               suspicious link in the chat interface. Scam Hunter will analyze it and provide you
               with detailed results.
             </p>
-            <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4">
+            <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 mb-4">
               <p className="text-blue-300 text-sm flex items-start space-x-2">
                 <div className="w-4 h-4 mt-0.5 flex-shrink-0">
                   <svg className="w-full h-full" fill="currentColor" viewBox="0 0 20 20">
@@ -289,6 +289,16 @@ const onboardingContent = {
                 <span><strong>Remember:</strong> You can access help anytime by clicking the help button in the bottom-right corner.</span>
               </p>
             </div>
+            <p className="text-xs text-gray-400">
+              By continuing, you agree to our{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:underline">
+                Privacy Policy
+              </a>
+              {' '}and{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:underline">
+                Terms of Service
+              </a>
+            </p>
           </div>
         ),
       },

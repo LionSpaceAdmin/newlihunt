@@ -79,7 +79,6 @@ export interface UseScamAnalysisReturn {
   isLoading: boolean;
   error: string | null;
   currentAnalysis: FullAnalysisResult | null;
-  connectionStatus?: 'disconnected' | 'connecting' | 'connected';
   storageStatus?: 'idle' | 'saving' | 'saved' | 'failed';
   sendMessage: (content: string, imageUrl?: string) => Promise<void>;
   clearConversation: () => void;

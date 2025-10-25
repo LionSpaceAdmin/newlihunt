@@ -2,20 +2,16 @@
 
 import { FullAnalysisResult, Message, UseScamAnalysisReturn } from '@/types/analysis';
 import { generateMessageId } from '@/utils/helpers';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface AnalysisConfig {
   apiUrl?: string;
-  websocketUrl?: string;
   timeout?: number;
-  retryAttempts?: number;
 }
 
 const DEFAULT_CONFIG: AnalysisConfig = {
   apiUrl: '/api', // Always use relative API path
-  websocketUrl: undefined, // Disable WebSocket for now
   timeout: 30000, // 30 seconds
-  retryAttempts: 3,
 };
 
 export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisReturn => {
@@ -23,140 +19,11 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentAnalysis, setCurrentAnalysis] = useState<FullAnalysisResult | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<
-    'disconnected' | 'connecting' | 'connected'
-  >('disconnected');
   const [storageStatus, setStorageStatus] = useState<'idle' | 'saving' | 'saved' | 'failed'>(
     'idle'
   );
 
-  const wsRef = useRef<WebSocket | null>(null);
-  const retryCountRef = useRef(0);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
-
-  // WebSocket connection management
-  const connectWebSocket = useCallback(() => {
-    if (!finalConfig.websocketUrl) return;
-
-    setConnectionStatus('connecting');
-
-    try {
-      const ws = new WebSocket(finalConfig.websocketUrl);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        console.log('WebSocket connected');
-        setConnectionStatus('connected');
-        retryCountRef.current = 0;
-      };
-
-      ws.onmessage = event => {
-        try {
-          const data = JSON.parse(event.data);
-          handleWebSocketMessage(data);
-        } catch (err) {
-          console.error('Failed to parse WebSocket message:', err);
-        }
-      };
-
-      ws.onclose = event => {
-        console.log('WebSocket disconnected:', event.code, event.reason);
-        setConnectionStatus('disconnected');
-        wsRef.current = null;
-
-        // Auto-reconnect with exponential backoff
-        if (retryCountRef.current < (finalConfig.retryAttempts || 3)) {
-          const delay = Math.pow(2, retryCountRef.current) * 1000;
-          retryCountRef.current++;
-
-          setTimeout(() => {
-            connectWebSocket();
-          }, delay);
-        }
-      };
-
-      ws.onerror = error => {
-        console.error('WebSocket error:', error);
-        setError('Connection error. Please try again.');
-      };
-    } catch (err) {
-      console.error('Failed to create WebSocket connection:', err);
-      setConnectionStatus('disconnected');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finalConfig.websocketUrl, finalConfig.retryAttempts]);
-
-  // Handle WebSocket messages
-  const handleWebSocketMessage = useCallback(
-    (data: {
-      type: string;
-      content?: string;
-      analysis?: FullAnalysisResult;
-      error?: string;
-      progress?: number;
-      message?: string;
-      result?: FullAnalysisResult;
-    }) => {
-      switch (data.type) {
-        case 'analysis_started':
-          setIsLoading(true);
-          setError(null);
-          break;
-
-        case 'progress':
-          // Could add progress indicator here
-          console.log('Analysis progress:', data.progress, data.message);
-          break;
-
-        case 'analysis_complete':
-          setIsLoading(false);
-          setCurrentAnalysis(data.result || null);
-
-          // Add AI response message
-          if (data.result) {
-            addMessage({
-              role: 'assistant',
-              content: data.result.summary,
-            });
-          }
-          break;
-
-        case 'analysis_error':
-        case 'error':
-          setIsLoading(false);
-          setError(data.message || 'Analysis failed');
-          break;
-
-        default:
-          console.log('Unknown WebSocket message type:', data.type);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  // Initialize WebSocket connection (disabled for now)
-  useEffect(() => {
-    // Skip WebSocket connection if URL is not provided
-    if (finalConfig.websocketUrl) {
-      connectWebSocket();
-    }
-
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-      // Store ref value before cleanup
-      const timeout = timeoutRef.current;
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-    };
-  }, [connectWebSocket, finalConfig.websocketUrl]);
-
-  // Add message to conversation
   const addMessage = useCallback((message: Omit<Message, 'id' | 'timestamp'>) => {
     const newMessage: Message = {
       ...message,
@@ -168,7 +35,7 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
     return newMessage;
   }, []);
 
-  // Send message via WebSocket (preferred) or REST API (fallback)
+  // Send message via REST API
   const sendMessage = useCallback(
     async (content: string, imageUrl?: string) => {
       if (!content.trim() && !imageUrl) {
@@ -184,14 +51,14 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
         imageUrl,
       });
 
-      // Use REST API directly (WebSocket disabled)
+      // Use REST API
       await sendViaRestAPI(content, imageUrl);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [addMessage]
   );
 
-  // REST API fallback
+  // REST API implementation
   const sendViaRestAPI = useCallback(
     async (content: string, imageUrl?: string) => {
       setIsLoading(true);
@@ -204,14 +71,7 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
 
         const requestBody = {
           message: content,
-          // Handle both S3 URLs and base64 data URLs
-          imageUrl: imageUrl && !imageUrl.startsWith('data:') ? imageUrl : undefined,
-          imageBase64:
-            imageUrl && imageUrl.startsWith('data:') ? imageUrl.split(',')[1] : undefined,
-          imageMimeType:
-            imageUrl && imageUrl.startsWith('data:')
-              ? imageUrl.split(';')[0].split(':')[1]
-              : undefined,
+          imageBase64DataUrl: imageUrl, // Pass the full data URL
           conversationHistory: conversationHistory,
         };
 
@@ -318,23 +178,11 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
     }
   }, [currentAnalysis, saveToHistory]);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      // Store ref value before cleanup
-      const timeout = timeoutRef.current;
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-    };
-  }, []);
-
   return {
     messages,
     isLoading,
     error,
     currentAnalysis,
-    connectionStatus,
     storageStatus,
     sendMessage,
     clearConversation,
