@@ -273,7 +273,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ lang = 'en' }) => {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 bg-gradient-to-r from-blue-900/20 to-purple-900/20">
+            <section className="py-20 bg-linear-to-r from-blue-900/20 to-purple-900/20">
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl mx-auto text-center">
                         <h2 className="text-3xl md:text-4xl font-bold mb-6">

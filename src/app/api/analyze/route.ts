@@ -1,39 +1,60 @@
-import { analyzeScam } from '@/lib/gemini-service';
-import { withMiddleware, analysisMiddleware } from '@/lib/middleware';
-import { kv } from '@vercel/kv';
-import { createHash } from 'crypto';
+import { analyzeWithGemini } from '@/lib/gemini-service';
+import { analysisMiddleware, withMiddleware } from '@/lib/middleware';
+import { Message } from '@/types/analysis';
 import { NextRequest, NextResponse } from 'next/server';
 
-// ... (interface and sanitizeText function remain the same)
+interface AnalyzeRequest {
+  message?: string;
+  imageBase64DataUrl?: string;
+  conversationHistory: Message[];
+}
+
+function sanitizeText(text: string): string {
+  return text.trim().replace(/[\p{Cc}]/gu, '');
+}
 
 async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, imageBase64DataUrl, conversationHistory }: AnalyzeRequest =
-      body;
+    const { message, imageBase64DataUrl, conversationHistory } = body as AnalyzeRequest;
 
-    // Create a hash of the request content for caching
-    const hash = createHash('sha256')
-      .update(JSON.stringify({ message, imageBase64DataUrl }))
-      .digest('hex');
-
-    // Check for cached result
-    const cachedResult = await kv.get(hash);
-    if (cachedResult) {
-      return NextResponse.json(cachedResult);
+    if (!message && !imageBase64DataUrl) {
+      return NextResponse.json({ error: 'Message or image required' }, { status: 400 });
     }
 
-    // ... (rest of the function, from input validation to calling analyzeScam)
+    const sanitizedMessage = sanitizeText(message || '');
 
-    // Store the result in cache for 24 hours
-    await kv.set(hash, result, { ex: 86400 });
+    const history = conversationHistory.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.content }],
+    }));
+
+    let base64: string | undefined;
+    let mimeType: string | undefined;
+
+    if (imageBase64DataUrl) {
+      const parts = imageBase64DataUrl.split(',');
+      if (parts.length !== 2) {
+        return NextResponse.json({ error: 'Invalid image data' }, { status: 400 });
+      }
+      mimeType = parts[0].replace('data:', '').replace(';base64', '');
+      base64 = parts[1];
+      if (!mimeType.startsWith('image/')) {
+        return NextResponse.json({ error: 'Invalid image type' }, { status: 400 });
+      }
+    }
+
+    const result = await analyzeWithGemini(sanitizedMessage, history, base64, mimeType);
 
     return NextResponse.json(result);
   } catch (error) {
-    // ... (error handling remains the same)
+    console.error('Analysis error:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Analysis failed' },
+      { status: 500 }
+    );
   }
 }
-
 // Handle OPTIONS for CORS
 async function handleOPTIONS() {
   return new NextResponse(null, {

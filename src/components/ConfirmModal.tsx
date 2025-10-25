@@ -65,6 +65,8 @@ export function ConfirmModal({
                             <button
                                 onClick={onClose}
                                 className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800"
+                                aria-label="Close modal"
+                                title="Close"
                             >
                                 <FiX size={20} />
                             </button>
@@ -100,8 +102,8 @@ export function ConfirmModal({
                                     onClick={handleConfirm}
                                     disabled={isLoading}
                                     className={`flex-1 px-4 py-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${isDanger
-                                            ? 'bg-red-600 hover:bg-red-700'
-                                            : 'bg-accent-blue hover:bg-blue-600'
+                                        ? 'bg-red-600 hover:bg-red-700'
+                                        : 'bg-accent-blue hover:bg-blue-600'
                                         }`}
                                 >
                                     {isLoading ? 'Processing...' : confirmText}

@@ -7,17 +7,14 @@ import { FullAnalysisResult, Message } from '@/types/analysis';
 import { formatTimestamp } from '@/utils/helpers';
 
 import {
-
   createImagePreview,
 
   formatFileSize,
 
   validateImageFile,
-
 } from '@/utils/uploadService';
 
 import {
-
   detectURLs,
 
   formatURLInspectionResult,
@@ -25,7 +22,6 @@ import {
   inspectURL,
 
   isLikelySuspiciousURL,
-
 } from '@/utils/urlUtils';
 
 import Image from 'next/image';
@@ -665,11 +661,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
         <div
 
-          className={`max-w-[80%] rounded-lg px-4 py-3 ${
+          className={`max-w-[80%] rounded-lg px-4 py-3 ${isUser ? 'bg-accent-blue text-white' : 'bg-dark-gray text-gray-100'
 
-            isUser ? 'bg-accent-blue text-white' : 'bg-dark-gray text-gray-100'
-
-          }`}
+            }`}
 
         >
 
@@ -678,19 +672,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
             <div className="mb-2">
 
               <Image
-
                 src={message.imageUrl}
-
                 alt="Uploaded content"
-
                 width={400}
-
                 height={200}
-
-                className="max-w-full h-auto rounded-lg"
-
-                style={{ objectFit: 'contain', maxHeight: '200px' }}
-
+                className="max-w-full h-auto rounded-lg object-contain max-h-[200px]"
               />
 
             </div>
@@ -720,22 +706,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
     <div className="flex flex-col h-full bg-black relative">
 
       {/* Background Pattern */}
-
-      <div
-
-        className="absolute inset-0 opacity-5 pointer-events-none"
-
-        style={{
-
-          backgroundImage: 'url(/lion-digital-guardian/background-pattern/cyber-grid_v1_tile.webp)',
-
-          backgroundRepeat: 'repeat',
-
-          backgroundSize: '200px 200px',
-
-        }}
-
-      />
+      <div className="absolute inset-0 opacity-5 pointer-events-none bg-[url(/lion-digital-guardian/background-pattern/cyber-grid_v1_tile.webp)] bg-repeat bg-size-[200px_200px]" />
 
       {/* Header */}
 
@@ -751,24 +722,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
         <div className="flex items-center space-x-3">
 
-          {/* Connection Status */}
-
-                {connectionStatus === 'connected'
-
-                  ? 'Live'
-
-                  : connectionStatus === 'connecting'
-
-                    ? 'Connecting...'
-
-                    : 'Offline'}
-
-              </span>
-
-            </div>
-
-          )}
-
 
 
           {/* Storage Status */}
@@ -779,19 +732,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
               <div
 
-                className={`w-2 h-2 rounded-full ${
+                className={`w-2 h-2 rounded-full ${storageStatus === 'saved'
 
-                  storageStatus === 'saved'
+                  ? 'bg-green-500'
 
-                    ? 'bg-green-500'
+                  : storageStatus === 'saving'
 
-                    : storageStatus === 'saving'
+                    ? 'bg-blue-500 animate-pulse'
 
-                      ? 'bg-blue-500 animate-pulse'
+                    : 'bg-red-500'
 
-                      : 'bg-red-500'
-
-                }`}
+                  }`}
 
               />
 
@@ -887,7 +838,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
                   className="p-3 text-sm bg-dark-gray hover:bg-light-gray text-gray-300 hover:text-white rounded-lg transition-all duration-200 text-left hover:scale-105 hover:shadow-lg animate-fade-in"
 
-                  style={{ animationDelay: `${Object.keys(t.quickActions).indexOf(key) * 100}ms` }}
 
                 >
 
@@ -945,7 +895,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
                       className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
 
-                      style={{ animationDelay: '0ms' }}
 
                     />
 
@@ -953,7 +902,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
                       className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
 
-                      style={{ animationDelay: '150ms' }}
 
                     />
 
@@ -961,7 +909,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
                       className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
 
-                      style={{ animationDelay: '300ms' }}
 
                     />
 
@@ -1036,6 +983,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
                 onClick={() => setUploadError(null)}
 
                 className="ml-3 text-red-300 hover:text-white"
+                aria-label="Dismiss error"
+                title="Dismiss"
 
               >
 
@@ -1073,7 +1022,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
             <div className="flex items-start space-x-3">
 
-              <div className="flex-shrink-0 mt-1">
+              <div className="shrink-0 mt-1">
 
                 <svg
 
@@ -1133,7 +1082,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
                             <svg
 
-                              className="w-4 h-4 text-red-400 flex-shrink-0"
+                              className="w-4 h-4 text-red-400 shrink-0"
 
                               fill="none"
 
@@ -1171,7 +1120,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
                           {isSuspicious && (
 
-                            <span className="text-xs text-red-400 bg-red-900/30 px-2 py-1 rounded flex-shrink-0">
+                            <span className="text-xs text-red-400 bg-red-900/30 px-2 py-1 rounded shrink-0">
 
                               {t.urlSafetyWarning}
 
@@ -1349,15 +1298,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
         <div
 
-          className={`relative border-2 border-dashed rounded-lg transition-colors ${
+          className={`relative border-2 border-dashed rounded-lg transition-colors ${dragActive
 
-            dragActive
+            ? 'border-accent-blue bg-blue-900/10'
 
-              ? 'border-accent-blue bg-blue-900/10'
+            : 'border-gray-600 hover:border-gray-500'
 
-              : 'border-gray-600 hover:border-gray-500'
-
-          }`}
+            }`}
 
           onDragOver={handleDragOver}
 
@@ -1375,43 +1322,43 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
               onClick={() => fileInputRef.current?.click()}
 
-              className={`flex-shrink-0 p-3 sm:p-2 transition-colors touch-manipulation text-gray-400 hover:text-accent-blue active:text-accent-blue'
+              className={`shrink-0 p-3 sm:p-2 transition-colors touch-manipulation text-gray-400 hover:text-accent-blue active:text-accent-blue'
 
               }`}
 
-                            disabled={isLoading}
+              disabled={isLoading}
 
-                            title="Upload image"
+              title="Upload image"
 
               aria-label="Upload image"
 
             >
 
-                <svg
+              <svg
 
-                  className="w-6 h-6 sm:w-5 sm:h-5"
+                className="w-6 h-6 sm:w-5 sm:h-5"
 
-                  fill="none"
+                fill="none"
 
-                  stroke="currentColor"
+                stroke="currentColor"
 
-                  viewBox="0 0 24 24"
+                viewBox="0 0 24 24"
 
-                >
+              >
 
-                  <path
+                <path
 
-                    strokeLinecap="round"
+                  strokeLinecap="round"
 
-                    strokeLinejoin="round"
+                  strokeLinejoin="round"
 
-                    strokeWidth={2}
+                  strokeWidth={2}
 
-                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
 
-                  />
+                />
 
-                </svg>
+              </svg>
 
             </button>
 
@@ -1431,13 +1378,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
               placeholder={t.placeholder}
 
-              className="flex-1 bg-transparent text-white placeholder-gray-400 resize-none focus:outline-none min-h-[44px] sm:min-h-[40px] max-h-[120px] text-base"
+              className="flex-1 bg-transparent text-white placeholder-gray-400 resize-none focus:outline-none min-h-11 sm:min-h-10 max-h-[120px] text-base"
 
               rows={1}
 
               disabled={isLoading}
 
-              style={{ fontSize: '16px' }}
 
             />
 
@@ -1449,9 +1395,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
               onClick={handleInputSubmit}
 
-                            disabled={isLoading || (!inputText.trim() && !previewImage)}
+              disabled={isLoading || (!inputText.trim() && !previewImage)}
 
-              className="flex-shrink-0 p-3 sm:p-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation"
+              className="shrink-0 p-3 sm:p-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation"
 
               aria-label="Send message"
 
@@ -1516,6 +1462,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
         <input
 
           ref={fileInputRef}
+          aria-label="Upload file"
+          title="Upload file"
 
           type="file"
 

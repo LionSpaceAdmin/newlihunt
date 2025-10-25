@@ -45,7 +45,7 @@ const onboardingContent = {
             </p>
             <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4">
               <p className="text-blue-300 text-sm flex items-start space-x-2">
-                <div className="w-4 h-4 mt-0.5 flex-shrink-0">
+                <div className="w-4 h-4 mt-0.5 shrink-0">
                   <img
                     src="/lion-digital-guardian/status-success/digital-shield-success_v1_1x1.webp"
                     alt="Shield"
@@ -98,7 +98,7 @@ const onboardingContent = {
 
             <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-4">
               <p className="text-yellow-300 text-sm flex items-start space-x-2">
-                <div className="w-4 h-4 mt-0.5 flex-shrink-0">
+                <div className="w-4 h-4 mt-0.5 shrink-0">
                   <svg className="w-full h-full" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
@@ -116,7 +116,7 @@ const onboardingContent = {
         content: (
           <div className="space-y-4">
             <div className="flex items-start space-x-4 p-4 bg-dark-gray rounded-lg">
-              <div className="flex-shrink-0 w-10 h-10 bg-green-900/30 rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-10 h-10 bg-green-900/30 rounded-full flex items-center justify-center">
                 <svg
                   className="w-5 h-5 text-green-400"
                   fill="none"
@@ -141,7 +141,7 @@ const onboardingContent = {
             </div>
 
             <div className="flex items-start space-x-4 p-4 bg-dark-gray rounded-lg">
-              <div className="flex-shrink-0 w-10 h-10 bg-blue-900/30 rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-10 h-10 bg-blue-900/30 rounded-full flex items-center justify-center">
                 <svg
                   className="w-5 h-5 text-blue-400"
                   fill="none"
@@ -165,7 +165,7 @@ const onboardingContent = {
             </div>
 
             <div className="flex items-start space-x-4 p-4 bg-dark-gray rounded-lg">
-              <div className="flex-shrink-0 w-10 h-10 bg-purple-900/30 rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-10 h-10 bg-purple-900/30 rounded-full flex items-center justify-center">
                 <svg
                   className="w-5 h-5 text-purple-400"
                   fill="none"
@@ -189,7 +189,7 @@ const onboardingContent = {
             </div>
 
             <div className="flex items-start space-x-4 p-4 bg-dark-gray rounded-lg">
-              <div className="flex-shrink-0 w-10 h-10 bg-orange-900/30 rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-10 h-10 bg-orange-900/30 rounded-full flex items-center justify-center">
                 <svg
                   className="w-5 h-5 text-orange-400"
                   fill="none"
@@ -281,7 +281,7 @@ const onboardingContent = {
             </p>
             <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 mb-4">
               <p className="text-blue-300 text-sm flex items-start space-x-2">
-                <div className="w-4 h-4 mt-0.5 flex-shrink-0">
+                <div className="w-4 h-4 mt-0.5 shrink-0">
                   <svg className="w-full h-full" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
@@ -336,7 +336,7 @@ const onboardingContent = {
             </p>
             <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4">
               <p className="text-blue-300 text-sm flex items-start space-x-2">
-                <div className="w-4 h-4 mt-0.5 flex-shrink-0">
+                <div className="w-4 h-4 mt-0.5 shrink-0">
                   <img
                     src="/lion-digital-guardian/status-success/digital-shield-success_v1_1x1.webp"
                     alt="Shield"
@@ -441,7 +441,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ lang = 'en', onComplete
           <div className="w-full bg-gray-700 rounded-full h-2">
             <div
               className="bg-accent-blue h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
             />
           </div>
         </div>
@@ -470,6 +469,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ lang = 'en', onComplete
                     ? 'bg-success-green'
                     : 'bg-gray-600'
                   }`}
+                aria-label={`Go to step ${index + 1}`}
+                title={`Step ${index + 1}`}
               />
             ))}
           </div>

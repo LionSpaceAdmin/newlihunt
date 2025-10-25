@@ -136,7 +136,7 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
           {/* FIDF Support - First Priority */}
           <button
             onClick={handleFIDFSupport}
-            className="w-full p-5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all duration-200 flex items-center justify-between shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+            className="w-full p-5 bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all duration-200 flex items-center justify-between shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
           >
             <div className="text-left">
               <div className="font-bold text-lg">{content.fidfSupport}</div>
@@ -152,7 +152,7 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
           {/* Project Support */}
           <button
             onClick={handleProjectSupport}
-            className="w-full p-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl transition-all duration-200 flex items-center justify-between shadow-md hover:shadow-lg transform hover:scale-[1.01]"
+            className="w-full p-4 bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl transition-all duration-200 flex items-center justify-between shadow-md hover:shadow-lg transform hover:scale-[1.01]"
           >
             <div className="text-left">
               <div className="font-semibold">{content.projectSupport}</div>
@@ -170,7 +170,7 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
           {/* General Support */}
           <button
             onClick={handleGeneralSupport}
-            className="w-full p-4 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-xl transition-all duration-200 flex items-center justify-between shadow-md hover:shadow-lg transform hover:scale-[1.01]"
+            className="w-full p-4 bg-linear-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-xl transition-all duration-200 flex items-center justify-between shadow-md hover:shadow-lg transform hover:scale-[1.01]"
           >
             <div className="text-left">
               <div className="font-semibold">{content.generalSupport}</div>

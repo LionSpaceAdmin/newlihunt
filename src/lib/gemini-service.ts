@@ -1,15 +1,69 @@
-import { Classification, FullAnalysisResult, Severity } from '@/types/analysis';
+import { FullAnalysisResult } from '@/types/analysis';
 import {
   FunctionCall,
   FunctionResponsePart,
   GoogleGenerativeAI,
+  HarmBlockThreshold,
+  HarmCategory,
   SchemaType,
   Tool,
-  HarmCategory,
-  HarmBlockThreshold,
 } from '@google/generative-ai';
 
-// ... (imports and constants remain the same)
+import { env } from './config';
+
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+
+const tools: Tool[] = [
+  {
+    functionDeclarations: [
+      {
+        name: 'getUserProfile',
+        description: "Get a user's social media profile information.",
+        parameters: {
+          type: SchemaType.OBJECT,
+          properties: {
+            username: {
+              type: SchemaType.STRING,
+              description: 'The username to look up.',
+            },
+          },
+          required: ['username'],
+        },
+      },
+    ],
+  },
+];
+
+const responseSchema = {
+  type: SchemaType.OBJECT as const,
+  properties: {
+    summary: { type: SchemaType.STRING },
+    classification: { type: SchemaType.STRING },
+    riskFactors: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+    credibilityFactors: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+    recommendation: { type: SchemaType.STRING },
+  },
+  required: ['summary', 'classification', 'riskFactors', 'credibilityFactors', 'recommendation'],
+};
+
+const SYSTEM_PROMPT = `You are "Scam Hunter," an advanced AI security expert specializing in online safety.`;
+
+function isAnalysisRequest(text: string, hasImage: boolean): boolean {
+  if (hasImage) return true;
+  const lowerText = text.toLowerCase();
+  const analysisKeywords = ['analyze', 'check', 'scam', 'suspicious', 'fraud', 'http', 'www.'];
+  return analysisKeywords.some(keyword => lowerText.includes(keyword));
+}
+
+export async function analyzeWithGemini(
+  text: string,
+  conversationHistory: { role: string; parts: { text: string }[] }[] = [],
+  imageBase64?: string,
+  imageMimeType?: string
+): Promise<FullAnalysisResult | string> {
+  try {
+    const isAnalysis = isAnalysisRequest(text, !!imageBase64);
 
     const model = genAI.getGenerativeModel({
       model: isAnalysis ? 'gemini-2.5-pro' : 'gemini-2.5-flash',
@@ -18,7 +72,10 @@ import {
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 8192,
-        ...(isAnalysis && { responseMimeType: 'application/json', responseSchema }),
+        ...(isAnalysis && {
+          responseMimeType: 'application/json',
+          responseSchema: responseSchema as any,
+        }),
       },
       systemInstruction: SYSTEM_PROMPT,
       safetySettings: [
@@ -89,11 +146,12 @@ import {
         summary: parsedJson.summary,
         analysisData: {
           classification: parsedJson.classification,
-          riskScore: 0, // riskScore is deprecated, but kept for type compatibility
-          credibilityScore: 0, // credibilityScore is deprecated
+          riskScore: 0,
+          credibilityScore: 0,
           riskFactors: parsedJson.riskFactors,
           credibilityFactors: parsedJson.credibilityFactors,
           recommendation: parsedJson.recommendation,
+          recommendations: [parsedJson.recommendation],
           detectedRules: [],
           reasoning: '',
           debiasingStatus: {
@@ -107,10 +165,11 @@ import {
         },
       };
     } else {
-      // ... (conversational response remains the same)
+      return responseText;
     }
-  } catch (error) {
-    // ... (error handling remains the same)
+  } catch (err) {
+    console.error('Gemini analysis error:', err);
+    throw new Error(err instanceof Error ? err.message : 'Analysis failed');
   }
 }
 

@@ -138,9 +138,9 @@ export const apiMiddleware = [
   createSecurityMiddleware(),
   createRateLimitedMiddleware(
     new RateLimiter({
-      windowMs: 15 * 60 * 1000, // 15 minutes
+      windowMs: 60 * 1000, // 1 minute
       maxRequests: 100,
-      message: 'Too many API requests. Please try again in 15 minutes.',
+      message: 'Too many requests. Please wait before making another request.',
     })
   ),
 ];
@@ -151,7 +151,7 @@ export const analysisMiddleware = [
     new RateLimiter({
       windowMs: 60 * 1000, // 1 minute
       maxRequests: 10,
-      message: 'Too many analysis requests. Please wait before submitting another analysis.',
+      message: 'Too many analysis requests. Please wait before analyzing another item.',
     })
   ),
 ];
@@ -169,17 +169,6 @@ export const uploadMiddleware = [
   ),
 ];
 
-export const historyMiddleware = [
-  createSecurityMiddleware(),
-  createRateLimitedMiddleware(
-    new RateLimiter({
-      windowMs: 60 * 1000, // 1 minute
-      maxRequests: 30,
-      message: 'Too many history requests. Please wait before making more requests.',
-    })
-  ),
-];
-
 export const urlInspectorMiddleware = [
   createSecurityMiddleware(),
   createRateLimitedMiddleware(
@@ -191,6 +180,13 @@ export const urlInspectorMiddleware = [
   ),
 ];
 
-// Export all middleware components
-export * from './rate-limiter';
-export * from './security';
+export const historyMiddleware = [
+  createSecurityMiddleware(),
+  createRateLimitedMiddleware(
+    new RateLimiter({
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 50,
+      message: 'Too many history requests. Please wait before making another request.',
+    })
+  ),
+];

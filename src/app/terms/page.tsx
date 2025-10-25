@@ -188,7 +188,7 @@ const TermsPage: React.FC = () => {
                             </section>
 
                             {/* Acceptance */}
-                            <section className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-800/30 rounded-lg p-8">
+                            <section className="bg-linear-to-r from-blue-900/20 to-purple-900/20 border border-blue-800/30 rounded-lg p-8">
                                 <h2 className="text-2xl font-bold text-white mb-4">Acceptance of Terms</h2>
                                 <p className="text-gray-300">
                                     By using Scam Hunt Platform, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service and our Privacy Policy.

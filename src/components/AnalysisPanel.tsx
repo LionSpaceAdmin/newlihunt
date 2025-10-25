@@ -79,17 +79,17 @@ export function AnalysisPanel({
       case 'HIGH_RISK':
       case 'FAKE_SCAM':
         return (
-          <FiAlertTriangle className="text-red-500 flex-shrink-0 mr-4 text-4xl" />
+          <FiAlertTriangle className="text-red-500 shrink-0 mr-4 text-4xl" />
         );
       case 'SUSPICIOUS':
         return (
-          <FiInfo className="text-yellow-500 flex-shrink-0 mr-4 text-4xl" />
+          <FiInfo className="text-yellow-500 shrink-0 mr-4 text-4xl" />
         );
       case 'SAFE':
       case 'TRUSTED':
       case 'AUTHENTIC':
         return (
-          <FiCheckCircle className="text-green-500 flex-shrink-0 mr-4 text-4xl" />
+          <FiCheckCircle className="text-green-500 shrink-0 mr-4 text-4xl" />
         );
       default:
         return null;
@@ -125,7 +125,6 @@ export function AnalysisPanel({
         <div className="flex-1">
           <h2
             className={`text-2xl font-bold ${getClassificationClass()}`}
-            style={{ textShadow: '0 0 10px currentColor' }}
           >
             {classification.replace('_', ' ')}
           </h2>

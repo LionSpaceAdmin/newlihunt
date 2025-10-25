@@ -1,10 +1,34 @@
-import { kv } from '@vercel/kv';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
-// ... (interfaces remain the same)
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+}
+
+interface RateLimiterConfig {
+  windowMs: number;
+  maxRequests: number;
+  message: string;
+  keyGenerator?: (request: NextRequest) => string;
+}
 
 export class RateLimiter {
-  // ... (constructor and key generation remain the same)
+  private config: RateLimiterConfig;
+  private entries: Map<string, RateLimitEntry> = new Map();
+
+  constructor(config: RateLimiterConfig) {
+    this.config = config;
+  }
+
+  private getClientKey(request: NextRequest): string {
+    if (this.config.keyGenerator) {
+      return this.config.keyGenerator(request);
+    }
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const realIp = request.headers.get('x-real-ip');
+    const ip = forwardedFor?.split(',')[0] || realIp || 'unknown';
+    return `ip:${ip.trim()}`;
+  }
 
   public async checkRateLimit(request: NextRequest): Promise<{
     allowed: boolean;
@@ -16,7 +40,7 @@ export class RateLimiter {
     const key = this.getClientKey(request);
     const now = Date.now();
 
-    let entry: RateLimitEntry | null = await kv.get(key);
+    let entry = this.entries.get(key);
 
     // Initialize or reset if window has passed
     if (!entry || entry.resetTime < now) {
@@ -24,16 +48,25 @@ export class RateLimiter {
         count: 0,
         resetTime: now + this.config.windowMs,
       };
+      this.entries.set(key, entry);
     }
 
     const allowed = entry.count < this.config.maxRequests;
     const remaining = allowed ? this.config.maxRequests - (entry.count + 1) : 0;
     const retryAfter = allowed ? undefined : Math.ceil((entry.resetTime - now) / 1000);
 
-    // Increment count and update store
+    // Increment count
     if (allowed) {
       entry.count++;
-      await kv.set(key, entry, { ex: Math.ceil(this.config.windowMs / 1000) }); // Set with expiration
+    }
+
+    // Clean up old entries periodically
+    if (this.entries.size > 1000) {
+      for (const [k, v] of this.entries) {
+        if (v.resetTime < now) {
+          this.entries.delete(k);
+        }
+      }
     }
 
     return {
@@ -44,14 +77,12 @@ export class RateLimiter {
       retryAfter,
     };
   }
-
-  // ... (createMiddleware remains the same)
 }
 
-// Pre-configured rate limiters for different endpoints
+// Pre-configured rate limiters
 export const apiRateLimiter = new RateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 100, // 100 requests per 15 minutes
+  windowMs: 15 * 60 * 1000,
+  maxRequests: 100,
   message: 'Too many API requests. Please try again in 15 minutes.',
 });
 

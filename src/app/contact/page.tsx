@@ -144,7 +144,7 @@ const ContactPage: React.FC = () => {
                     </div>
 
                     {/* Mission Statement */}
-                    <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-800/30 rounded-lg p-8 text-center">
+                    <div className="bg-linear-to-r from-blue-900/20 to-purple-900/20 border border-blue-800/30 rounded-lg p-8 text-center">
                         <div className="w-16 h-16 mx-auto mb-4">
                             <img
                                 src="/lion-digital-guardian/app-icon/68512281-D399-4756-9206-67C2C2E83BB0.webp"
