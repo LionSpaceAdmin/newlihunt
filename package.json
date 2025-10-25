@@ -13,6 +13,11 @@
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
     "quality": "npm run type-check && npm run lint:strict && npm run format:check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "check-env": "node scripts/check-env.js",
     "analyze": "ANALYZE=true npm run build",
     "clean": "rm -rf .next out dist"
   },
@@ -21,8 +26,8 @@
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
     "@vercel/analytics": "^1.5.0",
+    "@vercel/blob": "^2.0.0",
     "@vercel/kv": "^3.0.0",
-    "aws-sdk": "^2.1692.0",
     "framer-motion": "^12.23.24",
     "isomorphic-dompurify": "^2.30.1",
     "nanoid": "^5.1.6",
@@ -36,15 +41,21 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^16.0.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.180.0",
+    "@vitejs/plugin-react": "^5.1.0",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
+    "jsdom": "^27.0.1",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.3"
   }
 }

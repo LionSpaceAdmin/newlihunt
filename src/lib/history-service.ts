@@ -172,126 +172,18 @@ class LocalHistoryService implements HistoryService {
   }
 }
 
-/**
- * API-based history service (for future implementation)
- */
-class APIHistoryService implements HistoryService {
-  private readonly baseUrl: string;
 
-  constructor(baseUrl: string = '/api') {
-    this.baseUrl = baseUrl;
-  }
-
-  async saveAnalysis(request: SaveAnalysisRequest): Promise<SaveAnalysisResponse> {
-    try {
-      const response = await fetch(`${this.baseUrl}/history`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Failed to save analysis via API:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
-    }
-  }
-
-  async getHistory(userId?: string): Promise<HistoryEntry[]> {
-    try {
-      const url = new URL(`${this.baseUrl}/history`, window.location.origin);
-      if (userId) {
-        url.searchParams.set('userId', userId);
-      }
-
-      const response = await fetch(url.toString());
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data.history || [];
-    } catch (error) {
-      console.error('Failed to get history via API:', error);
-      return [];
-    }
-  }
-
-  async getAnalysisById(id: string): Promise<HistoryEntry | null> {
-    try {
-      const response = await fetch(`${this.baseUrl}/history/${id}`);
-      
-      if (response.status === 404) {
-        return null;
-      }
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Failed to get analysis by ID via API:', error);
-      return null;
-    }
-  }
-
-  async deleteAnalysis(id: string): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/history/${id}`, {
-        method: 'DELETE',
-      });
-
-      return response.ok;
-    } catch (error) {
-      console.error('Failed to delete analysis via API:', error);
-      return false;
-    }
-  }
-
-  async clearHistory(userId?: string): Promise<boolean> {
-    try {
-      const url = new URL(`${this.baseUrl}/history`, window.location.origin);
-      if (userId) {
-        url.searchParams.set('userId', userId);
-      }
-
-      const response = await fetch(url.toString(), {
-        method: 'DELETE',
-      });
-
-      return response.ok;
-    } catch (error) {
-      console.error('Failed to clear history via API:', error);
-      return false;
-    }
-  }
-}
 
 // Service factory
 let historyService: HistoryService | null = null;
 
 export function getHistoryService(): HistoryService {
   if (!historyService) {
-    // Use local storage by default, can be switched to API later
     historyService = new LocalHistoryService();
-    
-    // Uncomment to use API service instead:
-    // historyService = new APIHistoryService();
   }
   
   return historyService;
 }
 
-// Export service classes for testing
-export { APIHistoryService, LocalHistoryService };
+// Export service class for testing
+export { LocalHistoryService };

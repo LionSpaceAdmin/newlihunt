@@ -71,7 +71,7 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
 
         const requestBody = {
           message: content,
-          imageBase64DataUrl: imageUrl, // Pass the full data URL
+          imageUrl: imageUrl, // Pass the Blob URL
           conversationHistory: conversationHistory,
         };
 

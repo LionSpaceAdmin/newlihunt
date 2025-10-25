@@ -1,9 +1,5 @@
+import { kv } from '@vercel/kv';
 import { NextRequest } from 'next/server';
-
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
-}
 
 interface RateLimiterConfig {
   windowMs: number;
@@ -14,7 +10,6 @@ interface RateLimiterConfig {
 
 export class RateLimiter {
   private config: RateLimiterConfig;
-  private entries: Map<string, RateLimitEntry> = new Map();
 
   constructor(config: RateLimiterConfig) {
     this.config = config;
@@ -30,6 +25,62 @@ export class RateLimiter {
     return `ip:${ip.trim()}`;
   }
 
+  private async checkRateLimitWithKV(key: string): Promise<{
+    allowed: boolean;
+    limit: number;
+    remaining: number;
+    resetTime: number;
+    retryAfter?: number;
+  }> {
+    const now = Date.now();
+    const windowStart = now - this.config.windowMs;
+    const kvKey = `ratelimit:${key}`;
+
+    try {
+      // Remove old entries outside the sliding window
+      await kv.zremrangebyscore(kvKey, 0, windowStart);
+
+      // Count requests in current window
+      const count = await kv.zcard(kvKey);
+
+      const allowed = count < this.config.maxRequests;
+      const remaining = allowed ? this.config.maxRequests - (count + 1) : 0;
+
+      if (allowed) {
+        // Add current request timestamp to sorted set
+        await kv.zadd(kvKey, { score: now, member: `${now}-${Math.random()}` });
+        
+        // Set expiration to window duration (in seconds)
+        await kv.expire(kvKey, Math.ceil(this.config.windowMs / 1000));
+      }
+
+      // Calculate reset time (end of current window)
+      const oldestTimestamp = await kv.zrange(kvKey, 0, 0, { withScores: true });
+      const resetTime = oldestTimestamp.length > 0 
+        ? (oldestTimestamp[1] as number) + this.config.windowMs
+        : now + this.config.windowMs;
+
+      const retryAfter = allowed ? undefined : Math.ceil((resetTime - now) / 1000);
+
+      return {
+        allowed,
+        limit: this.config.maxRequests,
+        remaining,
+        resetTime,
+        retryAfter,
+      };
+    } catch (error) {
+      // Fail-open: if KV is unavailable, allow the request
+      console.error('Rate limiter KV error, failing open:', error);
+      return {
+        allowed: true,
+        limit: this.config.maxRequests,
+        remaining: this.config.maxRequests,
+        resetTime: now + this.config.windowMs,
+      };
+    }
+  }
+
   public async checkRateLimit(request: NextRequest): Promise<{
     allowed: boolean;
     limit: number;
@@ -38,44 +89,7 @@ export class RateLimiter {
     retryAfter?: number;
   }> {
     const key = this.getClientKey(request);
-    const now = Date.now();
-
-    let entry = this.entries.get(key);
-
-    // Initialize or reset if window has passed
-    if (!entry || entry.resetTime < now) {
-      entry = {
-        count: 0,
-        resetTime: now + this.config.windowMs,
-      };
-      this.entries.set(key, entry);
-    }
-
-    const allowed = entry.count < this.config.maxRequests;
-    const remaining = allowed ? this.config.maxRequests - (entry.count + 1) : 0;
-    const retryAfter = allowed ? undefined : Math.ceil((entry.resetTime - now) / 1000);
-
-    // Increment count
-    if (allowed) {
-      entry.count++;
-    }
-
-    // Clean up old entries periodically
-    if (this.entries.size > 1000) {
-      for (const [k, v] of this.entries) {
-        if (v.resetTime < now) {
-          this.entries.delete(k);
-        }
-      }
-    }
-
-    return {
-      allowed,
-      limit: this.config.maxRequests,
-      remaining,
-      resetTime: entry.resetTime,
-      retryAfter,
-    };
+    return this.checkRateLimitWithKV(key);
   }
 }
 

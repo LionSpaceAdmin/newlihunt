@@ -7,11 +7,9 @@ import { FullAnalysisResult, Message } from '@/types/analysis';
 import { formatTimestamp } from '@/utils/helpers';
 
 import {
-  createImagePreview,
-
   formatFileSize,
 
-  validateImageFile,
+  validateImageFile
 } from '@/utils/uploadService';
 
 import {
@@ -513,19 +511,47 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
 
 
-        // Create base64 data URL
+        // Upload to Vercel Blob
 
-        const base64DataUrl = await createImagePreview(file);
+        const formData = new FormData();
+
+        formData.append('file', file);
 
 
 
-        // Send message with the base64 URL
+        const response = await fetch('/api/upload', {
+
+          method: 'POST',
+
+          body: formData,
+
+        });
+
+
+
+        if (!response.ok) {
+
+          const error = await response.json();
+
+          throw new Error(error.error || 'Upload failed');
+
+        }
+
+
+
+        const data = await response.json();
+
+        const imageUrl = data.url;
+
+
+
+        // Send message with the Blob URL
 
         await handleSendMessage(
 
           `Attached image: ${file.name} (${formatFileSize(file.size)})`,
 
-          base64DataUrl
+          imageUrl
 
         );
 

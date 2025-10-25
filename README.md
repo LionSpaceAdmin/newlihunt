@@ -12,7 +12,9 @@ Protecting supporters of Israel and the IDF from sophisticated online scams thro
 
 - **Frontend**: Next.js 16 with React 19 deployed on Vercel Edge Network
 - **AI Engine**: Google Gemini 2.5 Pro for deep analysis + 2.5 Flash for conversational interface
-- **Backend**: Complete AWS infrastructure (Lambda, API Gateway, DynamoDB, S3, CloudFront)
+- **Backend**: Vercel Serverless Functions with Vercel KV (Redis) for rate limiting and caching
+- **Image Storage**: Vercel Blob for scalable image uploads with CDN delivery
+- **User Data**: Client-side localStorage for user history and preferences
 - **Security**: Multi-layer protection with rate limiting, input sanitization, and anonymous user identification
 - **Graphics**: Professional Lion Digital Guardian visual identity system
 
@@ -37,7 +39,7 @@ Protecting supporters of Israel and the IDF from sophisticated online scams thro
 - **Multilingual Support**: Full Hebrew and English localization
 
 ### 📊 **Analysis History & Reporting**
-- **Persistent Storage**: AWS DynamoDB with graceful in-memory fallback
+- **Client-Side Storage**: Browser localStorage for private, local history management
 - **Detailed Reports**: Comprehensive analysis with reasoning and recommendations
 - **Export Capabilities**: PDF, JSON, and social sharing options
 - **Feedback System**: User rating system for continuous improvement
@@ -57,19 +59,20 @@ Protecting supporters of Israel and the IDF from sophisticated online scams thro
 - **Package Manager**: pnpm for efficient dependency management
 - **Deployment**: Vercel with edge optimization and global CDN
 
-### Backend (AWS Infrastructure)
-- **Compute**: AWS Lambda functions with Node.js 20 runtime
-- **API Management**: AWS API Gateway with REST API and WebSocket support
-- **Database**: AWS DynamoDB with on-demand scaling
-- **File Storage**: AWS S3 with CloudFront integration
-- **CDN**: AWS CloudFront for global content delivery
-- **Monitoring**: AWS CloudWatch for logging and metrics
+### Backend
+- **Serverless Functions**: Vercel Serverless Functions with Node.js 20 runtime
+- **Rate Limiting**: Vercel KV (Redis) for persistent rate limit tracking
+- **Caching**: Vercel KV for API response caching with TTL
+- **Image Storage**: Vercel Blob for scalable file storage with CDN
+- **Image Handling**: Upload to Vercel Blob, fetch for AI analysis
+- **CDN**: Vercel Edge Network for global content delivery
+- **Monitoring**: Vercel Analytics and logging
 
 ### AI Integration
 - **AI Model**: Google Gemini 2.5 Pro via @google/genai SDK
-- **Processing**: Server-side AI processing in Lambda functions
-- **Streaming**: WebSocket connections for real-time AI responses
-- **Security**: All API keys secured in AWS Lambda environment
+- **Processing**: Server-side AI processing in Vercel Serverless Functions
+- **Streaming**: Real-time streaming responses via HTTP
+- **Security**: API keys secured in Vercel environment variables
 
 ### Quality Assurance
 - **Testing**: Jest, React Testing Library, E2E testing
@@ -79,9 +82,9 @@ Protecting supporters of Israel and the IDF from sophisticated online scams thro
 ## 📋 Prerequisites
 
 - Node.js 18+ (recommended: 20+)
-- pnpm (recommended) or npm
+- npm or pnpm
 - Google Gemini API Key ([Get one here](https://aistudio.google.com/app/apikey))
-- AWS Account (for production deployment)
+- Vercel Account (for production deployment)
 
 ## 🚀 Quick Start
 
@@ -105,16 +108,20 @@ Configure your `.env.local`:
 # Required
 GEMINI_API_KEY=your_gemini_api_key_here
 
-# Optional (for AWS deployment)
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your_aws_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret
-DYNAMODB_TABLE_NAME=scam-hunt-analyses
+# Optional - Site URL
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Note: Vercel KV credentials are automatically configured when deployed to Vercel
+# For local development with Vercel KV, add these from your Vercel dashboard:
+# KV_REST_API_URL=your_kv_rest_api_url
+# KV_REST_API_TOKEN=your_kv_rest_api_token
 ```
 
 ### 3. Development Server
 
 ```bash
+npm run dev
+# or
 pnpm dev
 ```
 
@@ -146,12 +153,12 @@ src/
 ├── lib/                     # Core Services
 │   ├── middleware/          # Request middleware (rate limiting, security)
 │   ├── security/            # Security and validation services
-│   ├── storage/             # Storage providers (Memory/DynamoDB)
+│   ├── storage/             # Storage type definitions
 │   ├── config.ts            # Application configuration
 │   ├── exportUtils.ts       # Report generation utilities
 │   ├── feedback-service.ts  # User feedback handling
 │   ├── gemini-service.ts    # Google Gemini AI integration
-│   ├── history-service.ts   # Analysis history management
+│   ├── history-service.ts   # Client-side history management (localStorage)
 │   ├── social-media-tools.ts# Tools for social media analysis
 │   └── user-identification.ts # User identification and tracking
 ├── types/                   # TypeScript definitions
@@ -160,48 +167,60 @@ src/
 
 ## 🔧 API Endpoints
 
+All endpoints run as Vercel Serverless Functions with automatic scaling and global edge deployment.
+
+### Image Upload
+- `POST /api/upload` - Upload images to Vercel Blob storage
+  - **Input**: Multipart form data with image file
+  - **Output**: JSON with Blob URL
+  - **Validation**: JPEG, PNG, WebP only; max 10MB
+  - **Rate Limiting**: 5 uploads per minute per IP via Vercel KV
+
 ### Core Analysis
 - `POST /api/analyze` - Comprehensive AI-powered scam analysis
-  - **Input**: Text, images, URLs, conversation history
+  - **Input**: Text, image URLs (Vercel Blob), URLs, conversation history
   - **Output**: Streaming response with structured JSON analysis
-  - **Features**: Dual-score framework, risk detection, recommendations
-
-### History Management
-- `GET /api/history` - Retrieve user's analysis history
-- `POST /api/history` - Save completed analysis
-- `GET /api/history/[id]` - Get specific analysis details
-- `POST /api/history/[id]/feedback` - Submit user feedback
+  - **Features**: Dual-score framework, risk detection, recommendations, Vercel KV caching
+  - **Rate Limiting**: 10 requests per minute per IP via Vercel KV
 
 ### Security Utilities
 - `POST /api/url-inspector` - Safe URL content analysis
+  - **Rate Limiting**: 20 requests per minute per IP
 
 ### Development & Testing
 - `GET /api/test-gemini` - Endpoint for testing Gemini API connectivity
 
-## 🚀 Deployment Options
+**Note**: History management is handled client-side via localStorage for privacy and simplicity.
 
-### Vercel (Recommended)
+## 🚀 Deployment
+
+### Production Deployment (Vercel)
+
+**Live Site:** [https://lionsofzion.io](https://lionsofzion.io)  
+**Vercel Deployment:** [https://newlihunt-40h6q2dax-lionsteam.vercel.app](https://newlihunt-40h6q2dax-lionsteam.vercel.app)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-repo/scam-hunt-platform)
 
+**Automatic Deployment:**
+- Push to `main` branch triggers automatic deployment
+- Vercel automatically configures environment variables
+- `BLOB_READ_WRITE_TOKEN` is auto-configured for Vercel Blob
+- `KV_*` variables are auto-configured for Vercel KV
+
+**Manual Deployment:**
 ```bash
 # Install Vercel CLI
-pnpm add -g vercel
+npm install -g vercel
 
 # Deploy to production
 vercel --prod
 ```
 
-### AWS Infrastructure
+**Required Environment Variables:**
+- `GEMINI_API_KEY` - Set in Vercel dashboard under Settings > Environment Variables
 
-Complete AWS deployment using SAM or CDK:
-
-```bash
-# Deploy AWS backend
-cd aws/
-sam build
-sam deploy --guided
-```
+**Optional Environment Variables:**
+- `NEXT_PUBLIC_SITE_URL` - Defaults to https://lionsofzion.io
 
 ## 🧪 Testing & Quality
 
@@ -279,14 +298,15 @@ pnpm format
 ## 📚 Documentation
 
 ### Project Specifications
-- [Requirements Document](./.kiro/specs/scam-hunt-platform/requirements.md) - EARS-compliant requirements
-- [Design Document](./.kiro/specs/scam-hunt-platform/design.md) - Architecture and component design
-- [Implementation Tasks](./.kiro/specs/scam-hunt-platform/tasks.md) - Development roadmap
+- [Vercel Blob Integration](./.kiro/specs/vercel-blob-integration/) - Current architecture specification
+  - Requirements, design, and implementation tasks
+  - Image upload and storage with Vercel Blob
+  - Rate limiting and caching with Vercel KV
 
 ### Technical Guides
-- [AWS Deployment Guide](./aws/README.md) - Infrastructure setup
-- [Security Implementation](./docs/security.md) - Security best practices
-- [API Documentation](./docs/api.md) - Endpoint specifications
+- [Vercel Deployment](https://vercel.com/docs) - Deployment documentation
+- [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) - Image storage documentation
+- [Vercel KV](https://vercel.com/docs/storage/vercel-kv) - Redis documentation
 
 ## 🤝 Contributing
 
