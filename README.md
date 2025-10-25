@@ -128,7 +128,7 @@ src/
 │   ├── api/                 # Serverless API Routes
 │   │   ├── analyze/         # AI analysis endpoint
 │   │   ├── history/         # Analysis history management
-│   │   ├── upload/          # Secure image upload
+│   │   ├── test-gemini/     # Gemini API test endpoint
 │   │   └── url-inspector/   # Safe URL analysis
 │   ├── history/             # Analysis history pages
 │   ├── profile/             # User profile and statistics
@@ -144,10 +144,16 @@ src/
 ├── hooks/                   # Custom React Hooks
 │   └── useScamAnalysis.ts   # Main analysis state management
 ├── lib/                     # Core Services
-│   ├── ai/                  # AI integration modules
+│   ├── middleware/          # Request middleware (rate limiting, security)
+│   ├── security/            # Security and validation services
 │   ├── storage/             # Storage providers (Memory/DynamoDB)
-│   ├── security/            # Security and validation
-│   └── exportUtils.ts       # Report generation utilities
+│   ├── config.ts            # Application configuration
+│   ├── exportUtils.ts       # Report generation utilities
+│   ├── feedback-service.ts  # User feedback handling
+│   ├── gemini-service.ts    # Google Gemini AI integration
+│   ├── history-service.ts   # Analysis history management
+│   ├── social-media-tools.ts# Tools for social media analysis
+│   └── user-identification.ts # User identification and tracking
 ├── types/                   # TypeScript definitions
 └── utils/                   # Utility functions
 ```
@@ -167,8 +173,10 @@ src/
 - `POST /api/history/[id]/feedback` - Submit user feedback
 
 ### Security Utilities
-- `POST /api/upload` - Secure image upload to AWS S3
 - `POST /api/url-inspector` - Safe URL content analysis
+
+### Development & Testing
+- `GET /api/test-gemini` - Endpoint for testing Gemini API connectivity
 
 ## 🚀 Deployment Options
 

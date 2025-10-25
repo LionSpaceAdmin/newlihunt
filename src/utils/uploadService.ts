@@ -29,11 +29,11 @@ export interface UploadOptions {
 
 const DEFAULT_OPTIONS: Required<Omit<UploadOptions, 'onProgress'>> = {
   timeout: 30000, // 30 seconds
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.scamhunt.com',
+  apiUrl: '', // Use relative path for same-origin requests
 };
 
 /**
- * Upload an image file to the secure S3 storage
+ * Upload an image file to the secure S3 storage using a pre-signed URL
  */
 export const uploadImage = async (
   file: File,
@@ -42,26 +42,46 @@ export const uploadImage = async (
   const config = { ...DEFAULT_OPTIONS, ...options };
 
   try {
-    // Validate file before upload
+    // 1. Validate file before getting the signed URL
     const validation = validateImageFile(file);
     if (!validation.isValid) {
       return {
         success: false,
-        error: validation.error, // Use the specific error from validation
+        error: validation.error,
         message: validation.error || 'File validation failed',
         retryable: false,
       };
     }
 
-    // Create FormData for multipart upload
-    const formData = new FormData();
-    formData.append('file', file);
+    // 2. Get a pre-signed URL from our API
+    const signedUrlResponse = await fetch(`${config.apiUrl}/api/upload`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        filename: file.name,
+        contentType: file.type,
+      }),
+    });
 
-    // Create XMLHttpRequest for progress tracking
+    if (!signedUrlResponse.ok) {
+      const errorData = await signedUrlResponse.json();
+      return {
+        success: false,
+        error: 'Failed to get signed URL',
+        message: errorData.error || 'Could not prepare the file upload',
+        retryable: true,
+      };
+    }
+
+    const { signedUrl, key } = await signedUrlResponse.json();
+    const s3Url = signedUrl.split('?')[0];
+
+    // 3. Upload the file directly to S3 using the pre-signed URL
     return new Promise<UploadResult>(resolve => {
       const xhr = new XMLHttpRequest();
 
-      // Set up progress tracking
       if (options.onProgress) {
         xhr.upload.addEventListener('progress', event => {
           if (event.lengthComputable) {
@@ -75,30 +95,34 @@ export const uploadImage = async (
         });
       }
 
-      // Set up timeout
       xhr.timeout = config.timeout;
 
-      // Handle response
       xhr.addEventListener('load', () => {
-        try {
-          const response: UploadResult = JSON.parse(xhr.responseText);
-          resolve(response);
-        } catch {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve({
+            success: true,
+            url: s3Url,
+            key: key,
+            size: file.size,
+            contentType: file.type,
+            originalName: file.name,
+            uploadedAt: new Date().toISOString(),
+          });
+        } else {
           resolve({
             success: false,
-            error: 'Invalid response',
-            message: 'Failed to parse server response',
+            error: 'S3 Upload Failed',
+            message: `Failed to upload file to S3. Status: ${xhr.status}`,
             retryable: true,
           });
         }
       });
 
-      // Handle errors
       xhr.addEventListener('error', () => {
         resolve({
           success: false,
           error: 'Network error',
-          message: 'Failed to upload file due to network error',
+          message: 'Failed to upload file to S3 due to a network error',
           retryable: true,
         });
       });
@@ -107,7 +131,7 @@ export const uploadImage = async (
         resolve({
           success: false,
           error: 'Upload timeout',
-          message: 'Upload timed out. Please try again.',
+          message: 'S3 upload timed out. Please try again.',
           retryable: true,
         });
       });
@@ -116,20 +140,20 @@ export const uploadImage = async (
         resolve({
           success: false,
           error: 'Upload cancelled',
-          message: 'Upload was cancelled',
-          retryable: true,
+          message: 'Upload was cancelled by the user',
+          retryable: false,
         });
       });
 
-      // Start upload
-      xhr.open('POST', `${config.apiUrl}/upload`);
-      xhr.send(formData);
+      xhr.open('PUT', signedUrl);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.send(file);
     });
   } catch (error) {
     return {
       success: false,
       error: 'Upload failed',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      message: error instanceof Error ? error.message : 'An unknown error occurred during the upload process',
       retryable: true,
     };
   }
