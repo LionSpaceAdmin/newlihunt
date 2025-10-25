@@ -1,10 +1,5 @@
 import { Classification, FullAnalysisResult } from '@/types/analysis';
-import { GoogleGenerativeAI, SchemaType, FunctionDeclaration, Tool } from '@google/generative-ai';
-import {
-  getUserProfile,
-  getRecentPosts,
-  analyzeFollowerNetwork,
-} from './social-media-tools';
+import { GoogleGenerativeAI, SchemaType, Tool } from '@google/generative-ai';
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -14,7 +9,7 @@ const tools: Tool[] = [
     functionDeclarations: [
       {
         name: 'getUserProfile',
-        description: 'Get a user\'s social media profile information.',
+        description: "Get a user's social media profile information.",
         parameters: {
           type: SchemaType.OBJECT,
           properties: {
@@ -28,7 +23,7 @@ const tools: Tool[] = [
       },
       {
         name: 'getRecentPosts',
-        description: 'Get a user\'s recent social media posts.',
+        description: "Get a user's recent social media posts.",
         parameters: {
           type: SchemaType.OBJECT,
           properties: {
@@ -42,7 +37,7 @@ const tools: Tool[] = [
       },
       {
         name: 'analyzeFollowerNetwork',
-        description: 'Analyze a user\'s follower network for bot-like activity.',
+        description: "Analyze a user's follower network for bot-like activity.",
         parameters: {
           type: SchemaType.OBJECT,
           properties: {
@@ -56,16 +51,7 @@ const tools: Tool[] = [
       },
     ],
   },
-  {
-    googleSearchRetriever: {},
-  },
 ];
-
-const toolFunctions = {
-  getUserProfile,
-  getRecentPosts,
-  analyzeFollowerNetwork,
-};
 
 const SYSTEM_PROMPT = `You are "Scam Hunter," an advanced, agentic AI security expert. Your purpose is to be a helpful conversational partner who specializes in online safety. 
 
@@ -88,6 +74,38 @@ const SYSTEM_PROMPT = `You are "Scam Hunter," an advanced, agentic AI security e
 `;
 
 /**
+ * Check if the input appears to be a request for analysis or just conversation
+ */
+function isAnalysisRequest(text: string, hasImage: boolean): boolean {
+  if (hasImage) return true;
+  
+  const lowerText = text.toLowerCase();
+  
+  // Analysis indicators
+  const analysisKeywords = [
+    'analyze', 'check', 'scam', 'suspicious', 'fraud', 'phishing',
+    'http', 'www.', '.com', '.org', '.net', '@',
+    'urgent', 'donation', 'prize', 'winner', 'claim',
+    'verify', 'account', 'suspended', 'click here'
+  ];
+  
+  // Conversational indicators
+  const conversationalKeywords = [
+    'hi', 'hello', 'hey', 'how are you', 'thanks', 'thank you',
+    'what', 'who', 'when', 'where', 'why', 'how does this work',
+    'help', 'explain', 'what is', 'good morning', 'good evening'
+  ];
+  
+  // Check for conversational patterns first
+  if (conversationalKeywords.some(keyword => lowerText.includes(keyword))) {
+    return false;
+  }
+  
+  // Check for analysis patterns
+  return analysisKeywords.some(keyword => lowerText.includes(keyword));
+}
+
+/**
  * Analyze content for scam indicators using the agentic tool-based approach.
  *
  * @param text - The user's prompt, which may include text to analyze or a username to investigate.
@@ -104,17 +122,50 @@ export async function analyzeScam(
   imageMimeType?: string
 ): Promise<FullAnalysisResult> {
   try {
+    // Check if API key is configured
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+      // Return a mock response for development/testing
+      console.log('Using mock response - Gemini API key not configured');
+      return {
+        summary: `Hello! I'm Scam Hunter, your AI security assistant. I see you said: "${text}". To fully analyze content for scams, please configure the GEMINI_API_KEY in your environment variables. For now, I'm running in demo mode.`,
+        analysisData: {
+          classification: Classification.SAFE,
+          riskScore: 0,
+          credibilityScore: 100,
+          detectedRules: [],
+          recommendations: ['Configure GEMINI_API_KEY for full functionality'],
+          reasoning: 'Demo mode - no actual analysis performed.',
+          debiasingStatus: {
+            anonymous_profile_neutralized: false,
+            patriotic_tokens_neutralized: false,
+            sentiment_penalty_capped: false,
+          },
+        },
+        metadata: {
+          timestamp: new Date().toISOString(),
+        },
+      };
+    }
+    
+    // Check if this is an analysis request or just conversation
+    const isAnalysis = isAnalysisRequest(text, !!imageBase64);
+    
+    // Choose model based on request type
+    const modelName = isAnalysis ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
+    
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-pro',
+      model: modelName,
       generationConfig: {
         temperature: 0.2,
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 8192,
-        response_mime_type: 'application/json',
+        // Only use JSON mode for analysis requests
+        ...(isAnalysis && { responseMimeType: 'application/json' }),
       },
       systemInstruction: SYSTEM_PROMPT,
-      tools,
+      // Only use tools for analysis requests
+      ...(isAnalysis && { tools }),
     });
 
     const chat = model.startChat({ history: conversationHistory });
@@ -138,43 +189,49 @@ export async function analyzeScam(
 
     console.log('Raw AI response:', responseText);
 
-    try {
-      // First, try to parse as JSON for a structured analysis
-      const structuredResult: FullAnalysisResult = JSON.parse(responseText);
-      structuredResult.metadata = {
-        ...structuredResult.metadata,
-        timestamp: new Date().toISOString(),
-      };
-      return structuredResult;
-    } catch (e) {
-      // If parsing fails, it's a conversational response.
-      // We create a minimal FullAnalysisResult object.
-      return {
-        summary: responseText, // The conversational string from the AI
-        analysisData: {
-          // Use default/empty values as this is not a formal analysis
-          classification: Classification.SAFE, // Default to SAFE for conversations
-          riskScore: 0,
-          credibilityScore: 0,
-          detectedRules: [],
-          recommendations: [],
-          reasoning: 'Conversational response, no formal analysis performed.',
-          debiasingStatus: {
-            anonymous_profile_neutralized: false,
-            patriotic_tokens_neutralized: false,
-            sentiment_penalty_capped: false,
-          },
-        },
-        metadata: {
+    // Handle response based on whether this was an analysis request
+    if (isAnalysis) {
+      try {
+        // Try to parse as JSON for structured analysis
+        const structuredResult: FullAnalysisResult = JSON.parse(responseText);
+        structuredResult.metadata = {
+          ...structuredResult.metadata,
           timestamp: new Date().toISOString(),
-        },
-      };
+        };
+        return structuredResult;
+      } catch (parseError) {
+        console.warn('Failed to parse JSON response for analysis request:', parseError);
+        // Fallback: treat as conversational even though it was expected to be analysis
+      }
     }
+    
+    // Handle conversational response or fallback
+    return {
+      summary: responseText, // The conversational string from the AI
+      analysisData: {
+        // Use default/empty values as this is not a formal analysis
+        classification: Classification.SAFE, // Default to SAFE for conversations
+        riskScore: 0,
+        credibilityScore: 0,
+        detectedRules: [],
+        recommendations: [],
+        reasoning: 'Conversational response, no formal analysis performed.',
+        debiasingStatus: {
+          anonymous_profile_neutralized: false,
+          patriotic_tokens_neutralized: false,
+          sentiment_penalty_capped: false,
+        },
+      },
+      metadata: {
+        timestamp: new Date().toISOString(),
+      },
+    };
   } catch (error) {
     console.error('Gemini API error:', error);
     // Return a generic error in case of API failure
     return {
-      summary: 'Unable to complete analysis due to a technical error. Please try again or verify content through official channels.',
+      summary:
+        'Unable to complete analysis due to a technical error. Please try again or verify content through official channels.',
       analysisData: {
         classification: Classification.SUSPICIOUS,
         riskFactors: ['Analysis Error'],
@@ -200,14 +257,27 @@ export async function analyzeScam(
 /**
  * Test Gemini API connection
  */
-export async function testGeminiConnection(): Promise<boolean> {
+export async function testGeminiConnection(): Promise<{ success: boolean; error?: string }> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    // Check if API key is configured
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+      return { 
+        success: false, 
+        error: 'Gemini API key is not configured. Please set GEMINI_API_KEY in your environment variables.' 
+      };
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent('Test connection. Respond with "OK".');
     const response = await result.response;
-    return response.text().includes('OK');
+    const success = response.text().includes('OK');
+    
+    return { success };
   } catch (error) {
     console.error('Gemini connection test failed:', error);
-    return false;
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
   }
 }

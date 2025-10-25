@@ -199,7 +199,7 @@ export class InputSanitizer {
     }
 
     // Remove path traversal attempts
-    let sanitized = filename.replace(/\.\.[\/\\]/g, '');
+    let sanitized = filename.replace(/\.\.[/\\]/g, '');
 
     // Replace leading dots
     sanitized = sanitized.replace(/^\.+/, '_');
