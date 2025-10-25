@@ -88,15 +88,23 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
           throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
         }
 
-        const result: FullAnalysisResult = await response.json();
+        const result = await response.json();
 
-        setCurrentAnalysis(result);
-
-        // Add AI response message
-        addMessage({
-          role: 'assistant',
-          content: result.summary,
-        });
+        // Check if it's a full analysis or just a conversational response
+        if (typeof result === 'string') {
+          // Conversational response
+          addMessage({
+            role: 'assistant',
+            content: result,
+          });
+        } else {
+          // Full analysis result
+          setCurrentAnalysis(result);
+          addMessage({
+            role: 'assistant',
+            content: result.summary,
+          });
+        }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Analysis failed';
         setError(errorMessage);

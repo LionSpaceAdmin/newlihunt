@@ -35,7 +35,11 @@ const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
   const content = textContent[lang];
 
   useEffect(() => {
-    // Load Buy Me a Coffee widget script
+    // Load Buy Me a Coffee widget script - Only in production
+    if (process.env.NODE_ENV !== 'production') {
+      return;
+    }
+
     const script = document.createElement('script');
     script.setAttribute('data-name', 'BMC-Widget');
     script.setAttribute('data-cfasync', 'false');

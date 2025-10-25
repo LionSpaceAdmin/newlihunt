@@ -1,9 +1,9 @@
 
+import DynamicBackground from '@/components/DynamicBackground';
 import { Analytics } from '@vercel/analytics/react';
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import DynamicBackground from '@/components/DynamicBackground';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -117,20 +117,22 @@ export default function RootLayout({
         {children}
         <Analytics />
 
-        {/* Buy Me a Coffee Widget Script */}
-        <script
-          data-name="BMC-Widget"
-          data-cfasync="false"
-          src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
-          data-id="danielhanukayeb"
-          data-description="Support Our Mission!"
-          data-message="🦁 Thank you for visiting! Your support helps us keep the digital front strong — exposing fake accounts and defending truth online. Join the pride. Roar for Israel. 🇮🇱🔥"
-          data-color="#FF5F5F"
-          data-position="Left"
-          data-x_margin="18"
-          data-y_margin="18"
-          async
-        />
+        {/* Buy Me a Coffee Widget Script - Only in Production */}
+        {process.env.NODE_ENV === 'production' && (
+          <script
+            data-name="BMC-Widget"
+            data-cfasync="false"
+            src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
+            data-id="danielhanukayeb"
+            data-description="Support Our Mission!"
+            data-message="🦁 Thank you for visiting! Your support helps us keep the digital front strong — exposing fake accounts and defending truth online. Join the pride. Roar for Israel. 🇮🇱🔥"
+            data-color="#FF5F5F"
+            data-position="Left"
+            data-x_margin="18"
+            data-y_margin="18"
+            async
+          />
+        )}
       </body>
     </html>
   );
