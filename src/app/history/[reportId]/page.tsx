@@ -1,9 +1,10 @@
 'use client';
 
-import AnalysisPanel from '@/components/AnalysisPanel';
+import { AnalysisPanel } from '@/components/AnalysisPanel';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Navigation from '@/components/Navigation';
 import { getHistoryService, HistoryEntry } from '@/lib/history-service';
+import { Message } from '@/types/analysis';
 import { formatDate, formatTimestamp } from '@/utils/helpers';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -267,9 +268,8 @@ const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
 
           {/* Analysis Results */}
           <AnalysisPanel
-            analysis={entry.analysis}
-            conversation={entry.conversation}
-            lang={lang}
+            analysisResult={entry.analysis}
+            isLoading={false}
           />
 
           {/* Conversation History */}
@@ -277,7 +277,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
             <div className="bg-dark-gray rounded-lg p-6 mt-8">
               <h2 className="text-xl font-bold text-white mb-4">{t.conversationHistory}</h2>
               <div className="space-y-4">
-                {entry.conversation.map((message, index) => (
+                {entry.conversation.map((message: Message, index) => (
                   <div
                     key={message.id || index}
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}

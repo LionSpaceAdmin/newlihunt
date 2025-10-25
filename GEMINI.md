@@ -60,20 +60,24 @@ The platform is built as a modern web application with a clear separation of con
 *   **Architecture:** The frontend is component-based, with a clear separation between pages, components, hooks, and utility functions. The backend is serverless, with individual Lambda functions for each API endpoint.
 *   **AI Integration:** The AI logic is encapsulated in the `src/lib/gemini-service.ts` file, which communicates with the Google Gemini API.
 
-## Future Capabilities
+## Current Capabilities
 
-Based on the latest Gemini API updates, here are some potential enhancements for the Scam Hunt Platform:
+Based on the latest Gemini API updates, the Scam Hunt Platform has been enhanced with the following features:
 
 ### 1. Enhanced Web Intelligence
 
-*   **Real-time Verification:** Integrate Gemini's "Grounding with Google Search" feature to cross-reference suspicious claims, URLs, and entities with live web search results. This would allow the platform to:
+*   **Real-time Verification:** The platform integrates Gemini's "Grounding with Google Search" feature to cross-reference suspicious claims, URLs, and entities with live web search results. This allows the platform to:
     *   Verify the legitimacy of organizations and donation platforms.
     *   Check for news articles or reports about known scams.
     *   Identify if a website is newly created or has a bad reputation.
 
 ### 2. Advanced Social Media Analysis
 
-*   **Deep Profile Analysis:** Go beyond just analyzing a profile picture. By leveraging Gemini's advanced capabilities, the platform could:
-    *   **Analyze a user's posts:** Perform sentiment analysis on a user's timeline to detect emotional manipulation, urgent language, or other scam tactics.
+*   **Deep Profile Analysis:** The platform now uses a Gemini-powered agent equipped with a specialized toolset to go beyond surface-level analysis. When a username is provided, the agent can:
+    *   **Analyze a user's posts:** Fetch recent posts to perform sentiment analysis, detecting emotional manipulation, urgent language, or other scam tactics.
     *   **Examine a user's network:** Analyze a user's followers and followed accounts to identify bot-like behavior or connections to known scam networks.
-    *   **Automated Profile Navigation:** Use a Gemini-powered agent to navigate a social media profile like a human would, gathering information from the bio, posts, and comments to build a more comprehensive risk assessment.
+    *   **Build a Risk Profile:** Synthesize information from the bio, posts, and network analysis to build a comprehensive risk assessment.
+
+## Future Capabilities
+
+Future enhancements will focus on expanding the agent's capabilities and connecting the social media tools to live APIs (e.g., X, Facebook, Instagram) for real-world data analysis.

@@ -44,6 +44,10 @@ export interface AnalysisData {
   recommendations: string[];
   reasoning: string;
   debiasingStatus: DebiasingStatus;
+  // Optional fields for conversational AI
+  riskFactors?: string[];
+  credibilityFactors?: string[];
+  recommendation?: string;
 }
 
 export interface AnalysisMetadata {

@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 // Remove direct gemini import - we'll use AWS API Gateway instead
 import { FullAnalysisResult, Message } from '@/types/analysis';
 import { fileToBase64, validateImageFile } from '@/utils/helpers';
-import AnalysisPanel from './AnalysisPanel';
+import { AnalysisPanel } from './AnalysisPanel';
 
 interface ScamAnalysisProps {
   lang?: 'en' | 'he';
@@ -175,7 +175,7 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({
             {t.newAnalysis}
           </button>
         </div>
-        <AnalysisPanel analysis={result} conversation={conversation} lang={lang} />
+        <AnalysisPanel analysisResult={result} isLoading={isAnalyzing} />
       </div>
     );
   }
