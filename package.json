@@ -14,8 +14,7 @@
     "type-check": "tsc --noEmit",
     "quality": "npm run type-check && npm run lint:strict && npm run format:check",
     "analyze": "ANALYZE=true npm run build",
-    "clean": "rm -rf .next out dist",
-    "prepare": "husky"
+    "clean": "rm -rf .next out dist"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -30,7 +29,8 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-icons": "^5.5.0",
-    "three": "^0.180.0"
+    "three": "^0.180.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.0.0",
@@ -42,8 +42,6 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5"

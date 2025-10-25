@@ -32,7 +32,8 @@ function sanitizeText(text: string, maxLength: number = 10000): string {
 async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, imageBase64, imageMimeType, imageUrl, conversationHistory }: AnalyzeRequest = body;
+    const { message, imageBase64, imageMimeType, imageUrl, conversationHistory }: AnalyzeRequest =
+      body;
 
     // Validate input
     if (!message && !imageBase64 && !imageUrl) {
@@ -105,7 +106,12 @@ async function handlePOST(request: NextRequest) {
 
     // Call Gemini API for analysis with timeout
     const startTime = Date.now();
-    const analysisResult = (await analyzeScam(sanitizedMessage, conversationHistory || [], processedImageBase64, processedImageMimeType)) as any;
+    const analysisResult = await analyzeScam(
+      sanitizedMessage,
+      conversationHistory || [],
+      processedImageBase64,
+      processedImageMimeType
+    );
 
     // Add metadata
     const result = {
@@ -121,7 +127,7 @@ async function handlePOST(request: NextRequest) {
 
     // Log successful analysis
     console.log('Analysis completed:', {
-      classification: analysisResult.analysisData.classification,
+      classification: analysisResult?.analysisData?.classification ?? 'UNKNOWN',
       processingTime: result.metadata.processingTime,
       hasImage: !!processedImageBase64,
       inputLength: sanitizedMessage.length,

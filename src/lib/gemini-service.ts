@@ -1,8 +1,21 @@
-import { Classification, FullAnalysisResult } from '@/types/analysis';
-import { GoogleGenerativeAI, SchemaType, Tool } from '@google/generative-ai';
+import { Classification, FullAnalysisResult, Severity } from '@/types/analysis';
+import {
+  FunctionCall,
+  FunctionResponsePart,
+  GoogleGenerativeAI,
+  SchemaType,
+  Tool,
+} from '@google/generative-ai';
+
+import { env } from './config';
+import {
+  analyzeFollowerNetwork as analyzeFollowerNetworkTool,
+  getRecentPosts as getRecentPostsTool,
+  getUserProfile as getUserProfileTool,
+} from './social-media-tools';
 
 // Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
 const tools: Tool[] = [
   {
@@ -78,29 +91,60 @@ const SYSTEM_PROMPT = `You are "Scam Hunter," an advanced, agentic AI security e
  */
 function isAnalysisRequest(text: string, hasImage: boolean): boolean {
   if (hasImage) return true;
-  
+
   const lowerText = text.toLowerCase();
-  
+
   // Analysis indicators
   const analysisKeywords = [
-    'analyze', 'check', 'scam', 'suspicious', 'fraud', 'phishing',
-    'http', 'www.', '.com', '.org', '.net', '@',
-    'urgent', 'donation', 'prize', 'winner', 'claim',
-    'verify', 'account', 'suspended', 'click here'
+    'analyze',
+    'check',
+    'scam',
+    'suspicious',
+    'fraud',
+    'phishing',
+    'http',
+    'www.',
+    '.com',
+    '.org',
+    '.net',
+    '@',
+    'urgent',
+    'donation',
+    'prize',
+    'winner',
+    'claim',
+    'verify',
+    'account',
+    'suspended',
+    'click here',
   ];
-  
+
   // Conversational indicators
   const conversationalKeywords = [
-    'hi', 'hello', 'hey', 'how are you', 'thanks', 'thank you',
-    'what', 'who', 'when', 'where', 'why', 'how does this work',
-    'help', 'explain', 'what is', 'good morning', 'good evening'
+    'hi',
+    'hello',
+    'hey',
+    'how are you',
+    'thanks',
+    'thank you',
+    'what',
+    'who',
+    'when',
+    'where',
+    'why',
+    'how does this work',
+    'help',
+    'explain',
+    'what is',
+    'good morning',
+    'good evening',
   ];
-  
+
   // Check for conversational patterns first
   if (conversationalKeywords.some(keyword => lowerText.includes(keyword))) {
     return false;
   }
-  
+
   // Check for analysis patterns
   return analysisKeywords.some(keyword => lowerText.includes(keyword));
 }
@@ -123,7 +167,7 @@ export async function analyzeScam(
 ): Promise<FullAnalysisResult> {
   try {
     // Check if API key is configured
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+    if (!env.GEMINI_API_KEY || env.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
       // Return a mock response for development/testing
       console.log('Using mock response - Gemini API key not configured');
       return {
@@ -146,13 +190,13 @@ export async function analyzeScam(
         },
       };
     }
-    
+
     // Check if this is an analysis request or just conversation
     const isAnalysis = isAnalysisRequest(text, !!imageBase64);
-    
+
     // Choose model based on request type
     const modelName = isAnalysis ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
-    
+
     const model = genAI.getGenerativeModel({
       model: modelName,
       generationConfig: {
@@ -161,7 +205,7 @@ export async function analyzeScam(
         topP: 0.95,
         maxOutputTokens: 8192,
         // Only use JSON mode for analysis requests
-        ...(isAnalysis && { responseMimeType: 'application/json' }),
+        // ...(isAnalysis && { responseMimeType: 'application/json' }),
       },
       systemInstruction: SYSTEM_PROMPT,
       // Only use tools for analysis requests
@@ -180,11 +224,66 @@ export async function analyzeScam(
       });
     }
 
-    const result = await chat.sendMessageStream([...imageParts, { text }]);
+    // First message to the model
+    let result = await chat.sendMessageStream([...imageParts, { text }]);
 
     let responseText = '';
+    const functionCalls: FunctionCall[] = [];
+
     for await (const chunk of result.stream) {
+      // Aggregate text and function calls
       responseText += chunk.text();
+      const calls = chunk.functionCalls();
+      if (calls) {
+        functionCalls.push(...calls);
+      }
+    }
+
+    // If the model made function calls, execute them and send back the results
+    if (functionCalls.length > 0) {
+      console.log('Executing tool calls:', functionCalls);
+      const toolResults: FunctionResponsePart[] = [];
+
+      for (const call of functionCalls) {
+        let toolResponse;
+        try {
+          const args = call.args as { username?: string };
+          switch (call.name) {
+            case 'getUserProfile':
+              toolResponse = await getUserProfileTool(args.username ?? '');
+              break;
+            case 'getRecentPosts':
+              toolResponse = await getRecentPostsTool(args.username ?? '');
+              break;
+            case 'analyzeFollowerNetwork':
+              toolResponse = await analyzeFollowerNetworkTool(args.username ?? '');
+              break;
+            default:
+              throw new Error(`Unknown tool: ${call.name}`);
+          }
+        } catch (toolError) {
+          console.error(`Error executing tool ${call.name}:`, toolError);
+          toolResponse = { error: `Failed to execute tool: ${call.name}` };
+        }
+
+        toolResults.push({
+          functionResponse: {
+            name: call.name,
+            response: {
+              content: toolResponse,
+            },
+          },
+        });
+      }
+
+      // Send the tool results back to the model
+      result = await chat.sendMessageStream(toolResults);
+
+      // Reset responseText to capture the final response after tool execution
+      responseText = '';
+      for await (const chunk of result.stream) {
+        responseText += chunk.text();
+      }
     }
 
     console.log('Raw AI response:', responseText);
@@ -192,19 +291,92 @@ export async function analyzeScam(
     // Handle response based on whether this was an analysis request
     if (isAnalysis) {
       try {
-        // Try to parse as JSON for structured analysis
-        const structuredResult: FullAnalysisResult = JSON.parse(responseText);
-        structuredResult.metadata = {
-          ...structuredResult.metadata,
-          timestamp: new Date().toISOString(),
+        // Clean the response text from markdown code blocks (```json ... ```)
+        const cleanedText = responseText.replace(/```json\s*|```/g, '');
+        type RawDetail = { finding?: string; implication?: string; severity?: string };
+        type RawAI = {
+          riskScore?: number;
+          summary?: string;
+          detailedAnalysis?: RawDetail[];
+          recommendations?: unknown[];
+          recommendation?: unknown;
         };
-        return structuredResult;
+        const raw = JSON.parse(cleanedText) as unknown as RawAI;
+
+        // Normalize raw AI JSON into our FullAnalysisResult shape
+        const riskScore = Number(raw.riskScore ?? 0) || 0;
+        const classification:
+          | Classification.SAFE
+          | Classification.SUSPICIOUS
+          | Classification.HIGH_RISK =
+          riskScore >= 70
+            ? Classification.HIGH_RISK
+            : riskScore >= 30
+              ? Classification.SUSPICIOUS
+              : Classification.SAFE;
+
+        const severityMap: Record<string, Severity> = {
+          Low: Severity.LOW,
+          LOW: Severity.LOW,
+          Medium: Severity.MEDIUM,
+          MEDIUM: Severity.MEDIUM,
+          High: Severity.HIGH,
+          HIGH: Severity.HIGH,
+        };
+
+        const details: RawDetail[] = Array.isArray(raw.detailedAnalysis)
+          ? (raw.detailedAnalysis as RawDetail[])
+          : [];
+
+        const detectedRules = details.map((item: RawDetail, idx: number) => ({
+          id: String(idx + 1),
+          name: item?.finding ?? 'Finding',
+          severity: severityMap[String(item?.severity ?? 'Low')] ?? Severity.LOW,
+          description: item?.implication ?? '',
+          points: 0,
+        }));
+
+        const recommendations: string[] = Array.isArray(raw.recommendations)
+          ? (raw.recommendations as unknown[]).filter((r): r is string => typeof r === 'string')
+          : raw.recommendation != null
+            ? [String(raw.recommendation)]
+            : [];
+
+        const reasoning = details
+          .map((d: RawDetail) => [d?.finding, d?.implication].filter(Boolean).join(' — '))
+          .filter(Boolean)
+          .join('\n');
+
+        const credibilityScore = Math.max(0, Math.min(100, 100 - riskScore * 10));
+
+        const normalized: FullAnalysisResult = {
+          summary:
+            typeof raw.summary === 'string' ? raw.summary : 'Analysis completed successfully.',
+          analysisData: {
+            classification,
+            riskScore,
+            credibilityScore,
+            detectedRules,
+            recommendations,
+            reasoning,
+            debiasingStatus: {
+              anonymous_profile_neutralized: false,
+              patriotic_tokens_neutralized: false,
+              sentiment_penalty_capped: false,
+            },
+          },
+          metadata: {
+            timestamp: new Date().toISOString(),
+          },
+        };
+
+        return normalized;
       } catch (parseError) {
         console.warn('Failed to parse JSON response for analysis request:', parseError);
-        // Fallback: treat as conversational even though it was expected to be analysis
+        // Fall through to conversational fallback below
       }
     }
-    
+
     // Handle conversational response or fallback
     return {
       summary: responseText, // The conversational string from the AI
@@ -260,10 +432,11 @@ export async function analyzeScam(
 export async function testGeminiConnection(): Promise<{ success: boolean; error?: string }> {
   try {
     // Check if API key is configured
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-      return { 
-        success: false, 
-        error: 'Gemini API key is not configured. Please set GEMINI_API_KEY in your environment variables.' 
+    if (!env.GEMINI_API_KEY || env.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+      return {
+        success: false,
+        error:
+          'Gemini API key is not configured. Please set GEMINI_API_KEY in your environment variables.',
       };
     }
 
@@ -271,13 +444,13 @@ export async function testGeminiConnection(): Promise<{ success: boolean; error?
     const result = await model.generateContent('Test connection. Respond with "OK".');
     const response = await result.response;
     const success = response.text().includes('OK');
-    
+
     return { success };
   } catch (error) {
     console.error('Gemini connection test failed:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
