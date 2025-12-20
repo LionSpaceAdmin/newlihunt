@@ -260,13 +260,7 @@ pnpm format
 - **Anonymous Identification**: Privacy-preserving user tracking
 - **Safe URL Analysis**: Inspect without visiting suspicious sites
 
-### AWS Security
-- **API Key Protection**: Secured in Lambda environment variables
-- **Pre-signed URLs**: Secure S3 file uploads with expiration
-- **Lambda Authorizers**: Custom authentication and authorization
-- **CloudWatch Monitoring**: Security event logging and alerting
-
-## 📈 Performance Optimizations
+### 📈 Performance Optimizations
 
 ### Frontend
 - **Edge Network**: Vercel global CDN deployment
@@ -276,9 +270,7 @@ pnpm format
 
 ### Backend
 - **Streaming Responses**: Real-time AI analysis feedback
-- **Connection Pooling**: Efficient AWS service connections
-- **Caching Strategy**: Smart API response caching
-- **Lambda Cold Start Optimization**: Minimal initialization time
+- **Caching Strategy**: Smart API response caching with Vercel KV
 
 ## 🎨 Visual Design System
 
