@@ -41,10 +41,12 @@ async function handlePOST(request: NextRequest) {
 
       // Check cache
       try {
-        const cachedResult = await kv.get(cacheKey);
-        if (cachedResult) {
-          console.log('Cache hit for analysis request');
-          return NextResponse.json(cachedResult);
+        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+            const cachedResult = await kv.get(cacheKey);
+            if (cachedResult) {
+                console.log('Cache hit for analysis request');
+                return NextResponse.json(cachedResult);
+            }
         }
       } catch (error) {
         console.warn('Cache read error, proceeding without cache:', error);
@@ -86,8 +88,10 @@ async function handlePOST(request: NextRequest) {
     // Cache the result with 5-minute TTL
     if (shouldCache && cacheKey) {
       try {
-        await kv.set(cacheKey, result, { ex: 300 });
-        console.log('Cached analysis result');
+          if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+              await kv.set(cacheKey, result, { ex: 300 });
+              console.log('Cached analysis result');
+          }
       } catch (error) {
         console.warn('Cache write error:', error);
       }

@@ -116,23 +116,6 @@ export default function RootLayout({
         <DynamicBackground />
         {children}
         <Analytics />
-
-        {/* Buy Me a Coffee Widget Script - Only in Production */}
-        {process.env.NODE_ENV === 'production' && (
-          <script
-            data-name="BMC-Widget"
-            data-cfasync="false"
-            src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
-            data-id="danielhanukayeb"
-            data-description="Support Our Mission!"
-            data-message="🦁 Thank you for visiting! Your support helps us keep the digital front strong — exposing fake accounts and defending truth online. Join the pride. Roar for Israel. 🇮🇱🔥"
-            data-color="#FF5F5F"
-            data-position="Left"
-            data-x_margin="18"
-            data-y_margin="18"
-            async
-          />
-        )}
       </body>
     </html>
   );

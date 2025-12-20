@@ -35,8 +35,13 @@ const tools: Tool[] = [
   },
   // Enable Google Search for grounding
   {
-    googleSearchRetriever: {},
-  },
+    googleSearchRetrieval: {
+      dynamicRetrievalConfig: {
+        mode: "unspecified",
+        dynamicThreshold: 0.7,
+      },
+    }
+  } as unknown as Tool,
 ];
 
 const responseSchema = {
@@ -144,12 +149,12 @@ When you receive data from the getUserProfile tool, apply the following logic IN
   - If < 30 days: Apply the "New account" risk factor (+8 risk points).
   - If > 365 days: Apply the "Significant account age" credibility factor (+10 credibility points).
 - **followerCount / followingCount Ratio:**
-  - If `followingCount` > `followerCount` * 2 AND `followerCount` < 1000: +5 risk points (Indicates potential bot-like behavior or aggressive following tactics).
-  - If `followerCount` > `followingCount` * 10 AND `followerCount` > 10000: +5 credibility points (Suggests an authority figure or influencer, less likely a scammer).
+  - If \`followingCount\` > \`followerCount\` * 2 AND \`followerCount\` < 1000: +5 risk points (Indicates potential bot-like behavior or aggressive following tactics).
+  - If \`followerCount\` > \`followingCount\` * 10 AND \`followerCount\` > 10000: +5 credibility points (Suggests an authority figure or influencer, less likely a scammer).
 - **postCount:**
-  - If `postCount` < 10 AND `accountAge` < 60 days: +5 risk points (Flags an empty or inactive new account).
+  - If \`postCount\` < 10 AND \`accountAge\` < 60 days: +5 risk points (Flags an empty or inactive new account).
 - **verified:**
-  - If `true`: +20 credibility points (A verified account is a strong credibility signal, but not a guarantee of safety).
+  - If \`true\`: +20 credibility points (A verified account is a strong credibility signal, but not a guarantee of safety).
 - **bio:**
   - Scan for keywords like 'crypto', 'airdrop', 'free money', 'DM me for help', 'investment'. If found: +15 risk points (Classic scam language).
   - Scan for patriotic or support-related keywords. Do not add risk points unless combined with a direct ask for money or links to suspicious payment methods. This is a de-biasing rule.
@@ -302,6 +307,7 @@ export async function analyzeWithGemini(
           threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
         },
       ],
+      tools: isAnalysis ? tools : undefined,
     });
 
     const chat = model.startChat({ history: conversationHistory });
@@ -444,5 +450,33 @@ export async function testGeminiConnection(): Promise<{ success: boolean; error?
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     };
+  }
+}
+
+/**
+ * Perform a web search using Gemini
+ */
+export async function performWebSearch(query: string): Promise<string> {
+  try {
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      tools: [
+        {
+          googleSearchRetrieval: {
+            dynamicRetrievalConfig: {
+              mode: "MODE_DYNAMIC",
+              dynamicThreshold: 0.7,
+            },
+          },
+        } as unknown as Tool,
+      ],
+    });
+
+    const result = await model.generateContent(query);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error('Web search error:', error);
+    throw error;
   }
 }

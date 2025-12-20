@@ -22,7 +22,8 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Use the scam analysis hook to get conversation data
-  const { currentAnalysis, messages } = useScamAnalysis();
+  const scamAnalysis = useScamAnalysis();
+  const { currentAnalysis, messages } = scamAnalysis;
 
   // Detect mobile screen size
   useEffect(() => {
@@ -103,7 +104,11 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
               </AnalysisErrorBoundary>
             ) : (
               <ChatErrorBoundary>
-                <ChatInterface onAnalysisComplete={handleAnalysisComplete} lang={lang} />
+                <ChatInterface 
+                  onAnalysisComplete={handleAnalysisComplete} 
+                  lang={lang} 
+                  {...scamAnalysis}
+                />
               </ChatErrorBoundary>
             )}
           </div>

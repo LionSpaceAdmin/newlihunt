@@ -1,12 +1,12 @@
-# 🦁 Scam Hunt Platform - Digital Guardian
+# Scam Hunt Platform - Digital Guardian
 
 An AI-powered security platform designed to identify and neutralize online impersonation scams targeting supporters of Israel and the IDF. Built with cutting-edge technology and professional Lion Digital Guardian branding.
 
-## 🛡️ Mission
+## Mission
 
 Protecting supporters of Israel and the IDF from sophisticated online scams through advanced AI analysis, real-time threat detection, and comprehensive security assessment. Our platform serves as a digital guardian, standing watch against those who seek to exploit and deceive.
 
-## 🏗️ Architecture
+## Architecture
 
 **Enterprise-Grade Serverless Stack:**
 
@@ -18,39 +18,39 @@ Protecting supporters of Israel and the IDF from sophisticated online scams thro
 - **Security**: Multi-layer protection with rate limiting, input sanitization, and anonymous user identification
 - **Graphics**: Professional Lion Digital Guardian visual identity system
 
-## ✨ Key Features
+## Key Features
 
-### 🤖 **AI-Powered Analysis Engine**
+### AI-Powered Analysis Engine
 - **Dual-Score Framework**: Risk Score (0-100) + Credibility Score (0-100)
 - **Multimodal Detection**: Analyze text, images, and URLs simultaneously
 - **Real-time Streaming**: Live analysis results with engaging visual feedback
 - **False Positive Mitigation**: Advanced contextual analysis to minimize incorrect flags
 
-### 🔍 **Comprehensive Threat Detection**
+### Comprehensive Threat Detection
 - **URL Inspection**: Safe analysis of suspicious links without visiting them
 - **Image Analysis**: Detect manipulated images and fake screenshots
 - **Behavioral Pattern Recognition**: Identify sophisticated impersonation tactics
 - **Donation Scam Protection**: Specialized detection for fake charity requests
 
-### 💬 **Conversational Security Interface**
+### Conversational Security Interface
 - **Chat-Based Analysis**: Natural language interaction for threat assessment
 - **Quick Action Buttons**: Streamlined analysis for common scam types
 - **Visual Feedback**: Professional graphics and status indicators
 - **Multilingual Support**: Full Hebrew and English localization
 
-### 📊 **Analysis History & Reporting**
+### Analysis History & Reporting
 - **Client-Side Storage**: Browser localStorage for private, local history management
 - **Detailed Reports**: Comprehensive analysis with reasoning and recommendations
 - **Export Capabilities**: PDF, JSON, and social sharing options
 - **Feedback System**: User rating system for continuous improvement
 
-### 🎨 **Professional Visual Identity**
+### Professional Visual Identity
 - **Lion Digital Guardian Branding**: Custom graphics throughout the platform
 - **Matte Black Theme**: High-contrast design for accessibility
 - **Responsive Design**: Optimized for desktop and mobile (320px-2560px)
 - **Loading Animations**: Engaging lion-awakening graphics during processing
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Frontend
 - **Framework**: Next.js 16.0 with React 19.2
@@ -79,14 +79,14 @@ Protecting supporters of Israel and the IDF from sophisticated online scams thro
 - **Code Quality**: ESLint v9, Prettier, Husky pre-commit hooks
 - **Security**: Advanced input validation, rate limiting, CSP headers
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Node.js 18+ (recommended: 20+)
 - npm or pnpm
 - Google Gemini API Key ([Get one here](https://aistudio.google.com/app/apikey))
 - Vercel Account (for production deployment)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone and Install
 
@@ -127,7 +127,7 @@ pnpm dev
 
 Visit [http://localhost:3000](http://localhost:3000) to access the platform.
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
@@ -165,7 +165,7 @@ src/
 └── utils/                   # Utility functions
 ```
 
-## 🔧 API Endpoints
+## API Endpoints
 
 All endpoints run as Vercel Serverless Functions with automatic scaling and global edge deployment.
 
@@ -192,12 +192,11 @@ All endpoints run as Vercel Serverless Functions with automatic scaling and glob
 
 **Note**: History management is handled client-side via localStorage for privacy and simplicity.
 
-## 🚀 Deployment
+## Deployment
 
 ### Production Deployment (Vercel)
 
-**Live Site:** [https://lionsofzion.io](https://lionsofzion.io)  
-**Vercel Deployment:** [https://newlihunt-40h6q2dax-lionsteam.vercel.app](https://newlihunt-40h6q2dax-lionsteam.vercel.app)
+**Live Site:** [https://lionsofzion.io](https://lionsofzion.io)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-repo/scam-hunt-platform)
 
@@ -222,36 +221,7 @@ vercel --prod
 **Optional Environment Variables:**
 - `NEXT_PUBLIC_SITE_URL` - Defaults to https://lionsofzion.io
 
-## 🧪 Testing & Quality
-
-### Test Suite
-```bash
-# Run all tests
-pnpm test
-
-# Watch mode
-pnpm test:watch
-
-# Coverage report
-pnpm test:coverage
-
-# E2E tests
-pnpm test:e2e
-```
-
-### Code Quality
-```bash
-# Linting
-pnpm lint
-
-# Type checking
-pnpm type-check
-
-# Format code
-pnpm format
-```
-
-## 🔒 Security Features
+## Security Features
 
 ### Multi-Layer Protection
 - **Input Sanitization**: DOMPurify and custom validation
@@ -260,7 +230,7 @@ pnpm format
 - **Anonymous Identification**: Privacy-preserving user tracking
 - **Safe URL Analysis**: Inspect without visiting suspicious sites
 
-### 📈 Performance Optimizations
+### Performance Optimizations
 
 ### Frontend
 - **Edge Network**: Vercel global CDN deployment
@@ -272,7 +242,7 @@ pnpm format
 - **Streaming Responses**: Real-time AI analysis feedback
 - **Caching Strategy**: Smart API response caching with Vercel KV
 
-## 🎨 Visual Design System
+## Visual Design System
 
 ### Lion Digital Guardian Graphics
 - **Brand Identity**: Consistent lion-themed visual elements
@@ -287,20 +257,7 @@ pnpm format
 - **Professional Appearance**: Enterprise-grade visual hierarchy
 - **Consistent Branding**: Unified Lion Digital Guardian identity
 
-## 📚 Documentation
-
-### Project Specifications
-- [Vercel Blob Integration](./.kiro/specs/vercel-blob-integration/) - Current architecture specification
-  - Requirements, design, and implementation tasks
-  - Image upload and storage with Vercel Blob
-  - Rate limiting and caching with Vercel KV
-
-### Technical Guides
-- [Vercel Deployment](https://vercel.com/docs) - Deployment documentation
-- [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) - Image storage documentation
-- [Vercel KV](https://vercel.com/docs/storage/vercel-kv) - Redis documentation
-
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions to strengthen our digital defense capabilities:
 
@@ -317,15 +274,15 @@ We welcome contributions to strengthen our digital defense capabilities:
 - Comprehensive test coverage
 - Security-first development practices
 
-## 🎯 Support Our Mission
+## Support Our Mission
 
 This platform is dedicated to protecting supporters of Israel and the IDF from online threats.
 
 ### Ways to Support
-- **🇮🇱 [Support FIDF](https://www.fidf.org/donate)** - Friends of the IDF official donation
-- **🎯 [Support This Project](https://buymeacoffee.com/danielhanukayeb/e/471429)** - Direct project support
-- **⭐ Star this Repository** - Help others discover this security tool
-- **🔄 Share with Community** - Spread awareness about online scam protection
+- **Support FIDF** - Friends of the IDF official donation
+- **Support This Project** - Direct project support
+- **Star this Repository** - Help others discover this security tool
+- **Share with Community** - Spread awareness about online scam protection
 
 ### Mission Impact
 - **Scam Detection**: Advanced AI-powered threat identification
@@ -333,14 +290,14 @@ This platform is dedicated to protecting supporters of Israel and the IDF from o
 - **Education**: Raising awareness about evolving scam tactics
 - **Digital Defense**: Strengthening online security for vulnerable communities
 
-## 📄 License
+## License
 
 This project is proprietary and confidential. All rights reserved.
 
 ---
 
-**🦁 Digital Guardian - Protecting the Pride**
+**Digital Guardian - Protecting the Pride**
 
 *Built with dedication for the safety and security of Israel supporters worldwide. Together, we stand guard against digital deception and defend the truth online.*
 
-**Am Yisrael Chai 🇮🇱**
+**Am Yisrael Chai**

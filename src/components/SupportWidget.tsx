@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 interface SupportWidgetProps {
   lang?: 'en' | 'he';
@@ -31,41 +31,7 @@ const textContent = {
 
 const SupportWidget: React.FC<SupportWidgetProps> = ({ lang = 'en' }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [, setWidgetLoaded] = useState(false);
   const content = textContent[lang];
-
-  useEffect(() => {
-    // Load Buy Me a Coffee widget script - Only in production
-    if (process.env.NODE_ENV !== 'production') {
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.setAttribute('data-name', 'BMC-Widget');
-    script.setAttribute('data-cfasync', 'false');
-    script.src = 'https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js';
-    script.setAttribute('data-id', 'danielhanukayeb');
-    script.setAttribute('data-description', 'Support me on Buy me a coffee!');
-    script.setAttribute(
-      'data-message',
-      '🦁 Thank you for visiting! Your support helps us keep the digital front strong — exposing fake accounts and defending truth online. Join the pride. Roar for Israel. 🇮🇱🔥'
-    );
-    script.setAttribute('data-color', '#FF5F5F');
-    script.setAttribute('data-position', 'Right');
-    script.setAttribute('data-x_margin', '18');
-    script.setAttribute('data-y_margin', '18');
-
-    script.onload = () => setWidgetLoaded(true);
-    document.head.appendChild(script);
-
-    return () => {
-      // Cleanup script on unmount
-      const existingScript = document.querySelector('script[data-name="BMC-Widget"]');
-      if (existingScript) {
-        existingScript.remove();
-      }
-    };
-  }, []);
 
   const handleProjectSupport = () => {
     window.open('https://buymeacoffee.com/danielhanukayeb/e/471429', '_blank');
