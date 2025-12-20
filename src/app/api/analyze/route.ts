@@ -1,5 +1,4 @@
 import { analyzeWithGemini } from '@/lib/gemini-service';
-import { analysisMiddleware, withMiddleware } from '@/lib/middleware';
 import { Message } from '@/types/analysis';
 import { kv } from '@vercel/kv';
 import crypto from 'crypto';
@@ -116,6 +115,6 @@ async function handleOPTIONS() {
   });
 }
 
-// Export handlers with middleware
-export const POST = withMiddleware(handlePOST, analysisMiddleware);
+// Export handlers without rate limiting (Gemini should work without KV)
+export const POST = handlePOST;
 export const OPTIONS = handleOPTIONS;

@@ -1,4 +1,5 @@
-import { getHistoryService } from '@/lib/history-service';
+import { HistoryEntry } from '@/lib/history-service';
+import { kv } from '@vercel/kv';
 import { NextRequest, NextResponse } from 'next/server';
 
 // GET /api/history/[id] - Get specific analysis by ID
@@ -19,26 +20,39 @@ export async function GET(
       );
     }
 
-    const historyService = getHistoryService();
-    const analysis = await historyService.getAnalysisById(id);
+    const userId = 'anonymous';
 
-    if (!analysis) {
+    try {
+      // Try to get from Vercel KV
+      const entry = await kv.get<HistoryEntry>(`history:${userId}:${id}`);
+
+      if (!entry) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Analysis not found',
+          },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        entry,
+      });
+    } catch (kvError) {
+      console.error('Vercel KV error:', kvError);
       return NextResponse.json(
         {
           success: false,
-          error: 'Analysis not found',
+          error: 'Failed to retrieve analysis',
         },
-        { status: 404 }
+        { status: 500 }
       );
     }
-
-    return NextResponse.json({
-      success: true,
-      analysis,
-    });
   } catch (error) {
     console.error('Failed to get analysis:', error);
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -68,26 +82,45 @@ export async function DELETE(
       );
     }
 
-    const historyService = getHistoryService();
-    const success = await historyService.deleteAnalysis(id);
+    const userId = 'anonymous';
 
-    if (success) {
+    try {
+      // Check if entry exists
+      const entry = await kv.get(`history:${userId}:${id}`);
+
+      if (!entry) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Analysis not found',
+          },
+          { status: 404 }
+        );
+      }
+
+      // Delete from Vercel KV
+      await kv.del(`history:${userId}:${id}`);
+
+      // Remove from sorted set index
+      await kv.zrem(`history:user:${userId}`, id);
+
       return NextResponse.json({
         success: true,
         message: 'Analysis deleted successfully',
       });
-    } else {
+    } catch (kvError) {
+      console.error('Vercel KV error:', kvError);
       return NextResponse.json(
         {
           success: false,
-          error: 'Analysis not found or could not be deleted',
+          error: 'Failed to delete analysis',
         },
-        { status: 404 }
+        { status: 500 }
       );
     }
   } catch (error) {
     console.error('Failed to delete analysis:', error);
-    
+
     return NextResponse.json(
       {
         success: false,

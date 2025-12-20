@@ -31,6 +31,7 @@ export class RateLimiter {
     remaining: number;
     resetTime: number;
     retryAfter?: number;
+    error?: string;
   }> {
     const now = Date.now();
     const windowStart = now - this.config.windowMs;
@@ -49,16 +50,17 @@ export class RateLimiter {
       if (allowed) {
         // Add current request timestamp to sorted set
         await kv.zadd(kvKey, { score: now, member: `${now}-${Math.random()}` });
-        
+
         // Set expiration to window duration (in seconds)
         await kv.expire(kvKey, Math.ceil(this.config.windowMs / 1000));
       }
 
       // Calculate reset time (end of current window)
       const oldestTimestamp = await kv.zrange(kvKey, 0, 0, { withScores: true });
-      const resetTime = oldestTimestamp.length > 0 
-        ? (oldestTimestamp[1] as number) + this.config.windowMs
-        : now + this.config.windowMs;
+      const resetTime =
+        oldestTimestamp.length > 0
+          ? (oldestTimestamp[1] as number) + this.config.windowMs
+          : now + this.config.windowMs;
 
       const retryAfter = allowed ? undefined : Math.ceil((resetTime - now) / 1000);
 
@@ -70,8 +72,15 @@ export class RateLimiter {
         retryAfter,
       };
     } catch (error) {
-      // Fail-open: if KV is unavailable, allow the request
-      console.error('Rate limiter KV error, failing open:', error);
+      // KV error - log but allow request to proceed
+      console.error('Rate limiter KV error:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorType: error instanceof Error ? error.name : 'Unknown',
+        timestamp: new Date().toISOString(),
+        key: kvKey,
+      });
+
+      // Allow request to proceed without rate limiting when KV fails
       return {
         allowed: true,
         limit: this.config.maxRequests,
@@ -87,6 +96,7 @@ export class RateLimiter {
     remaining: number;
     resetTime: number;
     retryAfter?: number;
+    error?: string;
   }> {
     const key = this.getClientKey(request);
     return this.checkRateLimitWithKV(key);

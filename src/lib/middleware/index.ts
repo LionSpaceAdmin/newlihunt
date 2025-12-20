@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RateLimiter } from './rate-limiter';
-import { SecurityMiddleware, SecurityLogger } from './security';
+import { SecurityLogger, SecurityMiddleware } from './security';
 
 export type MiddlewareFunction = (request: NextRequest) => Promise<NextResponse | null>;
 
@@ -90,11 +90,17 @@ export function createRateLimitedMiddleware(rateLimiter: RateLimiter): Middlewar
     if (!result.allowed) {
       const ip = getClientIP(request);
 
+      // Determine if this is a rate limit or service error
+      const isServiceError = !!result.error;
+      const statusCode = isServiceError ? 503 : 429;
+
       // Log rate limit event
       SecurityLogger.logEvent({
         type: 'rate_limit',
-        severity: 'medium',
-        message: `Rate limit exceeded: ${result.limit} requests per window`,
+        severity: isServiceError ? 'high' : 'medium',
+        message: isServiceError
+          ? `Rate limiter service error: ${result.error}`
+          : `Rate limit exceeded: ${result.limit} requests per window`,
         ip,
         userAgent: request.headers.get('user-agent') || 'unknown',
         endpoint: request.nextUrl.pathname,
@@ -102,23 +108,28 @@ export function createRateLimitedMiddleware(rateLimiter: RateLimiter): Middlewar
           limit: result.limit,
           remaining: result.remaining,
           retryAfter: result.retryAfter,
+          error: result.error,
         },
       });
 
       const response = NextResponse.json(
         {
-          error: 'Rate limit exceeded',
-          message: 'Too many requests, please try again later.',
+          error: result.error || 'Rate limit exceeded',
+          message: isServiceError
+            ? 'Service temporarily unavailable. Please try again later.'
+            : 'Too many requests, please try again later.',
           retryAfter: result.retryAfter,
         },
-        { status: 429 }
+        { status: statusCode }
       );
 
       // Add rate limit headers
       response.headers.set('X-RateLimit-Limit', result.limit.toString());
-      response.headers.set('X-RateLimit-Remaining', '0');
+      response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
       response.headers.set('X-RateLimit-Reset', result.resetTime.toString());
-      response.headers.set('Retry-After', result.retryAfter!.toString());
+      if (result.retryAfter) {
+        response.headers.set('Retry-After', result.retryAfter.toString());
+      }
 
       return response;
     }

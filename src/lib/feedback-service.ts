@@ -17,43 +17,32 @@ interface FeedbackResponse {
  */
 export async function submitFeedback(feedback: FeedbackData): Promise<FeedbackResponse> {
   try {
-    // Add metadata
-    const feedbackWithMetadata: FeedbackData = {
-      ...feedback,
-      userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown',
-      timestamp: new Date().toISOString(),
-    };
+    // Call the feedback API endpoint
+    const response = await fetch('/api/feedback', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        analysisId: feedback.analysisId,
+        feedbackType: feedback.feedbackType,
+        comment: feedback.comment,
+      }),
+    });
 
-    // For now, we'll store feedback locally and log it
-    // In a full implementation, this would send to an API endpoint
-    if (typeof window !== 'undefined') {
-      const existingFeedback = JSON.parse(
-        localStorage.getItem('scam-hunter-feedback') || '[]'
-      );
-      
-      existingFeedback.push(feedbackWithMetadata);
-      
-      // Keep only last 100 feedback entries
-      if (existingFeedback.length > 100) {
-        existingFeedback.splice(0, existingFeedback.length - 100);
-      }
-      
-      localStorage.setItem('scam-hunter-feedback', JSON.stringify(existingFeedback));
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.error || 'Failed to submit feedback',
+      };
     }
 
-    // Log feedback for development
-    console.log('Feedback submitted:', feedbackWithMetadata);
-
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    return {
-      success: true,
-      message: 'Feedback submitted successfully',
-    };
+    return data;
   } catch (error) {
     console.error('Failed to submit feedback:', error);
-    
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -64,23 +53,30 @@ export async function submitFeedback(feedback: FeedbackData): Promise<FeedbackRe
 /**
  * Get feedback statistics (for development/admin use)
  */
-export function getFeedbackStats(): {
+export async function getFeedbackStats(
+  analysisId?: string,
+  userId?: string
+): Promise<{
   total: number;
   positive: number;
   negative: number;
   recent: FeedbackData[];
-} {
-  if (typeof window === 'undefined') {
-    return { total: 0, positive: 0, negative: 0, recent: [] };
-  }
-
+}> {
   try {
-    const feedback: FeedbackData[] = JSON.parse(
-      localStorage.getItem('scam-hunter-feedback') || '[]'
-    );
+    const params = new URLSearchParams();
+    if (analysisId) params.append('analysisId', analysisId);
+    if (userId) params.append('userId', userId);
 
-    const positive = feedback.filter(f => f.feedbackType === 'up').length;
-    const negative = feedback.filter(f => f.feedbackType === 'down').length;
+    const response = await fetch(`/api/feedback?${params.toString()}`);
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      return { total: 0, positive: 0, negative: 0, recent: [] };
+    }
+
+    const feedback: FeedbackData[] = data.feedback || [];
+    const positive = feedback.filter((f) => f.feedbackType === 'up').length;
+    const negative = feedback.filter((f) => f.feedbackType === 'down').length;
     const recent = feedback.slice(-10).reverse(); // Last 10, most recent first
 
     return {
@@ -92,35 +88,5 @@ export function getFeedbackStats(): {
   } catch (error) {
     console.error('Failed to get feedback stats:', error);
     return { total: 0, positive: 0, negative: 0, recent: [] };
-  }
-}
-
-/**
- * Clear all stored feedback (for development/privacy)
- */
-export function clearFeedback(): boolean {
-  try {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('scam-hunter-feedback');
-    }
-    return true;
-  } catch (error) {
-    console.error('Failed to clear feedback:', error);
-    return false;
-  }
-}
-
-/**
- * Export feedback data (for analysis/backup)
- */
-export function exportFeedback(): string | null {
-  try {
-    if (typeof window === 'undefined') return null;
-    
-    const feedback = localStorage.getItem('scam-hunter-feedback');
-    return feedback;
-  } catch (error) {
-    console.error('Failed to export feedback:', error);
-    return null;
   }
 }

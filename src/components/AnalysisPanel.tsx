@@ -177,6 +177,66 @@ export function AnalysisPanel({
         <p className="text-lg leading-relaxed text-gray-300">{summary}</p>
       </div>
 
+      {/* Scores */}
+      <div className="py-6 border-t border-gray-700">
+        <h3 className="text-xl font-semibold text-white mb-4">Analysis Scores</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Risk Score */}
+          <div className="bg-gray-800 p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-400 font-medium">Risk Score</span>
+              <span className={`text-2xl font-bold ${analysisData.riskScore >= 61 ? 'text-red-400' :
+                  analysisData.riskScore >= 31 ? 'text-yellow-400' :
+                    'text-green-400'
+                }`}>
+                {analysisData.riskScore}/100
+              </span>
+            </div>
+            <div className="w-full bg-gray-700 rounded-full h-2">
+              <div
+                className={`h-2 rounded-full ${analysisData.riskScore >= 61 ? 'bg-red-500' :
+                    analysisData.riskScore >= 31 ? 'bg-yellow-500' :
+                      'bg-green-500'
+                  }`}
+                style={{ width: `${analysisData.riskScore}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Credibility Score */}
+          <div className="bg-gray-800 p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-400 font-medium">Credibility Score</span>
+              <span className={`text-2xl font-bold ${analysisData.credibilityScore >= 61 ? 'text-green-400' :
+                  analysisData.credibilityScore >= 31 ? 'text-yellow-400' :
+                    'text-red-400'
+                }`}>
+                {analysisData.credibilityScore}/100
+              </span>
+            </div>
+            <div className="w-full bg-gray-700 rounded-full h-2">
+              <div
+                className={`h-2 rounded-full ${analysisData.credibilityScore >= 61 ? 'bg-green-500' :
+                    analysisData.credibilityScore >= 31 ? 'bg-yellow-500' :
+                      'bg-red-500'
+                  }`}
+                style={{ width: `${analysisData.credibilityScore}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Reasoning */}
+      {analysisData.reasoning && (
+        <div className="py-6 border-t border-gray-700">
+          <h3 className="text-xl font-semibold text-white mb-3">Detailed Reasoning</h3>
+          <p className="text-lg leading-relaxed text-gray-300 whitespace-pre-line">
+            {analysisData.reasoning}
+          </p>
+        </div>
+      )}
+
       {/* Risk Factors */}
       {analysisData.riskFactors && analysisData.riskFactors.length > 0 && (
         <div className="py-6">
