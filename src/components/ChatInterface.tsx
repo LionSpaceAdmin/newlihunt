@@ -159,8 +159,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-
   const [urlInspectionLoading, setUrlInspectionLoading] = useState<string | null>(null);
 
   const [webSearchLoading, setWebSearchLoading] = useState<string | null>(null);
@@ -539,19 +537,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
 
 
-        // Clear preview after sending
-
-        setPreviewImage(null);
-
-
-
       } catch (err) {
 
         console.error('File processing error:', err);
 
         setUploadError(err instanceof Error ? err.message : t.error);
-
-        setPreviewImage(null);
 
       }
 
@@ -644,8 +634,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setInputText('');
 
     setUploadError(null);
-
-    setPreviewImage(null);
 
     setDetectedURLs([]);
 
@@ -1403,7 +1391,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
               onClick={handleInputSubmit}
 
-              disabled={isLoading || (!inputText.trim() && !previewImage)}
+              disabled={isLoading || !inputText.trim()}
 
               className="shrink-0 p-3 sm:p-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation"
 
