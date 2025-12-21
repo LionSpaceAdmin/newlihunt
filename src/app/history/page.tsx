@@ -9,7 +9,7 @@ import { Classification } from '@/types/analysis';
 import { formatDate, formatTimestamp, timeAgo } from '@/utils/helpers';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FiChevronDown, FiFilter, FiSearch } from 'react-icons/fi';
 
 const textContent = {
@@ -103,11 +103,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ lang = 'en' }) => {
 
   const t = textContent[lang];
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -121,7 +117,11 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ lang = 'en' }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [t.error]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   const handleClearHistory = async () => {
     setIsClearing(true);

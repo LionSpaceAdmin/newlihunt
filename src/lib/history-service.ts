@@ -23,6 +23,7 @@ export interface SaveAnalysisRequest {
     imageUrl?: string;
   };
   processingTime: number;
+  userId?: string;
 }
 
 export interface SaveAnalysisResponse {
@@ -39,18 +40,28 @@ export interface HistoryService {
   clearHistory(userId?: string): Promise<boolean>;
 }
 
+type RawHistoryEntry = Omit<HistoryEntry, 'timestamp' | 'conversation'> & {
+  timestamp: string;
+  conversation: Array<Omit<Message, 'timestamp'> & { timestamp: string }>;
+};
+
 /**
  * KV-based implementation of history service (uses API routes)
  */
 class KVHistoryService implements HistoryService {
   async saveAnalysis(request: SaveAnalysisRequest): Promise<SaveAnalysisResponse> {
     try {
+      const userId = request.userId || getAnonymousUserId();
+
       const response = await fetch('/api/history', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(request),
+        body: JSON.stringify({
+          ...request,
+          userId,
+        }),
       });
 
       const data = await response.json();
@@ -77,8 +88,10 @@ class KVHistoryService implements HistoryService {
 
   async getHistory(userId?: string): Promise<HistoryEntry[]> {
     try {
+      const effectiveUserId = userId || getAnonymousUserId();
+
       const params = new URLSearchParams();
-      if (userId) params.append('userId', userId);
+      params.append('userId', effectiveUserId);
 
       const response = await fetch(`/api/history?${params.toString()}`);
       const data = await response.json();
@@ -89,10 +102,10 @@ class KVHistoryService implements HistoryService {
       }
 
       // Convert timestamp strings back to Date objects
-      const history: HistoryEntry[] = data.history.map((entry: any) => ({
+      const history: HistoryEntry[] = data.history.map((entry: RawHistoryEntry) => ({
         ...entry,
         timestamp: new Date(entry.timestamp),
-        conversation: entry.conversation.map((msg: any) => ({
+        conversation: entry.conversation.map(msg => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
         })),
@@ -107,7 +120,8 @@ class KVHistoryService implements HistoryService {
 
   async getAnalysisById(id: string): Promise<HistoryEntry | null> {
     try {
-      const response = await fetch(`/api/history/${id}`);
+      const userId = getAnonymousUserId();
+      const response = await fetch(`/api/history/${id}?userId=${encodeURIComponent(userId)}`);
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -118,7 +132,7 @@ class KVHistoryService implements HistoryService {
       const entry: HistoryEntry = {
         ...data.entry,
         timestamp: new Date(data.entry.timestamp),
-        conversation: data.entry.conversation.map((msg: any) => ({
+        conversation: data.entry.conversation.map((msg: { timestamp: string }) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
         })),
@@ -133,7 +147,8 @@ class KVHistoryService implements HistoryService {
 
   async deleteAnalysis(id: string): Promise<boolean> {
     try {
-      const response = await fetch(`/api/history/${id}`, {
+      const userId = getAnonymousUserId();
+      const response = await fetch(`/api/history/${id}?userId=${encodeURIComponent(userId)}`, {
         method: 'DELETE',
       });
 
@@ -148,7 +163,8 @@ class KVHistoryService implements HistoryService {
   async clearHistory(userId?: string): Promise<boolean> {
     try {
       const params = new URLSearchParams();
-      if (userId) params.append('userId', userId);
+      const effectiveUserId = userId || getAnonymousUserId();
+      params.append('userId', effectiveUserId);
 
       const response = await fetch(`/api/history?${params.toString()}`, {
         method: 'DELETE',

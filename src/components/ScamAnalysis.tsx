@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 // Remove direct gemini import - we'll use AWS API Gateway instead
 import { FullAnalysisResult, Message } from '@/types/analysis';
 import { fileToBase64, validateImageFile } from '@/utils/helpers';
@@ -49,7 +49,7 @@ const textContent = {
 const ScamAnalysis: React.FC<ScamAnalysisProps> = ({
   lang = 'en',
   analysis = null,
-  conversation = [],
+  conversation: _conversation = [],
 }) => {
   const [inputText, setInputText] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -58,6 +58,10 @@ const ScamAnalysis: React.FC<ScamAnalysisProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const t = textContent[lang];
+
+  useEffect(() => {
+    setResult(analysis);
+  }, [analysis]);
 
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

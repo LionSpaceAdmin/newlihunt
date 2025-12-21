@@ -2,11 +2,11 @@
 
 import { ConfirmModal } from '@/components/ConfirmModal';
 import Navigation from '@/components/Navigation';
-import { getHistoryService } from '@/lib/history-service';
+import { getHistoryService, HistoryEntry } from '@/lib/history-service';
 import { Classification } from '@/types/analysis';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 const ProfilePage: React.FC = () => {
     const [stats, setStats] = useState({
@@ -18,15 +18,11 @@ const ProfilePage: React.FC = () => {
         averageCredibilityScore: 0,
     });
     const [loading, setLoading] = useState(true);
-    const [recentAnalyses, setRecentAnalyses] = useState<any[]>([]);
+    const [recentAnalyses, setRecentAnalyses] = useState<HistoryEntry[]>([]);
     const [showClearModal, setShowClearModal] = useState(false);
     const [isClearing, setIsClearing] = useState(false);
 
-    useEffect(() => {
-        loadUserStats();
-    }, []);
-
-    const loadUserStats = async () => {
+    const loadUserStats = useCallback(async () => {
         try {
             setLoading(true);
             const historyService = getHistoryService();
@@ -54,7 +50,11 @@ const ProfilePage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        loadUserStats();
+    }, [loadUserStats]);
 
     const handleClearHistory = async () => {
         setIsClearing(true);

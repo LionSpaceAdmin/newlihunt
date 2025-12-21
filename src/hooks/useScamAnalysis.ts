@@ -1,7 +1,8 @@
 'use client';
 
+import { HistoryEntry } from '@/lib/history-service';
 import { FullAnalysisResult, Message, UseScamAnalysisReturn } from '@/types/analysis';
-import { generateMessageId } from '@/utils/helpers';
+import { generateMessageId, getAnonymousUserId } from '@/utils/helpers';
 import { useCallback, useEffect, useState } from 'react';
 
 interface AnalysisConfig {
@@ -203,11 +204,16 @@ export const useScamAnalysis = (config: AnalysisConfig = {}): UseScamAnalysisRet
 
 // Hook for managing analysis history
 export const useAnalysisHistory = (config: AnalysisConfig = {}) => {
-  const [history, setHistory] = useState<FullAnalysisResult[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
 
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
+
+  type RawHistoryEntry = Omit<HistoryEntry, 'timestamp' | 'conversation'> & {
+    timestamp: string;
+    conversation: Array<Omit<Message, 'timestamp'> & { timestamp: string }>;
+  };
 
   const loadHistory = useCallback(async () => {
     if (!finalConfig.apiUrl) return;
@@ -216,14 +222,27 @@ export const useAnalysisHistory = (config: AnalysisConfig = {}) => {
     setHistoryError(null);
 
     try {
-      const response = await fetch(`${finalConfig.apiUrl}/history`);
+      const userId = getAnonymousUserId();
+      const response = await fetch(
+        `${finalConfig.apiUrl}/history?userId=${encodeURIComponent(userId)}`
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to load history: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      setHistory(data.history || []);
+      const data: { history?: RawHistoryEntry[] } = await response.json();
+      const parsedHistory =
+        (data.history || []).map(entry => ({
+          ...entry,
+          timestamp: new Date(entry.timestamp),
+          conversation: (entry.conversation || []).map(msg => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          })),
+        })) ?? [];
+
+      setHistory(parsedHistory);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load history';
       setHistoryError(errorMessage);
@@ -237,12 +256,16 @@ export const useAnalysisHistory = (config: AnalysisConfig = {}) => {
       if (!finalConfig.apiUrl) return;
 
       try {
-        const response = await fetch(`${finalConfig.apiUrl}/history/${id}`, {
-          method: 'DELETE',
-        });
+        const userId = getAnonymousUserId();
+        const response = await fetch(
+          `${finalConfig.apiUrl}/history/${id}?userId=${encodeURIComponent(userId)}`,
+          {
+            method: 'DELETE',
+          }
+        );
 
         if (response.ok) {
-          setHistory(prev => prev.filter(item => item.analysisData !== undefined));
+          setHistory(prev => prev.filter(item => item.id !== id));
         }
       } catch (err) {
         console.error('Failed to delete history item:', err);
