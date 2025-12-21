@@ -1,8 +1,6 @@
 'use client';
 
-import { useScamAnalysis } from '@/hooks/useScamAnalysis';
-
-import { FullAnalysisResult, Message } from '@/types/analysis';
+import { FullAnalysisResult, Message, UseScamAnalysisReturn } from '@/types/analysis';
 
 import { formatTimestamp } from '@/utils/helpers';
 
@@ -28,12 +26,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 
 
-interface ChatInterfaceProps {
-
+interface ChatInterfaceProps extends UseScamAnalysisReturn {
   onAnalysisComplete: (analysis: FullAnalysisResult) => void;
-
   lang?: 'en' | 'he';
-
 }
 
 
@@ -144,15 +139,25 @@ const textContent = {
 
 
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang = 'en' }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({
+  onAnalysisComplete,
+  lang = 'en',
+  messages,
+  isLoading,
+  error,
+  currentAnalysis,
+  storageStatus,
+  sendMessage,
+  clearConversation,
+  retryLastAnalysis,
+  addMessage,
+}) => {
 
   const [inputText, setInputText] = useState('');
 
   const [dragActive, setDragActive] = useState(false);
 
   const [uploadError, setUploadError] = useState<string | null>(null);
-
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const [urlInspectionLoading, setUrlInspectionLoading] = useState<string | null>(null);
 
@@ -167,31 +172,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-
-
-  const {
-
-    messages,
-
-    isLoading,
-
-    error,
-
-    currentAnalysis,
-
-
-    storageStatus,
-
-    sendMessage,
-
-    clearConversation,
-
-    retryLastAnalysis,
-
-    addMessage,
-
-  } = useScamAnalysis();
 
 
 
@@ -483,7 +463,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
     },
 
-    [sendMessage]
+    [addMessage, sendMessage]
 
   );
 
@@ -557,19 +537,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
 
 
-        // Clear preview after sending
-
-        setPreviewImage(null);
-
-
-
       } catch (err) {
 
         console.error('File processing error:', err);
 
         setUploadError(err instanceof Error ? err.message : t.error);
-
-        setPreviewImage(null);
 
       }
 
@@ -662,8 +634,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
     setInputText('');
 
     setUploadError(null);
-
-    setPreviewImage(null);
 
     setDetectedURLs([]);
 
@@ -1421,7 +1391,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
               onClick={handleInputSubmit}
 
-              disabled={isLoading || (!inputText.trim() && !previewImage)}
+              disabled={isLoading || !inputText.trim()}
 
               className="shrink-0 p-3 sm:p-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation"
 
