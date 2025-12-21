@@ -82,7 +82,7 @@ export function generateTextReport(
   if (includeConversation && conversation && privacy !== 'minimal') {
     report += 'CONVERSATION HISTORY\n';
     report += '--------------------\n';
-    conversation.forEach((message, index) => {
+    conversation.forEach((message, _index) => {
       const time = formatTimestamp(message.timestamp);
       const role = message.role === 'user' ? 'USER' : 'SCAM HUNTER';
       report += `[${time}] ${role}: ${sanitizeForExport(message.content, privacy)}\n`;

@@ -152,7 +152,11 @@ const Layout: React.FC<LayoutProps> = ({ lang = 'en' }) => {
 
             <div className="flex-1">
               <ChatErrorBoundary>
-                <ChatInterface onAnalysisComplete={handleAnalysisComplete} lang={lang} />
+                <ChatInterface
+                  onAnalysisComplete={handleAnalysisComplete}
+                  lang={lang}
+                  {...scamAnalysis}
+                />
               </ChatErrorBoundary>
             </div>
           </div>

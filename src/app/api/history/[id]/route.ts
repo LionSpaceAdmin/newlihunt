@@ -20,7 +20,8 @@ export async function GET(
       );
     }
 
-    const userId = 'anonymous';
+    const { searchParams } = new URL(request.url);
+    const userId = (searchParams.get('userId') || 'anonymous').trim() || 'anonymous';
 
     try {
       // Try to get from Vercel KV
@@ -82,7 +83,8 @@ export async function DELETE(
       );
     }
 
-    const userId = 'anonymous';
+    const { searchParams } = new URL(request.url);
+    const userId = (searchParams.get('userId') || 'anonymous').trim() || 'anonymous';
 
     try {
       // Check if entry exists

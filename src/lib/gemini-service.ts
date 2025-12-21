@@ -5,6 +5,7 @@ import {
     GoogleGenerativeAI,
     HarmBlockThreshold,
     HarmCategory,
+    Schema,
     SchemaType,
     Tool,
 } from '@google/generative-ai';
@@ -44,8 +45,8 @@ const tools: Tool[] = [
   } as unknown as Tool,
 ];
 
-const responseSchema = {
-  type: SchemaType.OBJECT as const,
+const responseSchema: Schema = {
+  type: SchemaType.OBJECT,
   properties: {
     summary: { type: SchemaType.STRING },
     classification: { type: SchemaType.STRING },
@@ -285,7 +286,7 @@ export async function analyzeWithGemini(
         maxOutputTokens: 8192,
         ...(isAnalysis && {
           responseMimeType: 'application/json',
-          responseSchema: responseSchema as any,
+          responseSchema,
         }),
       },
       systemInstruction: SYSTEM_PROMPT,

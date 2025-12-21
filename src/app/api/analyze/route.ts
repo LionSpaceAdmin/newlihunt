@@ -14,12 +14,6 @@ function sanitizeText(text: string): string {
   return text.trim().replace(/[\p{Cc}]/gu, '');
 }
 
-function generateCacheKey(message: string, imageHash?: string): string {
-  const content = imageHash ? `${message}:${imageHash}` : message;
-  const hash = crypto.createHash('sha256').update(content).digest('hex');
-  return `analysis:cache:${hash}`;
-}
-
 async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json();

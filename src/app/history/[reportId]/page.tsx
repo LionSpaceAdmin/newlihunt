@@ -10,7 +10,7 @@ import { Message } from '@/types/analysis';
 import { formatDate, formatTimestamp } from '@/utils/helpers';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FiShare2 } from 'react-icons/fi';
 
 const textContent = {
@@ -70,13 +70,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
 
   const t = textContent[lang];
 
-  useEffect(() => {
-    if (reportId) {
-      loadAnalysis();
-    }
-  }, [reportId]);
-
-  const loadAnalysis = async () => {
+  const loadAnalysis = useCallback(async () => {
     if (!reportId) return;
 
     setIsLoading(true);
@@ -97,7 +91,13 @@ const ReportPage: React.FC<ReportPageProps> = ({ lang = 'en' }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [reportId]);
+
+  useEffect(() => {
+    if (reportId) {
+      loadAnalysis();
+    }
+  }, [loadAnalysis, reportId]);
 
   const handleDelete = async () => {
     if (!entry) return;

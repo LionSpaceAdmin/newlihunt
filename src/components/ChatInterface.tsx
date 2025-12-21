@@ -1,8 +1,6 @@
 'use client';
 
-import { useScamAnalysis } from '@/hooks/useScamAnalysis';
-
-import { FullAnalysisResult, Message } from '@/types/analysis';
+import { FullAnalysisResult, Message, UseScamAnalysisReturn } from '@/types/analysis';
 
 import { formatTimestamp } from '@/utils/helpers';
 
@@ -28,12 +26,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 
 
-interface ChatInterfaceProps {
-
+interface ChatInterfaceProps extends UseScamAnalysisReturn {
   onAnalysisComplete: (analysis: FullAnalysisResult) => void;
-
   lang?: 'en' | 'he';
-
 }
 
 
@@ -144,7 +139,19 @@ const textContent = {
 
 
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang = 'en' }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({
+  onAnalysisComplete,
+  lang = 'en',
+  messages,
+  isLoading,
+  error,
+  currentAnalysis,
+  storageStatus,
+  sendMessage,
+  clearConversation,
+  retryLastAnalysis,
+  addMessage,
+}) => {
 
   const [inputText, setInputText] = useState('');
 
@@ -167,31 +174,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-
-
-  const {
-
-    messages,
-
-    isLoading,
-
-    error,
-
-    currentAnalysis,
-
-
-    storageStatus,
-
-    sendMessage,
-
-    clearConversation,
-
-    retryLastAnalysis,
-
-    addMessage,
-
-  } = useScamAnalysis();
 
 
 
@@ -483,7 +465,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onAnalysisComplete, lang 
 
     },
 
-    [sendMessage]
+    [addMessage, sendMessage]
 
   );
 

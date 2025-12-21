@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId') || 'anonymous';
+    const userId = (searchParams.get('userId') || 'anonymous').trim() || 'anonymous';
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { analysis, conversation, input, processingTime } = body;
+    const { analysis, conversation, input, processingTime, userId: bodyUserId } = body;
 
     if (!analysis || !input) {
       return NextResponse.json(
@@ -139,8 +139,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get userId - generate one for anonymous users
-    const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Get userId - fallback to anonymous if not provided
+    const userId =
+      typeof bodyUserId === 'string' && bodyUserId.trim().length > 0
+        ? bodyUserId.trim()
+        : 'anonymous';
     const id = `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const timestamp = new Date().toISOString();
     const userAgent = request.headers.get('user-agent') || 'unknown';
@@ -221,7 +224,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId') || 'anonymous';
+    const userId = (searchParams.get('userId') || 'anonymous').trim() || 'anonymous';
 
     try {
       // Get all history IDs for the user
